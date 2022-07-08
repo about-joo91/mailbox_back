@@ -24,6 +24,9 @@
 https://www.inven.co.kr/webzine/news/?news=198156
 https://scienceon.kisti.re.kr/commons/util/originalView.do?cn=CFKO201924664108493&oCn=NPAP13263940&dbt=CFKO&journal=NPRO00383455
 
+## api명세서 
+https://thinkable-sassafras-50a.notion.site/ab237d868d5d46d0a159bc07b523cdb3?v=9442da6f0ae744fea4619ad4f7d6a8f5
+
 ## 컨벤션
 feat/ : 새로운 기능 추가/수정/삭제
 enhan/ : 기존 코드에 기능을 추가하거나 기능을 강화할 때

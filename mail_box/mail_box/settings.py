@@ -42,8 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
+    'corsheaders',
 
-    'joo_test'
+    'joo'
 ]
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [ # 기본적인 view 접근 권한 지정
@@ -96,7 +97,7 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
     "access-control-allow-origin"
 ]
-CSRF_TRUSTED_ORIGINS = ['*']
+CSRF_TRUSTED_ORIGINS = ['http://*']
 
 ROOT_URLCONF = 'mail_box.urls'
 

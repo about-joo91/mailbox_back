@@ -1,0 +1,7 @@
+version: '3.9'
+services:
+  mail_box:
+    image: aboutjoo/mail_box:latest
+    ports:
+      - "80:8000"
+    command: gunicorn --bind 0.0.0.0:8000 mail_box.wsgi:application &

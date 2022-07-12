@@ -22,6 +22,7 @@ class BoardComment(models.Model):
     content = models.TextField("내용", max_length=120)
     create_date = models.DateTimeField(auto_now_add=True)
 
+
 class BoardCommentLike(models.Model):
     board_comment_author = models.ForeignKey("won_test.User", on_delete=models.CASCADE)
     board_comment = models.ForeignKey("board.BoardComment", on_delete=models.CASCADE)

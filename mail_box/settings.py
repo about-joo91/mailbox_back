@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "joo",
     "won_test",
     "board",
+    "jin",
 ]
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [  # 기본적인 view 접근 권한 지정
@@ -123,6 +124,9 @@ WSGI_APPLICATION = "mail_box.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
+
+AUTH_USER_MODEL = "won_test.User"
+
 
 pymysql.install_as_MySQLdb()
 

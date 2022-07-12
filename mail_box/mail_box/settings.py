@@ -31,6 +31,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     'joo',
     'won_test',
     'board',
+    'jin',
 ]
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [ # 기본적인 view 접근 권한 지정
@@ -140,6 +142,8 @@ DATABASES = {
         }
     }
 }
+
+AUTH_USER_MODEL = 'won_test.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators

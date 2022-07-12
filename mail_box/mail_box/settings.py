@@ -45,7 +45,7 @@ INSTALLED_APPS = [
     'corsheaders',
 
     'joo',
-    'ko',
+    'won_test',
     'board',
 ]
 REST_FRAMEWORK = {

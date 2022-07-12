@@ -1,9 +1,8 @@
 name: lint_by_black
 on: 
   push:
-    branches:
-      - '!main'
-      - '*'
+    branches-ignore:
+      - main 
 jobs:
   linter_name:
     name: runner / black
@@ -22,7 +21,5 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           title: "Format Python code with psf/black push"
           commit-message: ":art: Format Python code with psf/black"
-          body: |
-
           base: ${{ github.head_ref }} # Creates pull request onto pull request or commit branch
           branch: main

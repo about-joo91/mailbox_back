@@ -30,7 +30,7 @@ class User(AbstractBaseUser):
     nickname = models.CharField("닉네임", max_length=20)
     create_date = models.DateTimeField("가입일", auto_now_add=True)
     update_date = models.DateTimeField("갱신일", auto_now_add=True)
-    report_cnt = models.IntegerField("신고 수", null=True)
+    report_cnt = models.IntegerField("신고 수", null=True) 
 
     is_active = models.BooleanField(default=True)
 

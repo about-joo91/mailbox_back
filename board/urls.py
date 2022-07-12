@@ -4,4 +4,5 @@ from board import views
 
 urlpatterns = [
     path('', views.BoardView.as_view()),
+    path('<int:board_id>', views.BoardView.as_view()),
 ]

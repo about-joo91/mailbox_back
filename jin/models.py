@@ -10,7 +10,7 @@ class Category(models.Model):
 
 
 class Letter(models.Model):
-    letter_author = models.OneToOneField(
+    letter_author = models.ForeignKey(
         "won_test.User", on_delete=models.SET_NULL, null=True
     )
     category = models.ForeignKey("Category", on_delete=models.CASCADE)
@@ -19,7 +19,7 @@ class Letter(models.Model):
 
 
 class User_Letter_Target_User(models.Model):
-    author = models.OneToOneField("won_test.User", on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey("won_test.User", on_delete=models.SET_NULL, null=True)
     target_user = models.ForeignKey("Letter", on_delete=models.SET_NULL, null=True)
 
 

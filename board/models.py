@@ -20,6 +20,7 @@ class BoardComment(models.Model):
     author = models.ForeignKey("won_test.User", on_delete=models.CASCADE)
     board = models.ForeignKey("board.Board", on_delete=models.CASCADE)
     content = models.TextField("내용", max_length=120)
+    create_date = models.DateTimeField(auto_now_add=True)
 
 
 class BoardCommentLike(models.Model):

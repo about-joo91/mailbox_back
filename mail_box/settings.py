@@ -9,11 +9,11 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import os
 from pathlib import Path
+from datetime import timedelta
 
 import pymysql
-import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,13 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config.SECRET_KEY
+
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
-
 
 # Application definition
 
@@ -65,6 +65,7 @@ REST_FRAMEWORK = {
 }
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -72,7 +73,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -133,17 +133,32 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",  # engine: mysql
-        "NAME": config.RDS_DB_NAME,  # DB Name
-        "USER": config.RDS_USER,  # DB User
-        "PASSWORD": config.RDS_PASSWORD,  # Password
-        "HOST": config.RDS_HOST,
-        "PORT": config.RDS_PORT,  # 데이터베이스 포트
-        "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'"},
+
+        "NAME": os.environ['RDS_DB_NAME'],  # DB Name
+        "USER": os.environ['RDS_USER'],  # DB User
+        "PASSWORD": os.environ['RDS_PASSWORD'],  # Password
+        "HOST": os.environ['RDS_HOST'],
+        "PORT": os.environ['RDS_PORT'],  # 데이터베이스 포트
+        "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'",},
+
     }
 }
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
+
+
+REST_USE_JWT = True
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+
+    "SIGNING_KEY": os.environ['JWT_SECRET_KEY'],
+
+}
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {

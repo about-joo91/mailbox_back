@@ -6,8 +6,8 @@ from board.models import Board as BoardModel, BoardComment as BoardCommentModel
 
 class BoardSerializer(serializers.ModelSerializer):
     like_count = serializers.SerializerMethodField()
-    
-    def get_like_count(self,obj):
+
+    def get_like_count(self, obj):
 
         return obj.boardlike_set.count()
 
@@ -15,9 +15,8 @@ class BoardSerializer(serializers.ModelSerializer):
         model = BoardModel
         fields = ["id", "author", "title", "create_date", "content", "like_count"]
 
+
 class BoardCommentSerializer(serializers.ModelSerializer):
-
-
     class Meta:
         model = BoardCommentModel
         fields = ["id", "author", "board", "create_date", "content"]

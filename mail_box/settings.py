@@ -133,14 +133,14 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",  # engine: mysql
-
-        "NAME": os.environ['RDS_DB_NAME'],  # DB Name
-        "USER": os.environ['RDS_USER'],  # DB User
-        "PASSWORD": os.environ['RDS_PASSWORD'],  # Password
-        "HOST": os.environ['RDS_HOST'],
-        "PORT": os.environ['RDS_PORT'],  # 데이터베이스 포트
-        "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'",},
-
+        "NAME": os.environ["RDS_DB_NAME"],  # DB Name
+        "USER": os.environ["RDS_USER"],  # DB User
+        "PASSWORD": os.environ["RDS_PASSWORD"],  # Password
+        "HOST": os.environ["RDS_HOST"],
+        "PORT": os.environ["RDS_PORT"],  # 데이터베이스 포트
+        "OPTIONS": {
+            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 
@@ -154,9 +154,7 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
-
-    "SIGNING_KEY": os.environ['JWT_SECRET_KEY'],
-
+    "SIGNING_KEY": os.environ["JWT_SECRET_KEY"],
 }
 
 

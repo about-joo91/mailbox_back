@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ['SECRET_KEY']
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -133,11 +133,11 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",  # engine: mysql
-        "NAME": os.environ['RDS_DB_NAME'],  # DB Name
-        "USER": os.environ['RDS_USER'],  # DB User
-        "PASSWORD": os.environ['RDS_PASSWORD'],  # Password
-        "HOST": os.environ['RDS_HOST'],
-        "PORT": os.environ['RDS_PORT'],  # 데이터베이스 포트
+        "NAME": os.environ["RDS_DB_NAME"],  # DB Name
+        "USER": os.environ["RDS_USER"],  # DB User
+        "PASSWORD": os.environ["RDS_PASSWORD"],  # Password
+        "HOST": os.environ["RDS_HOST"],
+        "PORT": os.environ["RDS_PORT"],  # 데이터베이스 포트
         "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'"},
     }
 }
@@ -152,7 +152,7 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
-    "SIGNING_KEY": os.environ['JWT_SECRET_KEY'],
+    "SIGNING_KEY": os.environ["JWT_SECRET_KEY"],
 }
 
 

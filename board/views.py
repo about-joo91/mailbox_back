@@ -13,7 +13,13 @@ class BoardView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     
+    def get(self, request):
 
+        board_list = BoardModel.objects.all().order_by('-create_date')
+        return Response({
+            "boards" : BoardSerializer(board_list, many=True).data}
+
+        ,status=status.HTTP_200_OK)
 
     def post(self, request):
         try:

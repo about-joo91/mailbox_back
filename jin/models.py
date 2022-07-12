@@ -3,7 +3,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from won_test.models import User as UserModel 
 # Create your models here.
 
-#######
+###############
 class Category(models.Model):
     Cate_name = models.CharField(max_length=30)
 

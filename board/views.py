@@ -5,7 +5,7 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from board.serializers import BoardSerializer
+from board.serializers import BoardSerializer, BoardCommentSerializer
 from board.models import Board as BoardModel,  BoardLike as BoardLikeModel
 # Create your views here.
 
@@ -60,3 +60,21 @@ class BorderLikeView(APIView):
             return Response({"message": "좋아요가 완료 되었습니다!!"}, status=status.HTTP_200_OK)
         liked_board.delete()
         return Response({"message": "좋아요가 취소 되었습니다!!"}, status=status.HTTP_200_OK)
+
+
+class BorderCommentView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request, obj_id):
+        #obj_id는 board_id 입니다.
+        try:
+            request.data['author'] = request.user.id
+            request.data['board'] = obj_id
+            create_board_comment_serializer = BoardCommentSerializer(data = request.data)
+            create_board_comment_serializer.is_valid(raise_exception=True)
+            create_board_comment_serializer.save()
+            print(create_board_comment_serializer.errors)
+            return Response({"message" : "댓글이 생성되었습니다."}, status=status.HTTP_200_OK)
+        except:
+            return Response({"message" : "저장에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)

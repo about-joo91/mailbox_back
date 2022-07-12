@@ -1,0 +1,20 @@
+
+# .git 과 .cache 폴더를 무시 
+.git 
+.cache
+.gitignore
+.github 
+
+# ignore all *.class files in all folders, including build root
+# 모든 폴더안에 있는 모든, *.class 파일들을 무시   
+**/*.class 
+ 
+# 모든 마크다운 파일들 (md) 파일들을 무시, 
+# 모든 README*.md 파일 무시 
+*.md 
+IREADME*.md
+
+venv
+
+**/__pycache__
+*.pyc

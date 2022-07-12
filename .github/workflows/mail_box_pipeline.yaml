@@ -38,14 +38,6 @@ jobs:
       - uses: actions/checkout@master
       - name: copy file via ssh password
         uses: appleboy/scp-action@master
-        env:
-          - SECRET_KEY: ${{ secrets.SECRET_KEY }}
-          - JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
-          - RDS_USER: ${{ secrets.RDS_USER }}
-          - RDS_DB_NAME: ${{ secrets.RDS_DB_NAME }}
-          - RDS_PASSWORD: ${{ secrets.RDS_PASSWORD }}
-          - RDS_HOST: ${{ secrets.RDS_HOST }}
-          - RDS_PORT: ${{ secrets.RDS_PORT }}
         with:
           host: ${{ secrets.HOST }}
           username: ubuntu

@@ -6,5 +6,5 @@ urlpatterns = [
     path("won_test/", include("won_test.urls")),
     path("joo/", include("joo.urls")),
     path("board/", include("board.urls")),
-    path("jin/", include("jin.urls"))
+    path("jin/", include("jin.urls")),
 ]

@@ -16,7 +16,8 @@ class MainPageView(APIView):
     def get(self, request):
         user = request.user.id
         letter_get = LetterModel.objects.all()
-        
+        for cate_list in letter_get:
+            print(cate_list)
         
         print(letter_get)
         return Response({"get"}, status=status.HTTP_200_OK)

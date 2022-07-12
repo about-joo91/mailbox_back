@@ -8,8 +8,6 @@ WORKDIR /app
 
 COPY requirements.txt /app/
 
-ADD config.py /app/
-
 RUN pip install -r requirements.txt
 
 COPY . /app/

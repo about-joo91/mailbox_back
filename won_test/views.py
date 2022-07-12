@@ -10,6 +10,9 @@ class UserView(APIView):
     '''
     회원정보 추가, 수정 및 탈퇴 기능
     '''
+    def get(self, request):
+        return Response(UserSignupSerializer(request.user).data, status=status.HTTP_200_OK)
+    
     def post(self, request):
         serializer = UserSignupSerializer(data=request.data)
         if serializer.is_valid():

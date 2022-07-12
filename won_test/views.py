@@ -8,9 +8,9 @@ from won_test.serializers import UserSignupSerializer
 # Create your views here.
 class UserView(APIView):
     """
-    회원정보 추가, 수정 및 탈퇴 기능
+    회원정보 조회 및 추가, 수정 및 탈퇴
     """
-
+    
     def get(self, request):
         return Response(
             UserSignupSerializer(request.user).data, status=status.HTTP_200_OK

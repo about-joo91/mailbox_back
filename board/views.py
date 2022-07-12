@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from board.serializers import BoardSerializer, BoardCommentSerializer
-from board.models import Board as BoardModel,  BoardLike as BoardLikeModel
+from board.models import Board as BoardModel, BoardComment,  BoardLike as BoardLikeModel
 # Create your views here.
 
 class BoardView(APIView):
@@ -17,7 +17,7 @@ class BoardView(APIView):
         all_board_list = BoardModel.objects.all().order_by('-create_date')
         return Response({
             "boards" : BoardSerializer(all_board_list, many=True).data}
-
+            
         ,status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -65,6 +65,13 @@ class BorderLikeView(APIView):
 class BorderCommentView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
+
+    def get(self, request):
+        all_board_list = BoardComment.objects.all().order_by('-create_date')
+        return Response({
+            "boards" : BoardCommentSerializer(all_board_list, many=True).data}
+            
+        ,status=status.HTTP_200_OK)
 
     def post(self, request, obj_id):
         #obj_id는 board_id 입니다.

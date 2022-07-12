@@ -5,8 +5,6 @@ on:
       - main
 jobs:
   build-image:
-    needs: run_black
-    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       -

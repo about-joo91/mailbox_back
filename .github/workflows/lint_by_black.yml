@@ -5,7 +5,6 @@ on:
     - main
 jobs:
   linter_name:
-    if: github.event_name != 'pull_request'
     name: runner / black
     runs-on: ubuntu-latest
     steps:
@@ -22,5 +21,5 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           title: "Format Python code with psf/black push"
           commit-message: ":art: Format Python code with psf/black"
-          base : ${{ github.head_ref }}
-          branch: main
+          base : main
+          branch: ${{ github.head_ref }}

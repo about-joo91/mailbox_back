@@ -1,4 +1,4 @@
-# mailbox_back
+# 몽글우체국(가제)
 
 ## 기획의도 
 - 익명의 사용자가 고민을 게재하면 기명의 사용자가 그 고민에 대해서 편지를 보내준다.
@@ -15,14 +15,20 @@
 ![Group 31](https://user-images.githubusercontent.com/55477835/177790475-5b13c5f2-38d9-4801-8e50-ca58aa3c2594.png)
 
 ## 페이지 목업
-![Group 32](https://user-images.githubusercontent.com/55477835/177790644-e2f3110d-139f-429c-9703-f715efa7894b.png)
+![](https://velog.velcdn.com/images/aboutjoo/post/6456f187-1956-4b54-ba3e-d1b609052f4b/image.png)
+
 
 정한 테마 색상을 토대로 편지를 쓴다는 컨셉에 맞게 편지를 작성할 수 있고 접근성이 너무 낮다는 팀원들의 피드백에 맞춰 익명 게시판도 만들게 되었습니다.
 
+## 메인 캐릭터 - 몽글이
+![](https://velog.velcdn.com/images/aboutjoo/post/a0f5bc54-0c1e-446b-a1cd-77ffa918a7b8/image.jpeg)
+
 ## 사용기술
-딥러닝을 활용한 비속어 필터링 기술
-https://www.inven.co.kr/webzine/news/?news=198156
-https://scienceon.kisti.re.kr/commons/util/originalView.do?cn=CFKO201924664108493&oCn=NPAP13263940&dbt=CFKO&journal=NPRO00383455
+- 딥러닝을 활용한 비속어 필터링 기술
+페이지의 의도와 맞지않는 편지내용이 들어갈 수도 있으므로 비속어나 비방언어를 사용하면 편지를 쓰지 못하게 막는다.
+https://github.com/smilegate-ai/korean_unsmile_dataset
+- 블랙을 사용하여 ci시 python 코드 포매팅
+- github action과 도커를 통한 ci/cd 기능 구현
 
 ## ERD
 
@@ -46,6 +52,7 @@ https://thinkable-sassafras-50a.notion.site/ab237d868d5d46d0a159bc07b523cdb3?v=9
 4. PULL REQUESTS 작업시 다같이 라이브로 수정한다 or 주맨이 대표로 리뷰하고 merge 한다.
 5. 자기가 맡은 역할 기간 안에 최선을 다해서 끝내기. ( 당연할 수록 어려움 )
 6. 어렵거나 막히는 부분 있으면 팀원들이나 튜터님한테 적극적으로 소통하고 팀원들과 같이 해결하기.
+11. 공통 파일 수정 후 main 브랜치에 머지한다면 모두가 풀한 후 작업을 다시 시작한다.
 7. 하진이형이 형 동생들 멘탈 잘 잡아주기
 8. 쉬는 시간 챙기면서 일하기.
 9. 밤샘 금지

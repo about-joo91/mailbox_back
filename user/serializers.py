@@ -1,8 +1,5 @@
 from rest_framework import serializers
-from .models import (
-     User as UserModel,
-     UserProfile as UserProfileModel
-)
+from .models import User as UserModel, UserProfile as UserProfileModel
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
@@ -28,13 +25,23 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
+
     def get_user(self, obj):
         return obj.user.nickname
+
     def update(self, instance, validated_data):
         for key, value in validated_data.items():
             setattr(instance, key, value)
         instance.save()
         return instance
+
     class Meta:
         model = UserProfileModel
-        fields = ['user', 'description', 'mongle_level', 'mongle_grade', 'fullname', 'profile_img']
+        fields = [
+            "user",
+            "description",
+            "mongle_level",
+            "mongle_grade",
+            "fullname",
+            "profile_img",
+        ]

@@ -1,3 +1,4 @@
+from operator import mod
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
@@ -49,3 +50,19 @@ class User(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.is_admin
+
+
+class UserPrifile(models.Model):
+    user = models.OneToOneField('User',on_delete=models.CASCADE)
+    description = models.TextField()
+    mongle_level = models.IntegerField()
+    mongle_grade = models.IntegerField()
+    fullname = models.TextField()
+    profile_img = models.URLField(default="https://user-images.githubusercontent.com/55477835/178631292-f381c6e2-2541-4a2c-ba67-b5bb4369e3d0.jpeg")
+
+
+class UserProfileCategory(models.Model):
+    user_profile = models.ForeignKey('UserProfile', on_delete= models.CASCADE)
+    category = models.ForeignKey('jin.WorryCategory',on_delete=models.SET_NULL, null=True)
+
+

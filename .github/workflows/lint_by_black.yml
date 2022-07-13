@@ -1,11 +1,9 @@
 name: lint_by_black
 on: 
   push:
-    branches-ignore:
-      - main
+    branches: [joo, feat/users, feat/jin, feature/Ko]
 jobs:
   linter_name:
-    if: github.event.pull_request.merged == false 
     name: runner / black
     runs-on: ubuntu-latest
     steps:

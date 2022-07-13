@@ -55,10 +55,10 @@ class User(AbstractBaseUser):
 
 class UserProfile(models.Model):
     user = models.OneToOneField("User", on_delete=models.CASCADE)
-    description = models.TextField()
-    mongle_level = models.IntegerField()
-    mongle_grade = models.IntegerField()
-    fullname = models.TextField()
+    description = models.TextField(default='')
+    mongle_level = models.IntegerField(default=0)
+    mongle_grade = models.IntegerField(default=0)
+    fullname = models.TextField(default='')
     profile_img = models.URLField(
         default="https://user-images.githubusercontent.com/55477835/178631292-f381c6e2-2541-4a2c-ba67-b5bb4369e3d0.jpeg"
     )
@@ -70,7 +70,7 @@ class UserProfileCategory(models.Model):
         "jin.WorryCategory", on_delete=models.SET_NULL, null=True
     )
 
-class ReportUser(models.Model):
+class Report(models.Model):
     report_user = models.ForeignKey('User',on_delete=models.CASCADE)
     reported_user = models.ForeignKey('ReportedUser',on_delete=models.CASCADE)
     report_reason = models.CharField(max_length=150)

@@ -9,4 +9,3 @@ class LetterSerializer(serializers.ModelSerializer):
     class Meta:
         model = LetterModel
         fields = ['category', 'title','content','create_date']
-

@@ -1,8 +1,11 @@
-from django.shortcuts import render
+
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
-from .serializers import UserSignupSerializer
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+from user.models import UserProfile as UserProfileModel
+from .serializers import UserSignupSerializer, UserProfileSerializer
 
 
 # Create your views here.
@@ -28,3 +31,25 @@ class UserView(APIView):
 
     def delete(self, request):
         return Response({"message": "탈퇴가 완료되었습니다!"}, status=status.HTTP_200_OK)
+
+
+class UserProfileView(APIView):
+    """
+    유저 프로필의 CRUD를 담당하는 View
+    """
+    authentication_classes =[JWTAuthentication]
+    def get(self, request):
+        cur_user = request.user
+        cur_user_profile = UserProfileModel(user = cur_user)
+        return Response(UserProfileSerializer(cur_user_profile).data,status=status.HTTP_200_OK)
+    def put(self, request):
+        cur_user = request.user
+        cur_user_profile = UserProfileModel(user=cur_user)
+
+        user_profile_serializer = UserProfileSerializer(cur_user_profile, data= request.data, partial=True)
+        user_profile_serializer.is_valid(raise_exception=True)
+        user_profile_serializer.save()
+
+        return Response({"message":"프로필 수정이 완료되었습니다."},status=status.HTTP_200_OK)
+
+

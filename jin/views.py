@@ -27,6 +27,9 @@ class MainPageView(APIView):
         #             "content": letter_get.content,
         #         }
         #         category_list.append(cate)
+
+
+
         cur_user = request.user
         best_review_get = LetterReviewModel.objects.all().order_by("-grade")[:3]
         best_review = [
@@ -49,9 +52,10 @@ class MainPageView(APIView):
         ]
 
         return Response(
-            {
+            {   
                 "best_review": MainpageSerializer(best_review, many=True).data,
                 "live_review": MainpageSerializer(live_review, many=True).data,
+                "take_letter":MainpageSerializer(cur_user).data,
             },
             status=status.HTTP_200_OK,
         )

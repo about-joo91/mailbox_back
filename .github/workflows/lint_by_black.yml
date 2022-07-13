@@ -21,4 +21,5 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           title: "Format Python code with psf/black push"
           commit-message: ":art: Format Python code with psf/black"
+          base : main
           branch: ${{ github.ref }}

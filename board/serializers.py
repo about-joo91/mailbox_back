@@ -13,7 +13,8 @@ class BoardSerializer(serializers.ModelSerializer):
         return obj.boardlike_set.count()
 
     def get_is_liked(self, obj):
-        return bool(obj.boardlike_set.filter(board=obj.id))
+        cur_user = self.context["request"].user
+        return bool(obj.boardlike_set.filter(author = cur_user.id))
 
     def get_is_board_writer(self, obj):
         cur_user = self.context["request"].user

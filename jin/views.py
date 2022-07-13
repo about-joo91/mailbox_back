@@ -27,14 +27,29 @@ class MainPageView(APIView):
         #             "content": letter_get.content,
         #         }
         #         category_list.append(cate)
+        cur_user = request.user
         best_review_get = LetterReviewModel.objects.all().order_by("-grade")[:3]
         best_review = [
-            {"content": best_review.content} for best_review in best_review_get
+            {
+                "content": best_review.content,
+                "review_author" : best_review.review_author,
+                "grade": best_review.grade
+            } for best_review in best_review_get
+        ]
+
+        live_review_get = LetterReviewModel.objects.all().order_by("-create_date")[:2]
+        live_review = [
+            {
+                "content":live_review.content,
+                "review_author": live_review.review_author,
+                "grade": live_review.grade
+                } for live_review in live_review_get
         ]
 
         return Response(
             {
                 "best_review": MainpageSerializer(best_review, many=True).data,
+                "live_review": MainpageSerializer(live_review, many=True).data,
             },
             status=status.HTTP_200_OK,
         )

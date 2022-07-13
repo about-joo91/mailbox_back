@@ -52,7 +52,7 @@ class User(AbstractBaseUser):
         return self.is_admin
 
 
-class UserPrifile(models.Model):
+class UserProfile(models.Model):
     user = models.OneToOneField("User", on_delete=models.CASCADE)
     description = models.TextField()
     mongle_level = models.IntegerField()

@@ -68,3 +68,10 @@ class UserProfileCategory(models.Model):
     category = models.ForeignKey(
         "jin.WorryCategory", on_delete=models.SET_NULL, null=True
     )
+
+class Report(models.Model):
+    report_user = models.ForeignKey('User',on_delete=models.CASCADE)
+    reported_user = models.ForeignKey('UserReportedTargetUser',on_delete=models.CASCADE)
+
+class UserReportedTargetUser(models.Model):
+    target_user = models.ForeignKey('User',on_delete=models.CASCADE)

@@ -22,4 +22,4 @@ jobs:
           title: "Format Python code with psf/black push"
           commit-message: ":art: Format Python code with psf/black"
           base : main
-          branch: ${{ github.head_ref }}
+          branch: lint

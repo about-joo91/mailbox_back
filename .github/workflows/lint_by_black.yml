@@ -8,7 +8,7 @@ jobs:
     name: runner / black
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Check files using the black formatter
         uses: rickstaa/action-black@v1
         id: action_black
@@ -22,4 +22,4 @@ jobs:
           title: "Format Python code with psf/black push"
           commit-message: ":art: Format Python code with psf/black"
           base: main # Creates pull request onto pull request or commit branch
-          branch: ${{ github.head_ref }}
+          branch: ${{ github.ref }}

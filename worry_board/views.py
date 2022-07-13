@@ -25,6 +25,15 @@ class WorryBoardView(APIView):
         create_worry_board_serializer = WorryBoardSerializer(data = request.data)
         if create_worry_board_serializer.is_valid(raise_exception=True):
             create_worry_board_serializer.save()
-            return Response({"message": "고민을 게시하였습니다."}, status=status.HTTP_200_OK)
+            return Response({"message": "고민 게시글을 게시하였습니다."}, status=status.HTTP_200_OK)
         else :
             return Response({"message": "게시에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, worry_board_id):
+        update_worry_board = WorryBoardModel.objects.get(id=worry_board_id)
+        update_worry_board_serializer = WorryBoardSerializer(
+            update_worry_board, data=request.data, partial=True
+        )
+        update_worry_board_serializer.is_valid(raise_exception=True)
+        update_worry_board_serializer.save()
+        return Response({"message": "고민 게시글이 수정되었습니다."}, status=status.HTTP_200_OK)

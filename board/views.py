@@ -18,7 +18,11 @@ class BoardView(APIView):
     def get(self, request):
         all_board_list = BoardModel.objects.all().order_by("-create_date")
         return Response(
-            {"boards": BoardSerializer(all_board_list, many=True, context={"request" : request}).data,},
+            {
+                "boards": BoardSerializer(
+                    all_board_list, many=True, context={"request": request}
+                ).data,
+            },
             status=status.HTTP_200_OK,
         )
 
@@ -75,7 +79,11 @@ class BorderCommentView(APIView):
     def get(self, request):
         all_board_list = BoardComment.objects.all().order_by("-create_date")
         return Response(
-            {"boards": BoardCommentSerializer(all_board_list, many=True, context={"request" : request}).data},
+            {
+                "boards": BoardCommentSerializer(
+                    all_board_list, many=True, context={"request": request}
+                ).data
+            },
             status=status.HTTP_200_OK,
         )
 

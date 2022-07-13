@@ -26,7 +26,8 @@ https://scienceon.kisti.re.kr/commons/util/originalView.do?cn=CFKO20192466410849
 
 ## ERD
 
-![mail_box](https://user-images.githubusercontent.com/55477835/177930975-6287281c-ea24-4a8f-b961-188a357e8bf3.png)
+![mail_box](https://user-images.githubusercontent.com/101394490/178623485-8189e5c6-a4ea-4aad-b5ae-10b0dc251ae1.png)
+
 
 ## api명세서 
 https://thinkable-sassafras-50a.notion.site/ab237d868d5d46d0a159bc07b523cdb3?v=9442da6f0ae744fea4619ad4f7d6a8f5

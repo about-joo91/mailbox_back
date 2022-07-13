@@ -1,15 +1,13 @@
 from rest_framework import serializers
 
-from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
 from worry_board.models import WorryBoard as WorryBoardModel
-from .models import LetterReview as LetterReviewModel
-from .models import Letter as LetterModel
-from .models import UserLetterTargetUser as UserLetterTargetUserModel
+from .models import (
+    LetterReview as LetterReviewModel,
+    Letter as LetterModel,
+    UserLetterTargetUser as UserLetterTargetUserModel
 
-
-
-
+)
 
 
 
@@ -19,14 +17,13 @@ class LetterSerilaizer(serializers.ModelSerializer):
             **validated_data
         ) 
         new_post.save()
-        target_user = validated_data.pop('letter_author')
-        UserLetterTargetUserModel(letter= new_post, target_user = target_user).save()
+        target_user = validated_data.pop('worryboard')
+        UserLetterTargetUserModel(letter= new_post, target_user = target_user.author).save()
         return new_post
         
     class Meta:
         model = LetterModel
         fields = ["letter_author","category","title","content","create_date","worryboard"]
-
 
 
 

@@ -1,10 +1,11 @@
 name: mail_box_pipline
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types: [closed]
+    branches: [main]
 jobs:
   build-image:
+    if: github.event.pull_request.merged
     runs-on: ubuntu-latest
     steps:
       -

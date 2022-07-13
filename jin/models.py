@@ -5,21 +5,21 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 # Create your models here.
 
 ############### ##################
-class Category(models.Model):
-    Cate_name = models.CharField(max_length=30)
+class Woory_Category(models.Model):
+    cate_name = models.CharField(max_length=30)
 
 
 class Letter(models.Model):
-    letter_author = models.OneToOneField(
+    letter_author = models.ForeignKey(
         "won_test.User", on_delete=models.SET_NULL, null=True
     )
-    category = models.ForeignKey("Category", on_delete=models.CASCADE)
+    category = models.ForeignKey("Woory_Category", on_delete=models.CASCADE)
     title = models.CharField(max_length=30)
     content = models.TextField()
 
 
 class User_Letter_Target_User(models.Model):
-    author = models.OneToOneField("won_test.User", on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey("won_test.User", on_delete=models.SET_NULL, null=True)
     target_user = models.ForeignKey("Letter", on_delete=models.SET_NULL, null=True)
 
 

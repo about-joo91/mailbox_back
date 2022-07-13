@@ -28,7 +28,8 @@ class MainPageView(APIView):
         #         }
         #         category_list.append(cate)
 
-
+        #####
+        
 
         cur_user = request.user
         best_review_get = LetterReviewModel.objects.all().order_by("-grade")[:3]

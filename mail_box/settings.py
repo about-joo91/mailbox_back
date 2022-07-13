@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
-    "joo",
+    "my_page",
     "board",
     "jin",
     "worry_board",

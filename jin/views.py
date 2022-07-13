@@ -4,8 +4,10 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from .serializers import MainpageSerializer
+from .serializers import MaiapageSerializer
+from .serializers import LetterSerializer
 from .models import LetterReview as LetterReviewModel
+from worry_board.models import WorryBoard
 
 # Create your views here.
 class MainPageView(APIView):
@@ -17,46 +19,15 @@ class MainPageView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
-        # category_list = []
-        # for cate_get in range(1, 7):
-        #     letter_gets = LetterModel.objects.filter(category=cate_get)[:3]
-        #     for letter_get in letter_gets:
-        #         cate = {
-        #             "category": letter_get.category,
-        #             "title": letter_get.title,
-        #             "content": letter_get.content,
-        #         }
-        #         category_list.append(cate)
-
-        #####
-        
-
-        cur_user = request.user
-        best_review_get = LetterReviewModel.objects.all().order_by("-grade")[:3]
-        best_review = [
-            {
-                "content": best_review.content,
-                "review_author": best_review.review_author,
-                "grade": best_review.grade,
-            }
-            for best_review in best_review_get
-        ]
-
-        live_review_get = LetterReviewModel.objects.all().order_by("-create_date")[:2]
-        live_review = [
-            {
-                "content": live_review.content,
-                "review_author": live_review.review_author,
-                "grade": live_review.grade,
-            }
-            for live_review in live_review_get
-        ]
+        cur_user =request.user
+        review_get = LetterReviewModel.objects.none()
+        profile_grade= request.user.userprofile.mongle_grade
 
         return Response(
             {   
-                "best_review": MainpageSerializer(best_review, many=True).data,
-                "live_review": MainpageSerializer(live_review, many=True).data,
-                "take_letter":MainpageSerializer(cur_user).data,
+                "profile_grade": profile_grade,
+                "main_datas": MaiapageSerializer(review_get).data,
+                "letter_count":LetterSerializer(cur_user).data,
             },
             status=status.HTTP_200_OK,
         )

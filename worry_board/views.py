@@ -37,3 +37,10 @@ class WorryBoardView(APIView):
         update_worry_board_serializer.is_valid(raise_exception=True)
         update_worry_board_serializer.save()
         return Response({"message": "고민 게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
+
+    def delete(self, request, worry_board_id):
+        delete_worry_board = WorryBoardModel.objects.get(id=worry_board_id)
+        if delete_worry_board:
+            delete_worry_board.delete()
+            return Response({"message": "고민 게시글이 삭제되었습니다."}, status=status.HTTP_200_OK)
+        return Response({"message": "삭제에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)

@@ -5,4 +5,4 @@ from .models import Letter as LetterModel
 class MainpageSerializer(serializers.ModelSerializer):
     class Meta:
         model = LetterModel
-        fields = ["category", "title", "content"]
+        fields = ["letter_review","category", "title", "content"]

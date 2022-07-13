@@ -4,7 +4,7 @@ from .models import (
     UserProfile as UserProfileModel,
     Report as ReportModel,
     ReportedUser as ReportedUserModel,
-    )
+)
 
 # Register your models here.
 admin.site.register(UserModel)

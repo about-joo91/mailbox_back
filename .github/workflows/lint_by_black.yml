@@ -2,7 +2,7 @@ name: lint_by_black
 on: 
   push:
    branches-ignore:
-    - main
+    [main, lint]
 jobs:
   linter_name:
     name: runner / black
@@ -23,3 +23,4 @@ jobs:
           commit-message: ":art: Format Python code with psf/black"
           base : main
           branch: lint
+          delete-branch: true

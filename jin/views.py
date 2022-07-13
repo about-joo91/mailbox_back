@@ -32,18 +32,20 @@ class MainPageView(APIView):
         best_review = [
             {
                 "content": best_review.content,
-                "review_author" : best_review.review_author,
-                "grade": best_review.grade
-            } for best_review in best_review_get
+                "review_author": best_review.review_author,
+                "grade": best_review.grade,
+            }
+            for best_review in best_review_get
         ]
 
         live_review_get = LetterReviewModel.objects.all().order_by("-create_date")[:2]
         live_review = [
             {
-                "content":live_review.content,
+                "content": live_review.content,
                 "review_author": live_review.review_author,
-                "grade": live_review.grade
-                } for live_review in live_review_get
+                "grade": live_review.grade,
+            }
+            for live_review in live_review_get
         ]
 
         return Response(

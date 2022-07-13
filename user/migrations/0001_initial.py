@@ -10,45 +10,107 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('jin', '0001_initial'),
+        ("jin", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='User',
+            name="User",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('username', models.CharField(max_length=50, unique=True, verbose_name='사용자 계정')),
-                ('password', models.CharField(max_length=128, verbose_name='비밀번호')),
-                ('nickname', models.CharField(max_length=20, verbose_name='닉네임')),
-                ('create_date', models.DateTimeField(auto_now_add=True, verbose_name='가입일')),
-                ('update_date', models.DateTimeField(auto_now=True, verbose_name='갱신일')),
-                ('is_active', models.BooleanField(default=True)),
-                ('is_admin', models.BooleanField(default=False)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "last_login",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="last login"
+                    ),
+                ),
+                (
+                    "username",
+                    models.CharField(max_length=50, unique=True, verbose_name="사용자 계정"),
+                ),
+                ("password", models.CharField(max_length=128, verbose_name="비밀번호")),
+                ("nickname", models.CharField(max_length=20, verbose_name="닉네임")),
+                (
+                    "create_date",
+                    models.DateTimeField(auto_now_add=True, verbose_name="가입일"),
+                ),
+                (
+                    "update_date",
+                    models.DateTimeField(auto_now=True, verbose_name="갱신일"),
+                ),
+                ("is_active", models.BooleanField(default=True)),
+                ("is_admin", models.BooleanField(default=False)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='UserProfile',
+            name="UserProfile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('description', models.TextField()),
-                ('mongle_level', models.IntegerField()),
-                ('mongle_grade', models.IntegerField()),
-                ('fullname', models.TextField()),
-                ('profile_img', models.URLField(default='https://user-images.githubusercontent.com/55477835/178631292-f381c6e2-2541-4a2c-ba67-b5bb4369e3d0.jpeg')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("description", models.TextField()),
+                ("mongle_level", models.IntegerField()),
+                ("mongle_grade", models.IntegerField()),
+                ("fullname", models.TextField()),
+                (
+                    "profile_img",
+                    models.URLField(
+                        default="https://user-images.githubusercontent.com/55477835/178631292-f381c6e2-2541-4a2c-ba67-b5bb4369e3d0.jpeg"
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
         migrations.CreateModel(
-            name='UserProfileCategory',
+            name="UserProfileCategory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('category', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='jin.worrycategory')),
-                ('user_profile', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='user.userprofile')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "category",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to="jin.worrycategory",
+                    ),
+                ),
+                (
+                    "user_profile",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="user.userprofile",
+                    ),
+                ),
             ],
         ),
     ]

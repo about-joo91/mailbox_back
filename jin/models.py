@@ -9,9 +9,7 @@ class WorryCategory(models.Model):
 
 
 class Letter(models.Model):
-    letter_author = models.ForeignKey(
-        "user.User", on_delete=models.SET_NULL, null=True
-    )
+    letter_author = models.ForeignKey("user.User", on_delete=models.SET_NULL, null=True)
     category = models.ForeignKey("WorryCategory", on_delete=models.CASCADE)
     title = models.CharField(max_length=30)
     content = models.TextField()

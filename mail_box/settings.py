@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     "board",
     "jin",
     "worry_board",
-    'user'
+    "user",
 ]
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [  # 기본적인 view 접근 권한 지정

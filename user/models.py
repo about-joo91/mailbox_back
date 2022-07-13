@@ -1,6 +1,7 @@
-from operator import mod
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+
+from django.conf import settings
 
 # Create your models here.
 class UserManager(BaseUserManager):
@@ -68,3 +69,11 @@ class UserProfileCategory(models.Model):
     category = models.ForeignKey(
         "jin.WorryCategory", on_delete=models.SET_NULL, null=True
     )
+
+class ReportUser(models.Model):
+    report_user = models.ForeignKey('User',on_delete=models.CASCADE)
+    reported_user = models.ForeignKey('ReportedUser',on_delete=models.CASCADE)
+    report_reason = models.CharField(max_length=150)
+
+class ReportedUser(models.Model):
+    user = models.ForeignKey('User',on_delete=models.CASCADE)

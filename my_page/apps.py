@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class JooConfig(AppConfig):
+class MyPageConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "joo"
+    name = "my_page"

@@ -29,6 +29,7 @@ class LetterReview(models.Model):
     letter = models.ForeignKey("Letter", on_delete=models.CASCADE)
     grade = models.IntegerField()
     content = models.TextField()
+    create_date = models.DateTimeField(auto_now_add=True)
 
 
 class LetterReviewLike(models.Model):

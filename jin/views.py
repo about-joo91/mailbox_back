@@ -5,11 +5,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from .serializers import MainpageSerializer
+from . models import LetterReview as LetterReviewModel
 
 # Create your views here.
 class MainPageView(APIView):
     """
-    마이 페이지의 CRUD를 담당하는 View
+    메인 페이지의 CRUD를 담당하는 View
     """
 
     permission_classes = [IsAuthenticated]
@@ -26,7 +27,10 @@ class MainPageView(APIView):
         #             "content": letter_get.content,
         #         }
         #         category_list.append(cate)
+        best_review_get = LetterReviewModel.objects.all().order_by('-grade')[:3]
+        best_review=[{"content":best_review.content}for best_review in best_review_get]
 
         return Response(
+            {"best_review":MainpageSerializer(best_review, many=True).data,},
             status=status.HTTP_200_OK,
         )

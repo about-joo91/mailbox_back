@@ -6,7 +6,7 @@ from django.db import models
 class Board(models.Model):
     author = models.ForeignKey("won_test.User", on_delete=models.CASCADE)
     title = models.CharField("제목", max_length=30)
-    content = models.TextField("내용", max_length=120)
+    content = models.TextField("내용", max_length=500)
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
 
@@ -19,7 +19,7 @@ class BoardLike(models.Model):
 class BoardComment(models.Model):
     author = models.ForeignKey("won_test.User", on_delete=models.CASCADE)
     board = models.ForeignKey("board.Board", on_delete=models.CASCADE)
-    content = models.TextField("내용", max_length=120)
+    content = models.TextField("내용", max_length=500)
     create_date = models.DateTimeField(auto_now_add=True)
 
 

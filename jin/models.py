@@ -8,6 +8,7 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 class WooryCategory(models.Model):
     cate_name = models.CharField(max_length=30)
 
+
 class Letter(models.Model):
     letter_author = models.ForeignKey(
         "won_test.User", on_delete=models.SET_NULL, null=True

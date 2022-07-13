@@ -27,9 +27,6 @@ class MainPageView(APIView):
         #         }
         #         category_list.append(cate)
 
-
-
-
         return Response(
             status=status.HTTP_200_OK,
         )

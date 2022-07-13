@@ -4,6 +4,7 @@ on:
     branches:
       - main
 jobs:
+  if: github.event.pull_request.merged == true 
   build-image:
     runs-on: ubuntu-latest
     steps:

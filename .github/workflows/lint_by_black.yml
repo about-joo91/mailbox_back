@@ -5,7 +5,7 @@ on:
       - main
 jobs:
   linter_name:
-    if: github.event.pull_request.merged == false
+    if: github.event.pull_request.merged == false 
     name: runner / black
     runs-on: ubuntu-latest
     steps:

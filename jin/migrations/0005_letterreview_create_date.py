@@ -7,14 +7,16 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('jin', '0004_rename_letter_review_letterreview_and_more'),
+        ("jin", "0004_rename_letter_review_letterreview_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='letterreview',
-            name='create_date',
-            field=models.DateTimeField(auto_now_add=True, default=django.utils.timezone.now),
+            model_name="letterreview",
+            name="create_date",
+            field=models.DateTimeField(
+                auto_now_add=True, default=django.utils.timezone.now
+            ),
             preserve_default=False,
         ),
     ]

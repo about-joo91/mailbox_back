@@ -6,6 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from django.db.models.query_utils import Q
 
+
 from .serializers import (
     LetterReviewSerializer,
     UserProfileSerializer,
@@ -52,7 +53,6 @@ class LetterView(APIView):
     Letter CRUD 를 담당하는 view 
     """
     def post(self, request):
-
         worry_board_get = request.data['worry_board_id']
         request.data['letter_author'] = request.user.id
         request.data['category'] = WorryBoardModel.objects.get(id=worry_board_get).category.id
@@ -60,3 +60,4 @@ class LetterView(APIView):
         letterserialzier.is_valid(raise_exception=True)
         letterserialzier.save(worryboard=WorryBoardModel.objects.get(id=worry_board_get))
         return Response({"messge"},status=status.HTTP_200_OK)
+

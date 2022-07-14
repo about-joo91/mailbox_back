@@ -6,9 +6,7 @@ from .models import (
     LetterReview as LetterReviewModel,
     Letter as LetterModel,
     UserLetterTargetUser as UserLetterTargetUserModel
-
 )
-
 
 
 class LetterSerilaizer(serializers.ModelSerializer):

@@ -24,10 +24,6 @@ class MainPageView(APIView):
 
     def get(self, request):
         cur_user = request.user
-        review_get = LetterReviewModel.objects.none()
-        profile_grade = request.user.userprofile.mongle_grade
-
-        cur_user = request.user
         profile_grade = request.user.userprofile.mongle_grade
         letter_count = request.user.userlettertargetuser_set.all().count()
         worry_list = WorryBoardModel.objects.none()

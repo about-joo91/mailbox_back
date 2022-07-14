@@ -4,13 +4,16 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from django.db.models.query_utils import Q
+from .serializers import (
+    LetterReviewSerializer,
+    UserProfileSerializer,
+    LetterSerilaizer
+)
 
-from .serializers import LetterReviewSerializer, UserProfileSerializer, LetterSerilaizer
 from .models import WorryCategory
 from worry_board.serializers import WorryBoardSerializer
 from worry_board.models import WorryBoard as WorryBoardModel
-from .models import Letter as LetterModel
+
 
 # Create your views here.
 class MainPageView(APIView):
@@ -23,19 +26,11 @@ class MainPageView(APIView):
 
     def get(self, request):
         cur_user = request.user
-        review_get = LetterReviewModel.objects.none()
-        profile_grade = request.user.userprofile.mongle_grade
-
-        cur_user = request.user
         profile_grade = request.user.userprofile.mongle_grade
         letter_count = request.user.userlettertargetuser_set.all().count()
         worry_list = WorryBoardModel.objects.none()
         for cate_get in WorryCategory.objects.all():
-            worry_list = worry_list.union(
-                WorryBoardModel.objects.filter(category=cate_get).order_by(
-                    "-create_date"
-                )[:3]
-            )
+            worry_list = worry_list.union(WorryBoardModel.objects.filter(category=cate_get).order_by("-create_date")[:3])
 
         return Response(
             {
@@ -43,11 +38,10 @@ class MainPageView(APIView):
                 "letter_count": letter_count,
                 "rank_list": UserProfileSerializer(cur_user).data,
                 "worry_list": WorryBoardSerializer(worry_list, many=True).data,
-                "reviews": LetterReviewSerializer(cur_user).data,
+                "reviews" : LetterReviewSerializer(cur_user).data
             },
             status=status.HTTP_200_OK,
         )
-
 
 class LetterView(APIView):
     permission_classes = [IsAuthenticated]
@@ -55,7 +49,6 @@ class LetterView(APIView):
     """
     Letter CRUD 를 담당하는 view 
     """
-
     def post(self, request):
 
         worry_board_get = request.data["worry_board_id"]
@@ -65,7 +58,6 @@ class LetterView(APIView):
         ).category.id
         letterserialzier = LetterSerilaizer(data=request.data)
         letterserialzier.is_valid(raise_exception=True)
-        letterserialzier.save(
-            worryboard=WorryBoardModel.objects.get(id=worry_board_get)
-        )
-        return Response({"messge"}, status=status.HTTP_200_OK)
+        letterserialzier.save(worryboard=WorryBoardModel.objects.get(id=worry_board_get))
+        return Response({"messge"},status=status.HTTP_200_OK)
+

@@ -12,16 +12,22 @@ from board.serializers import BoardCommentSerializer, BoardSerializer
 
 
 class BoardView(APIView):
+    """
+    board 게시판의 CRUD를 담당하는 view
+    """
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get(self, request):
-        all_board_list = BoardModel.objects.all().order_by("-create_date")
+
+    def get(self, request, page_num):
+        all_board_list = BoardModel.objects.all().order_by("-create_date")[10*(page_num-1): 9 + 10*(page_num -1)]
+        total_count = BoardModel.objects.all().order_by("-create_date").count()
         return Response(
             {
                 "boards": BoardSerializer(
                     all_board_list, many=True, context={"request": request}
                 ).data,
+                "total_count" : total_count
             },
             status=status.HTTP_200_OK,
         )
@@ -51,6 +57,9 @@ class BoardView(APIView):
 
 
 class BorderLikeView(APIView):
+    """
+    Board 게시판의 좋아요를 post 하는 View
+    """
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
@@ -68,8 +77,13 @@ class BorderLikeView(APIView):
 
 
 class BorderCommentView(APIView):
+    """
+    Board 게시판의 댓글을 작성하고 불러오는 View
+    """
+
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
+
 
     def get(self, request):
         all_board_list = BoardComment.objects.all().order_by("-create_date")

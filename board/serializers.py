@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from board.models import Board as BoardModel, BoardComment as BoardCommentModel
+from board.models import Board as BoardModel
+from board.models import BoardComment as BoardCommentModel
 
 
 class BoardSerializer(serializers.ModelSerializer):

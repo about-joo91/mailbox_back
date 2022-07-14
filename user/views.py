@@ -1,10 +1,11 @@
-from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from user.models import UserProfile as UserProfileModel
-from .serializers import UserSignupSerializer, UserProfileSerializer
+
+from .serializers import UserProfileSerializer, UserSignupSerializer
 
 
 # Create your views here.

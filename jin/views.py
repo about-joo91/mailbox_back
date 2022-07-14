@@ -6,6 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from django.db.models.query_utils import Q
 
+
 from .serializers import LetterReviewSerializer, UserProfileSerializer, LetterSerilaizer
 from .models import WorryCategory
 from worry_board.serializers import WorryBoardSerializer
@@ -57,7 +58,6 @@ class LetterView(APIView):
     """
 
     def post(self, request):
-
         worry_board_get = request.data["worry_board_id"]
         request.data["letter_author"] = request.user.id
         request.data["category"] = WorryBoardModel.objects.get(

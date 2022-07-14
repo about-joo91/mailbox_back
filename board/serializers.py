@@ -46,7 +46,6 @@ class BoardCommentSerializer(serializers.ModelSerializer):
     is_comment_writer = serializers.SerializerMethodField()
 
     def get_is_comment_writer(self, obj):
-        print(self)
         cur_user = self.context["request"].user
         return bool(obj.author == cur_user)
 

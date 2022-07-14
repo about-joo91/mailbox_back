@@ -7,11 +7,13 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.db.models.query_utils import Q
 
 
+
 from .serializers import (
     LetterReviewSerializer,
     UserProfileSerializer,
     LetterSerilaizer
 )
+
 from .models import WorryCategory
 from worry_board.serializers import WorryBoardSerializer
 from worry_board.models import WorryBoard as WorryBoardModel
@@ -27,9 +29,8 @@ class MainPageView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
-
-        cur_user =request.user
-        profile_grade= request.user.userprofile.mongle_grade
+        cur_user = request.user
+        profile_grade = request.user.userprofile.mongle_grade
         letter_count = request.user.userlettertargetuser_set.all().count()
         worry_list = WorryBoardModel.objects.none()
         for cate_get in WorryCategory.objects.all():
@@ -53,9 +54,11 @@ class LetterView(APIView):
     Letter CRUD 를 담당하는 view 
     """
     def post(self, request):
-        worry_board_get = request.data['worry_board_id']
-        request.data['letter_author'] = request.user.id
-        request.data['category'] = WorryBoardModel.objects.get(id=worry_board_get).category.id
+        worry_board_get = request.data["worry_board_id"]
+        request.data["letter_author"] = request.user.id
+        request.data["category"] = WorryBoardModel.objects.get(
+            id=worry_board_get
+        ).category.id
         letterserialzier = LetterSerilaizer(data=request.data)
         letterserialzier.is_valid(raise_exception=True)
         letterserialzier.save(worryboard=WorryBoardModel.objects.get(id=worry_board_get))

@@ -3,8 +3,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from user.models import UserProfile as UserProfileModel
-
 from .serializers import UserProfileSerializer, UserSignupSerializer
 
 
@@ -35,24 +33,23 @@ class UserView(APIView):
 
 class UserProfileView(APIView):
     """
-    유저 프로필의 CRUD를 담당하는 View
+    유저 프로필을 가져오고 수정하는 View
     """
 
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
         cur_user = request.user
-        cur_user_profile = UserProfileModel(user=cur_user)
+
         return Response(
-            UserProfileSerializer(cur_user_profile).data, status=status.HTTP_200_OK
+            UserProfileSerializer(cur_user.userprofile).data, status=status.HTTP_200_OK
         )
 
     def put(self, request):
         cur_user = request.user
-        cur_user_profile = UserProfileModel(user=cur_user)
 
         user_profile_serializer = UserProfileSerializer(
-            cur_user_profile, data=request.data, partial=True
+            cur_user.userprofile, data=request.data, partial=True
         )
         user_profile_serializer.is_valid(raise_exception=True)
         user_profile_serializer.save()

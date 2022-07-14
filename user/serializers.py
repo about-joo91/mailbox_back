@@ -27,6 +27,13 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
+    categories = serializers.SerializerMethodField()
+
+    def get_categories(self, obj):
+        return [
+            {"id": cate.category.id, "cate_name": cate.category.cate_name}
+            for cate in obj.userprofilecategory_set.all()
+        ]
 
     def get_user(self, obj):
         return obj.user.nickname
@@ -46,4 +53,5 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "mongle_grade",
             "fullname",
             "profile_img",
+            "categories",
         ]

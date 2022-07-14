@@ -1,10 +1,9 @@
 from django.contrib import admin
-from .models import (
-    User as UserModel,
-    UserProfile as UserProfileModel,
-    Report as ReportModel,
-    ReportedUser as ReportedUserModel,
-)
+
+from .models import Report as ReportModel
+from .models import ReportedUser as ReportedUserModel
+from .models import User as UserModel
+from .models import UserProfile as UserProfileModel
 
 # Register your models here.
 admin.site.register(UserModel)

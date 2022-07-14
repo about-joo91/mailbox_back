@@ -1,9 +1,8 @@
 from django.db import models
-from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 
 # Create your models here.
 
-############### ##################
+
 class WorryCategory(models.Model):
     cate_name = models.CharField(max_length=30)
 

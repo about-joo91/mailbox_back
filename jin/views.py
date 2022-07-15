@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from unsmile_filtering import pipe
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import WorryBoardSerializer
 
@@ -11,6 +12,8 @@ from .models import LetterReview as LetterReviewModel
 from .models import LetterReviewLike as LetterReviewLikeModel
 from .models import WorryCategory
 from .serializers import LetterReviewSerializer, LetterSerilaizer, UserProfileSerializer
+
+# from . import recommender
 
 # Create your views here.
 
@@ -48,7 +51,12 @@ class MainPageView(APIView):
         cur_user = request.user
         profile_grade = request.user.userprofile.mongle_grade
         letter_count = request.user.userlettertargetuser_set.all().count()
+
+        # collab_recomendation = recommender.recommend_worryboard
+        # recommend_worry_list = collab_recomendation.recommend_worries(cur_user.id)
+
         worry_list = WorryBoardModel.objects.none()
+
         for cate_get in WorryCategory.objects.all():
             worry_list = worry_list.union(
                 WorryBoardModel.objects.filter(category=cate_get).order_by(
@@ -76,15 +84,21 @@ class LetterView(APIView):
     """
 
     def post(self, request):
-
-        worry_board_get = request.data["worry_board_id"]
-        request.data["letter_author"] = request.user.id
-        request.data["category"] = WorryBoardModel.objects.get(
-            id=worry_board_get
-        ).category.id
-        letterserialzier = LetterSerilaizer(data=request.data)
-        letterserialzier.is_valid(raise_exception=True)
-        letterserialzier.save(
-            worryboard=WorryBoardModel.objects.get(id=worry_board_get)
-        )
-        return Response({"messge"}, status=status.HTTP_200_OK)
+        result = pipe(request.data["content"])[0]
+        if result["label"] == "clean":
+            worry_board_get = request.data["worry_board_id"]
+            request.data["letter_author"] = request.user.id
+            request.data["category"] = WorryBoardModel.objects.get(
+                id=worry_board_get
+            ).category.id
+            letterserialzier = LetterSerilaizer(data=request.data)
+            letterserialzier.is_valid(raise_exception=True)
+            letterserialzier.save(
+                worryboard=WorryBoardModel.objects.get(id=worry_board_get)
+            )
+            return Response({"message"}, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

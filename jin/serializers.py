@@ -34,7 +34,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def get_rank_list(self, obj):
         rank_list_get = UserProfileModel.objects.all().order_by("-mongle_grade")[:10]
-        rank_list = [{"user": rank_list.user.username} for rank_list in rank_list_get]
+        rank_list = [
+            {"user": rank_list.user.username, "profile_img": rank_list.profile_img}
+            for rank_list in rank_list_get
+        ]
         return rank_list
 
     class Meta:
@@ -48,6 +51,7 @@ class LetterReviewSerializer(serializers.ModelSerializer):
 
     def get_best_review(self, obj):
         best_review_get = LetterReviewModel.objects.all().order_by("-grade")[:3]
+
         best_review = [
             {
                 "review_id": best_review.id,
@@ -59,7 +63,7 @@ class LetterReviewSerializer(serializers.ModelSerializer):
         ]
         return best_review
 
-    def get_live_review(self, request):
+    def get_live_review(self, obj):
         live_review_get = LetterReviewModel.objects.all().order_by("-create_date")[:2]
         live_review = [
             {

@@ -7,11 +7,35 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import WorryBoardSerializer
 
+from .models import LetterReview as LetterReviewModel
+from .models import LetterReviewLike as LetterReviewLikeModel
 from .models import WorryCategory
 from .serializers import LetterReviewSerializer, LetterSerilaizer, UserProfileSerializer
 
-
 # Create your views here.
+
+
+class ReviewLikeView(APIView):
+    """
+    메인페이지 리뷰 Like 를 담당하는 기능
+    """
+
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request, board_id):
+        author = request.user
+        target_board = LetterReviewModel.objects.get(id=board_id)
+        liked_board, created = LetterReviewLikeModel.objects.get_or_create(
+            user_id=author, review_id=target_board
+        )
+        if created:
+            liked_board.save()
+            return Response({"message": "좋아요가 완료 되었습니다!!"}, status=status.HTTP_200_OK)
+        liked_board.delete()
+        return Response({"message": "좋아요가 취소 되었습니다!!"}, status=status.HTTP_200_OK)
+
+
 class MainPageView(APIView):
     """
     메인 페이지의 CRUD를 담당하는 View

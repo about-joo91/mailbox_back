@@ -25,12 +25,12 @@ class UserLetterTargetUser(models.Model):
 
 class LetterReview(models.Model):
     review_author = models.ForeignKey("user.User", on_delete=models.CASCADE)
-    letter = models.ForeignKey("Letter", on_delete=models.CASCADE)
+    letter = models.OneToOneField("Letter", on_delete=models.CASCADE)
     grade = models.IntegerField()
     content = models.TextField()
     create_date = models.DateTimeField(auto_now_add=True)
 
 
 class LetterReviewLike(models.Model):
-    review_id = models.ForeignKey("LetterReview", on_delete=models.CASCADE)
+    review_id = models.OneToOneField("LetterReview", on_delete=models.CASCADE)
     user_id = models.ForeignKey("user.User", on_delete=models.CASCADE)

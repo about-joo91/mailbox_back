@@ -58,6 +58,9 @@ class UserProfile(models.Model):
     mongle_level = models.IntegerField(default=0)
     mongle_grade = models.IntegerField(default=0)
     fullname = models.TextField(default="")
+    categories = models.ManyToManyField(
+        "jin.WorryCategory", through="UserProfileCategory"
+    )
     profile_img = models.URLField(
         default="https://user-images.githubusercontent.com/55477835/178631292-f381c6e2-2541-4a2c-ba67-b5bb4369e3d0.jpeg"
     )

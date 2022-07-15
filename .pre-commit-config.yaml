@@ -1,20 +1,21 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
--   repo: https://github.com/psf/black
+  - repo: https://github.com/psf/black
     rev: 22.6.0
     hooks:
-    - id: black
-      language_version: python3.10
--   repo: https://github.com/asottile/seed-isort-config
+      - id: black
+        language_version: python3.10
+  - repo: https://github.com/asottile/seed-isort-config
     rev: v2.2.0
     hooks:
-    -   id: seed-isort-config
--   repo: https://github.com/timothycrosley/isort
-    rev: 5.10.1  # pick the isort version you'd like to use from https://github.com/timothycrosley/isort/releases
+      - id: seed-isort-config
+  - repo: https://github.com/timothycrosley/isort
+    rev: 5.10.1 # pick the isort version you'd like to use from https://github.com/timothycrosley/isort/releases
     hooks:
-    -   id: isort
--   repo: https://gitlab.com/pycqa/flake8
+      - id: isort
+        args: ["--profile", "black"]
+  - repo: https://gitlab.com/pycqa/flake8
     rev: 3.9.2
     hooks:
-    - id: flake8
+      - id: flake8

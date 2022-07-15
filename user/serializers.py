@@ -31,7 +31,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def get_categories(self, obj):
         return [
-            {"id": cate.category.id, "cate_name": cate.category.cate_name}
+            {"id": cate.id, "cate_name": cate.category.cate_name}
             for cate in obj.userprofilecategory_set.all()
         ]
 

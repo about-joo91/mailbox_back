@@ -6,6 +6,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from board.models import Board as BoardModel
 from board.models import BoardLike as BoardLikeModel
 from board.serializers import BoardCommentSerializer, BoardSerializer
+from unsmile_filtering import pipe
 
 # Create your views here.
 
@@ -35,11 +36,18 @@ class BoardView(APIView):
         )
 
     def post(self, request):
-        request.data["author"] = request.user.id
-        create_board_serializer = BoardSerializer(data=request.data)
-        create_board_serializer.is_valid(raise_exception=True)
-        create_board_serializer.save()
-        return Response({"message": "게시글이 생성되었습니다."}, status=status.HTTP_200_OK)
+        result = pipe(request.data["content"])[0]
+        if result["label"] == "clean":
+            request.data["author"] = request.user.id
+            create_board_serializer = BoardSerializer(data=request.data)
+            create_board_serializer.is_valid(raise_exception=True)
+            create_board_serializer.save()
+            return Response({"message": "게시글이 생성되었습니다."}, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def put(self, request, board_id):
         update_board = BoardModel.objects.get(id=board_id)

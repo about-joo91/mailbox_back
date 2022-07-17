@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from board.models import Board as BoardModel
+from board.models import BoardComment as BoardCommentModel
 from board.models import BoardLike as BoardLikeModel
 from board.serializers import BoardCommentSerializer, BoardSerializer
 from unsmile_filtering import pipe
@@ -24,7 +25,7 @@ class BoardView(APIView):
         all_board_list = BoardModel.objects.all().order_by("-create_date")[
             10 * (page_num - 1) : 10 + 10 * (page_num - 1)
         ]
-        total_count = BoardModel.objects.all().order_by("-create_date").count()
+        total_count = BoardModel.objects.all().count()
         return Response(
             {
                 "boards": BoardSerializer(
@@ -115,3 +116,19 @@ class BorderCommentView(APIView):
         create_board_comment_serializer.is_valid(raise_exception=True)
         create_board_comment_serializer.save()
         return Response({"message": "댓글이 생성되었습니다."}, status=status.HTTP_200_OK)
+
+    def put(self, request, comment_id):
+        update_comment = BoardCommentModel.objects.get(id=comment_id)
+        update_comment_serializer = BoardCommentSerializer(
+            update_comment, data=request.data, partial=True
+        )
+        update_comment_serializer.is_valid(raise_exception=True)
+        update_comment_serializer.save()
+        return Response({"message": "댓글이 수정되었습니다."}, status=status.HTTP_200_OK)
+
+    def delete(self, request, comment_id):
+        delete_comment = BoardCommentModel.objects.get(id=comment_id)
+        if delete_comment:
+            delete_comment.delete()
+            return Response({"message": "댓글이 삭제되었습니다."}, status=status.HTTP_200_OK)
+        return Response({"message": "삭제에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)

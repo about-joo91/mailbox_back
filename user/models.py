@@ -52,6 +52,14 @@ class User(AbstractBaseUser):
         return self.is_admin
 
 
+class MongleGrade(models.Model):
+    user = models.OneToOneField("User", on_delete=models.CASCADE)
+    grade = models.IntegerField(default=0)
+    mongle = models.URLField(
+        default="https://user-images.githubusercontent.com/55477835/178631292-f381c6e2-2541-4a2c-ba67-b5bb4369e3d0.jpeg"
+    )
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField("User", on_delete=models.CASCADE)
     description = models.TextField(default="")

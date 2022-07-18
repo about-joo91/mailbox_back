@@ -8,10 +8,16 @@ from unsmile_filtering import pipe
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import WorryBoardSerializer
 
+from .models import Letter as LetterModel
 from .models import LetterReview as LetterReviewModel
 from .models import LetterReviewLike as LetterReviewLikeModel
 from .models import WorryCategory
-from .serializers import LetterReviewSerializer, LetterSerilaizer, UserProfileSerializer
+from .serializers import (
+    BestReviewSerializer,
+    LetterSerilaizer,
+    LiveReviewSerializer,
+    UserProfileSerializer,
+)
 
 # from . import recommender
 
@@ -49,8 +55,14 @@ class MainPageView(APIView):
 
     def get(self, request):
         cur_user = request.user
+        best_review_list = LetterReviewModel.objects.all().order_by("-grade")[:3]
+        live_review_list = LetterReviewModel.objects.all().order_by("-create_date")[:2]
         profile_grade = request.user.userprofile.mongle_grade
-        letter_count = request.user.userlettertargetuser_set.all().count()
+        profile_image = request.user.userprofile.profile_img
+        my_worry_get = WorryBoardModel.objects.filter(author=request.user)
+        letter_count = LetterModel.objects.filter(
+            worryboard__id__in=my_worry_get
+        ).count()
 
         # collab_recomendation = recommender.recommend_worryboard
         # recommend_worry_list = collab_recomendation.recommend_worries(cur_user.id)
@@ -63,14 +75,19 @@ class MainPageView(APIView):
                     "-create_date"
                 )[:3]
             )
-
         return Response(
             {
                 "profile_grade": profile_grade,
+                "porfile_image": profile_image,
                 "letter_count": letter_count,
                 "rank_list": UserProfileSerializer(cur_user).data,
                 "worry_list": WorryBoardSerializer(worry_list, many=True).data,
-                "reviews": LetterReviewSerializer(cur_user).data,
+                "best_review": BestReviewSerializer(
+                    best_review_list, context={"request": request}, many=True
+                ).data,
+                "live_review": LiveReviewSerializer(
+                    live_review_list, context={"request": request}, many=True
+                ).data,
             },
             status=status.HTTP_200_OK,
         )
@@ -88,9 +105,6 @@ class LetterView(APIView):
         if result["label"] == "clean":
             worry_board_get = request.data["worry_board_id"]
             request.data["letter_author"] = request.user.id
-            request.data["category"] = WorryBoardModel.objects.get(
-                id=worry_board_get
-            ).category.id
             letterserialzier = LetterSerilaizer(data=request.data)
             letterserialzier.is_valid(raise_exception=True)
             letterserialzier.save(

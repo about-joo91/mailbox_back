@@ -9,6 +9,7 @@ class BoardSerializer(serializers.ModelSerializer):
     is_liked = serializers.SerializerMethodField()
     is_board_writer = serializers.SerializerMethodField()
     board_comment = serializers.SerializerMethodField()
+    board_comment_count = serializers.SerializerMethodField()
 
     def get_like_count(self, obj):
         return obj.boardlike_set.count()
@@ -27,6 +28,9 @@ class BoardSerializer(serializers.ModelSerializer):
             obj.boardcomment_set, many=True, context={"request": request}
         ).data
 
+    def get_board_comment_count(self, obj):
+        return obj.boardcomment_set.count()
+
     class Meta:
         model = BoardModel
         fields = [
@@ -39,7 +43,9 @@ class BoardSerializer(serializers.ModelSerializer):
             "is_liked",
             "is_board_writer",
             "board_comment",
+            "board_comment_count",
         ]
+        extra_kwargs = {"author": {"write_only": True}}
 
 
 class BoardCommentSerializer(serializers.ModelSerializer):
@@ -59,3 +65,4 @@ class BoardCommentSerializer(serializers.ModelSerializer):
             "content",
             "is_comment_writer",
         ]
+        extra_kwargs = {"author": {"write_only": True}}

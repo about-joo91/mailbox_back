@@ -5,27 +5,20 @@ from user.models import UserProfile as UserProfileModel
 from .models import Letter as LetterModel
 from .models import LetterReview as LetterReviewModel
 from .models import LetterReviewLike as LetterreviewLikeModel
-from .models import UserLetterTargetUser as UserLetterTargetUserModel
 
 
 class LetterSerilaizer(serializers.ModelSerializer):
     def create(self, validated_data):
         new_post = LetterModel.objects.create(**validated_data)
         new_post.save()
-        target_user = validated_data.pop("worryboard")
-        UserLetterTargetUserModel(
-            letter=new_post, target_user=target_user.author
-        ).save()
         return new_post
 
     class Meta:
         model = LetterModel
         fields = [
             "letter_author",
-            "category",
             "title",
             "content",
-            "create_date",
             "worryboard",
         ]
 

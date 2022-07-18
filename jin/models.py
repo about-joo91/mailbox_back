@@ -17,10 +17,6 @@ class Letter(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
 
 
-class UserLetterTargetUser(models.Model):
-    letter = models.ForeignKey("Letter", on_delete=models.SET_NULL, null=True)
-
-
 class LetterReview(models.Model):
     review_author = models.ForeignKey("user.User", on_delete=models.CASCADE)
     letter = models.OneToOneField("Letter", on_delete=models.CASCADE)

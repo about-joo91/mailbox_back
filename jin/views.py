@@ -8,6 +8,7 @@ from unsmile_filtering import pipe
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import WorryBoardSerializer
 
+from .models import Letter as LetterModel
 from .models import LetterReview as LetterReviewModel
 from .models import LetterReviewLike as LetterReviewLikeModel
 from .models import WorryCategory
@@ -58,7 +59,10 @@ class MainPageView(APIView):
         live_review_list = LetterReviewModel.objects.all().order_by("-create_date")[:2]
         profile_grade = request.user.userprofile.mongle_grade
         profile_image = request.user.userprofile.profile_img
-        letter_count = request.user.userlettertargetuser_set.all().count()
+        my_worry_get = WorryBoardModel.objects.filter(author=request.user)
+        letter_count = LetterModel.objects.filter(
+            worryboard__id__in=my_worry_get
+        ).count()
 
         # collab_recomendation = recommender.recommend_worryboard
         # recommend_worry_list = collab_recomendation.recommend_worries(cur_user.id)
@@ -101,9 +105,6 @@ class LetterView(APIView):
         if result["label"] == "clean":
             worry_board_get = request.data["worry_board_id"]
             request.data["letter_author"] = request.user.id
-            request.data["category"] = WorryBoardModel.objects.get(
-                id=worry_board_get
-            ).category.id
             letterserialzier = LetterSerilaizer(data=request.data)
             letterserialzier.is_valid(raise_exception=True)
             letterserialzier.save(

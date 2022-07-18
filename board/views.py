@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from board.models import Board as BoardModel
-from board.models import BoardComment
+from board.models import BoardComment as BoardCommentModel
 from board.models import BoardLike as BoardLikeModel
 from board.serializers import BoardCommentSerializer, BoardSerializer
 from unsmile_filtering import pipe
@@ -20,11 +20,12 @@ class BoardView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get(self, request, page_num):
+    def get(self, request):
+        page_num = int(self.request.query_params.get("page_num"))
         all_board_list = BoardModel.objects.all().order_by("-create_date")[
-            10 * (page_num - 1) : 9 + 10 * (page_num - 1)
+            10 * (page_num - 1) : 10 + 10 * (page_num - 1)
         ]
-        total_count = BoardModel.objects.all().order_by("-create_date").count()
+        total_count = BoardModel.objects.all().count()
         return Response(
             {
                 "boards": BoardSerializer(
@@ -103,21 +104,38 @@ class BorderCommentView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
-        all_board_list = BoardComment.objects.all().order_by("-create_date")
+        board_id = int(self.request.query_params.get("board_id"))
+        board_comment = BoardModel.objects.filter(id=board_id)
         return Response(
             {
-                "boards": BoardCommentSerializer(
-                    all_board_list, many=True, context={"request": request}
-                ).data
+                "board_comments": BoardSerializer(
+                    board_comment, many=True, context={"request": request}
+                ).data,
             },
             status=status.HTTP_200_OK,
         )
 
-    def post(self, request, obj_id):
-        # obj_id는 board_id 입니다.
+    def post(self, request):
+        board_id = int(self.request.query_params.get("board_id"))
         request.data["author"] = request.user.id
-        request.data["board"] = obj_id
+        request.data["board"] = board_id
         create_board_comment_serializer = BoardCommentSerializer(data=request.data)
         create_board_comment_serializer.is_valid(raise_exception=True)
         create_board_comment_serializer.save()
         return Response({"message": "댓글이 생성되었습니다."}, status=status.HTTP_200_OK)
+
+    def put(self, request, comment_id):
+        update_comment = BoardCommentModel.objects.get(id=comment_id)
+        update_comment_serializer = BoardCommentSerializer(
+            update_comment, data=request.data, partial=True
+        )
+        update_comment_serializer.is_valid(raise_exception=True)
+        update_comment_serializer.save()
+        return Response({"message": "댓글이 수정되었습니다."}, status=status.HTTP_200_OK)
+
+    def delete(self, request, comment_id):
+        delete_comment = BoardCommentModel.objects.get(id=comment_id)
+        if delete_comment:
+            delete_comment.delete()
+            return Response({"message": "댓글이 삭제되었습니다."}, status=status.HTTP_200_OK)
+        return Response({"message": "삭제에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)

@@ -14,12 +14,26 @@ class WorryBoardView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
-        all_board_list = WorryBoardModel.objects.all().order_by("-create_date")
+        category = int(self.request.query_params.get("category"))
+        page_num = int(self.request.query_params.get("page_num"))
+        if category == 1:
+            worry_board_list = WorryBoardModel.objects.all().order_by("-create_date")[
+                10 * (page_num - 1) : 10 + 10 * (page_num - 1)
+            ]
+            total_count = WorryBoardModel.objects.all().count()
+
+        else:
+            worry_board_list = WorryBoardModel.objects.filter(
+                category=category
+            ).order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+            total_count = WorryBoardModel.objects.filter(category=category).count()
+
         return Response(
             {
                 "boards": WorryBoardSerializer(
-                    all_board_list, many=True, context={"request": request}
+                    worry_board_list, many=True, context={"request": request}
                 ).data,
+                "total_count": total_count,
             },
             status=status.HTTP_200_OK,
         )

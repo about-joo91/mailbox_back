@@ -9,7 +9,6 @@ class WorryCategory(models.Model):
 
 class Letter(models.Model):
     letter_author = models.ForeignKey("user.User", on_delete=models.SET_NULL, null=True)
-    category = models.ForeignKey("WorryCategory", on_delete=models.CASCADE)
     worryboard = models.OneToOneField(
         "worry_board.WorryBoard", on_delete=models.SET_NULL, null=True
     )
@@ -19,7 +18,6 @@ class Letter(models.Model):
 
 
 class UserLetterTargetUser(models.Model):
-    target_user = models.ForeignKey("user.User", on_delete=models.SET_NULL, null=True)
     letter = models.ForeignKey("Letter", on_delete=models.SET_NULL, null=True)
 
 

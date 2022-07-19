@@ -3,41 +3,6 @@ import time
 import requests
 import schedule
 
-# def test():
-#     print("나는 바보가 아니다")
-#     # POST (JSON)
-
-#     # csv 파일로 만들기
-#     conn = pymysql.connect(
-#         host=os.environ["RDS_HOST"],
-#         user=os.environ["RDS_USER"],
-#         password=os.environ["RDS_PASSWORD"],
-#         db=os.environ["RDS_DB_NAME"],
-#         charset="utf8",
-#         autocommit=True,
-#         cursorclass=pymysql.cursors.DictCursor,
-#     )
-
-#     print(conn)
-
-#     try:
-#         with conn.cursor() as cursor:
-#             data = []
-#             sql = "select id, content, author_id, category_id from worry_board_worryboard"
-#             cursor.execute(sql)
-#             rows = cursor.fetchall()
-#             for row in rows:
-#                 data.append(row)
-#     finally:
-#         cursor.close()
-#         conn.close()
-#     print(data)
-
-#     headers = {'Content-Type': 'application/json; chearset=utf-8'}
-#     datas = {'data': data}
-#     res = requests.post('http://127.0.0.1:5002/test', data=json.dumps(datas), headers=headers)
-#     print(str(res.status_code) + " | " + res.text)
-
 
 def test():
     res = requests.get("http://54.180.75.68:5002/test")

@@ -10,6 +10,7 @@ class BoardSerializer(serializers.ModelSerializer):
     is_board_writer = serializers.SerializerMethodField()
     board_comment = serializers.SerializerMethodField()
     board_comment_count = serializers.SerializerMethodField()
+    create_date = serializers.SerializerMethodField()
 
     def get_like_count(self, obj):
         return obj.boardlike_set.count()
@@ -31,6 +32,14 @@ class BoardSerializer(serializers.ModelSerializer):
     def get_board_comment_count(self, obj):
         return obj.boardcomment_set.count()
 
+    def get_create_date(self, obj):
+        format_data = "%m-%d %H:%M"
+
+        time = obj.create_date
+        time_data = time.strftime(format_data)
+
+        return time_data
+
     class Meta:
         model = BoardModel
         fields = [
@@ -50,10 +59,14 @@ class BoardSerializer(serializers.ModelSerializer):
 
 class BoardCommentSerializer(serializers.ModelSerializer):
     is_comment_writer = serializers.SerializerMethodField()
+    is_detail_page_writer = serializers.SerializerMethodField()
 
     def get_is_comment_writer(self, obj):
         cur_user = self.context["request"].user
         return bool(obj.author == cur_user)
+
+    def get_is_detail_page_writer(self, obj):
+        return bool(obj.author == obj.board.author)
 
     class Meta:
         model = BoardCommentModel
@@ -64,5 +77,6 @@ class BoardCommentSerializer(serializers.ModelSerializer):
             "create_date",
             "content",
             "is_comment_writer",
+            "is_detail_page_writer",
         ]
         extra_kwargs = {"author": {"write_only": True}}

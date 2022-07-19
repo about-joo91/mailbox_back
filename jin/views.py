@@ -54,8 +54,8 @@ class MainPageView(APIView):
 
     def get(self, request):
         cur_user = request.user
-        best_review_list = LetterReviewModel.objects.all().order_by("-grade")[:3]
-        live_review_list = LetterReviewModel.objects.all().order_by("-create_date")[:2]
+        best_review_list = LetterReviewModel.objects.all().order_by("-grade")[:10]
+        live_review_list = LetterReviewModel.objects.all().order_by("-create_date")[:10]
         profile_grade = request.user.userprofile.mongle_grade
 
         profile_image = request.user.userprofile.profile_img

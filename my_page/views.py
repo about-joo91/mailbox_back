@@ -23,9 +23,6 @@ class MyLetterView(APIView):
         cur_user = request.user
         letter_num = int(self.request.query_params.get("letter_num"))
         letter_cnt = LetterModel.objects.filter(letter_author=cur_user).count()
-        letter_this_page = LetterModel.objects.filter(letter_author=cur_user)[
-            letter_num
-        ]
         try:
             letter_this_page = LetterModel.objects.filter(letter_author=cur_user)[
                 letter_num
@@ -53,13 +50,11 @@ class MyRecievedLetterView(APIView):
     def get(self, request):
         cur_user = request.user
         letter_num = int(self.request.query_params.get("letter_num"))
-        letter_cnt = LetterModel.objects.filter(
-            userlettertargetuser__target_user=cur_user
-        ).count()
+        letter_cnt = LetterModel.objects.filter(worryboard__author=cur_user).count()
         try:
-            letter_this_page = LetterModel.objects.filter(
-                userlettertargetuser__target_user=cur_user
-            )[letter_num]
+            letter_this_page = LetterModel.objects.filter(worryboard__author=cur_user)[
+                letter_num
+            ]
             return Response(
                 {
                     "is_letter_exist": True,

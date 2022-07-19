@@ -17,8 +17,10 @@ class LetterSerilaizer(serializers.ModelSerializer):
         model = LetterModel
         fields = [
             "letter_author",
+            "category",
             "title",
             "content",
+            "create_date",
             "worryboard",
         ]
 

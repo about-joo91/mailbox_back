@@ -43,12 +43,15 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
+    "django_apscheduler",
     "my_page",
     "board",
     "jin",
     "worry_board",
     "user",
+    "recommendation",
 ]
+
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [  # 기본적인 view 접근 권한 지정
         "rest_framework.permissions.AllowAny"
@@ -196,3 +199,8 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+
+SCHEDULER_DEFAULT = True

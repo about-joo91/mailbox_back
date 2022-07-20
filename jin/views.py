@@ -1,3 +1,5 @@
+import math
+
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -8,6 +10,7 @@ from unsmile_filtering import pipe
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import WorryBoardSerializer
 
+from . import recommender
 from .models import Letter as LetterModel
 from .models import LetterReview as LetterReviewModel
 from .models import LetterReviewLike as LetterReviewLikeModel
@@ -18,8 +21,6 @@ from .serializers import (
     LiveReviewSerializer,
     UserProfileSerializer,
 )
-
-# from . import recommender
 
 # Create your views here.
 
@@ -58,14 +59,22 @@ class MainPageView(APIView):
         best_review_list = LetterReviewModel.objects.all().order_by("-grade")[:10]
         live_review_list = LetterReviewModel.objects.all().order_by("-create_date")[:10]
         profile_grade = request.user.userprofile.mongle_grade
+
         profile_image = request.user.userprofile.profile_img
         my_worry_get = WorryBoardModel.objects.filter(author=request.user)
         letter_count = LetterModel.objects.filter(
             worryboard__id__in=my_worry_get
         ).count()
 
-        # collab_recomendation = recommender.recommend_worryboard
-        # recommend_worry_list = collab_recomendation.recommend_worries(cur_user.id)
+        # 가장 최근에 편지를 썼던 워리보드 아이디 기반 추천
+        user_letters = LetterModel.objects.filter(letter_author=cur_user).order_by(
+            "-create_date"
+        )[:1]
+        latest_worryboard_id = [obj.worryboard.id for obj in user_letters][0]
+        recomendation_sys = recommender.recommend_worryboard
+        final_worryboard_list = recomendation_sys.recommend_worries(
+            latest_worryboard_id
+        )
 
         worry_list = WorryBoardModel.objects.none()
 
@@ -81,6 +90,9 @@ class MainPageView(APIView):
                 "porfile_image": profile_image,
                 "letter_count": letter_count,
                 "rank_list": UserProfileSerializer(cur_user).data,
+                "recommend_list": WorryBoardSerializer(
+                    final_worryboard_list, many=True
+                ).data,
                 "worry_list": WorryBoardSerializer(worry_list, many=True).data,
                 "best_review": BestReviewSerializer(
                     best_review_list, context={"request": request}, many=True
@@ -101,18 +113,22 @@ class LetterView(APIView):
     """
 
     def post(self, request):
-        result = pipe(request.data["content"])[0]
-        if result["label"] == "clean":
-            worry_board_get = request.data["worry_board_id"]
-            request.data["letter_author"] = request.user.id
-            letterserialzier = LetterSerilaizer(data=request.data)
-            letterserialzier.is_valid(raise_exception=True)
-            letterserialzier.save(
-                worryboard=WorryBoardModel.objects.get(id=worry_board_get)
-            )
-            return Response({"message"}, status=status.HTTP_200_OK)
-        else:
-            return Response(
-                {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        data_content = request.data["content"]
+        repeat_num = math.ceil(len(data_content) / 900)
+        for i in range(repeat_num):
+            result = pipe(data_content[900 * i : 900 * (i + 1)])[0]
+            if result["label"] != "clean":
+                return Response(
+                    {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            break
+
+        worry_board_get = request.data["worry_board_id"]
+        request.data["letter_author"] = request.user.id
+        letterserialzier = LetterSerilaizer(data=request.data)
+        letterserialzier.is_valid(raise_exception=True)
+        letterserialzier.save(
+            worryboard=WorryBoardModel.objects.get(id=worry_board_get)
+        )
+        return Response({"message"}, status=status.HTTP_200_OK)

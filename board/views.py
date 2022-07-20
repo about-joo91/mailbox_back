@@ -51,13 +51,20 @@ class BoardView(APIView):
             )
 
     def put(self, request, board_id):
-        update_board = BoardModel.objects.get(id=board_id)
-        update_board_serializer = BoardSerializer(
-            update_board, data=request.data, partial=True
-        )
-        update_board_serializer.is_valid(raise_exception=True)
-        update_board_serializer.save()
-        return Response({"message": "게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
+        result = pipe(request.data["content"])[0]
+        if result["label"] == "clean":
+            update_board = BoardModel.objects.get(id=board_id)
+            update_board_serializer = BoardSerializer(
+                update_board, data=request.data, partial=True
+            )
+            update_board_serializer.is_valid(raise_exception=True)
+            update_board_serializer.save()
+            return Response({"message": "게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def delete(self, request, board_id):
         delete_board = BoardModel.objects.get(id=board_id)

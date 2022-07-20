@@ -1,14 +1,20 @@
 from django.db.models import Q
+from django.forms import ValidationError
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from jin.models import WorryCategory as WorryCategoryModel
+from user.services.user_profile_category_service import get_category_of_profile
+from user.services.user_profile_service import (
+    get_user_profile_data,
+    update_user_profile_data,
+)
 
 from .models import UserProfileCategory as UserProfileCategoryModel
-from .serializers import UserProfileSerializer, UserSignupSerializer
+from .serializers import UserSignupSerializer
 
 
 # Create your views here.
@@ -44,23 +50,24 @@ class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get(self, request):
+    def get(self, request: Request) -> Response:
         cur_user = request.user
 
-        return Response(
-            UserProfileSerializer(cur_user.userprofile).data, status=status.HTTP_200_OK
-        )
+        profile_data = get_user_profile_data(cur_user)
+
+        return Response(profile_data, status=status.HTTP_200_OK)
 
     def put(self, request):
         cur_user = request.user
+        update_data = request.data
 
-        user_profile_serializer = UserProfileSerializer(
-            cur_user.userprofile, data=request.data, partial=True
-        )
-        user_profile_serializer.is_valid(raise_exception=True)
-        user_profile_serializer.save()
-
-        return Response({"message": "프로필 수정이 완료되었습니다."}, status=status.HTTP_200_OK)
+        try:
+            update_user_profile_data(user=cur_user, update_data=update_data)
+            return Response({"detail": "프로필이 수정되었습니다"}, status=status.HTTP_200_OK)
+        except ValidationError:
+            return Response(
+                {"detail": "프로필 수정에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class UserProfileCategoryView(APIView):
@@ -71,25 +78,18 @@ class UserProfileCategoryView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get(self, request):
+    def get(self, request: Request) -> Response:
         cur_user = request.user
-        my_categories = cur_user.userprofile.categories.all()
-        category_all_except_mine = WorryCategoryModel.objects.all().exclude(
-            id__in=my_categories
-        )
-        categories = [
-            {"id": cate.id, "cate_name": cate.cate_name}
-            for cate in category_all_except_mine
-        ]
+        categories = get_category_of_profile(cur_user)
         return Response(categories, status=status.HTTP_200_OK)
 
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         cur_user = request.user
         categories = request.data["categories"]
         cur_user.userprofile.categories.add(*categories)
         return Response({"message": "카테고리가 저장되었습니다."}, status=status.HTTP_200_OK)
 
-    def delete(self, request, p_category):
+    def delete(self, request: Request, p_category: str) -> Response:
         cur_user = request.user
         cur_user_profile = cur_user.userprofile
         user_cate = UserProfileCategoryModel.objects.get(

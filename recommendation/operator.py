@@ -1,15 +1,14 @@
 from apscheduler.schedulers.background import BackgroundScheduler
-from django_apscheduler.jobstores import DjangoJobStore, register_events
+from django_apscheduler.jobstores import register_events
 
 from .views import db_to_csv
 
 
 def start():
     scheduler = BackgroundScheduler()
-    scheduler.add_jobstore(DjangoJobStore(), "djangojobstore")
     register_events(scheduler)
 
-    @scheduler.scheduled_job("cron", minute="*/1", name="auto_mail")
+    @scheduler.scheduled_job("interval", hours=4, name="auto_csv")
     def ready():
         db_to_csv()
 

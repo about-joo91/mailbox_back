@@ -7,7 +7,7 @@ class LetterSerializer(serializers.ModelSerializer):
     category = serializers.SerializerMethodField()
 
     def get_category(self, obj):
-        return obj.category.cate_name
+        return obj.worryboard.category.cate_name
 
     class Meta:
         model = LetterModel

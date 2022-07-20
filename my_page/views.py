@@ -1,3 +1,5 @@
+from django.db.models import Q
+from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -5,6 +7,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from jin.models import Letter as LetterModel
+from my_page.services.my_page_service import get_letter_data_by_user
 
 from .serializers import LetterSerializer
 
@@ -21,25 +24,31 @@ class MyLetterView(APIView):
 
     def get(self, request):
         cur_user = request.user
-        letter_num = int(self.request.query_params.get("letter_num"))
-        letter_cnt = LetterModel.objects.filter(letter_author=cur_user).count()
-        letter_this_page = LetterModel.objects.filter(letter_author=cur_user)[
-            letter_num
-        ]
         try:
-            letter_this_page = LetterModel.objects.filter(letter_author=cur_user)[
-                letter_num
-            ]
+            letter_num = int(self.request.query_params.get("letter_num"))
+        except TypeError:
+            return Response(
+                {"detail": "올바른 편지 번호를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        letter_cnt = LetterModel.objects.filter(letter_author=cur_user).count()
+        if letter_cnt == 0:
+            return Response(
+                {"detail": "편지가 없습니다. 작성하러 가볼까요?"}, status=status.HTTP_404_NOT_FOUND
+            )
+        try:
+            query = Q(letter_author=cur_user)
+            letter_this_page = get_letter_data_by_user(
+                query=query, letter_num=letter_num
+            )
             return Response(
                 {
-                    "is_letter_exist": True,
                     "letter": LetterSerializer(letter_this_page).data,
                     "letter_cnt": letter_cnt,
                 },
                 status=status.HTTP_200_OK,
             )
         except IndexError:
-            return Response({"is_letter_exist": False}, status=status.HTTP_200_OK)
+            return Response({"detail": f"{letter_num}번째 편지를 찾을 수 없습니다."})
 
 
 class MyRecievedLetterView(APIView):
@@ -50,23 +59,30 @@ class MyRecievedLetterView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get(self, request):
+    def get(self, request: HttpRequest) -> Response:
         cur_user = request.user
-        letter_num = int(self.request.query_params.get("letter_num"))
-        letter_cnt = LetterModel.objects.filter(
-            userlettertargetuser__target_user=cur_user
-        ).count()
         try:
-            letter_this_page = LetterModel.objects.filter(
-                userlettertargetuser__target_user=cur_user
-            )[letter_num]
+            letter_num = int(self.request.query_params.get("letter_num"))
+        except TypeError:
+            return Response(
+                {"detail": "올바른 편지 번호를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        letter_cnt = LetterModel.objects.filter(worryboard__author=cur_user).count()
+        if letter_cnt == 0:
+            return Response(
+                {"detail": "편지가 없습니다. 작성하러 가볼까요?"}, status=status.HTTP_404_NOT_FOUND
+            )
+        try:
+            query = Q(worryboard__author=cur_user)
+            letter_this_page = get_letter_data_by_user(
+                query=query, letter_num=letter_num
+            )
             return Response(
                 {
-                    "is_letter_exist": True,
                     "letter": LetterSerializer(letter_this_page).data,
                     "letter_cnt": letter_cnt,
                 },
                 status=status.HTTP_200_OK,
             )
         except IndexError:
-            return Response({"is_letter_exist": False}, status=status.HTTP_200_OK)
+            return Response({"detail": f"{letter_num}번째 편지를 찾을 수 없습니다."})

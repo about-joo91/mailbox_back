@@ -1,3 +1,5 @@
+import math
+
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -111,19 +113,22 @@ class LetterView(APIView):
     """
 
     def post(self, request):
-        result = pipe(request.data["content"])[0]
-        print(result)
-        if result["label"] == "clean":
-            worry_board_get = request.data["worry_board_id"]
-            request.data["letter_author"] = request.user.id
-            letterserialzier = LetterSerilaizer(data=request.data)
-            letterserialzier.is_valid(raise_exception=True)
-            letterserialzier.save(
-                worryboard=WorryBoardModel.objects.get(id=worry_board_get)
-            )
-            return Response({"message"}, status=status.HTTP_200_OK)
-        else:
-            return Response(
-                {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        data_content = request.data["content"]
+        repeat_num = math.ceil(len(data_content) / 900)
+        for i in range(repeat_num):
+            result = pipe(data_content[900 * i : 900 * (i + 1)])[0]
+            if result["label"] != "clean":
+                return Response(
+                    {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            break
+
+        worry_board_get = request.data["worry_board_id"]
+        request.data["letter_author"] = request.user.id
+        letterserialzier = LetterSerilaizer(data=request.data)
+        letterserialzier.is_valid(raise_exception=True)
+        letterserialzier.save(
+            worryboard=WorryBoardModel.objects.get(id=worry_board_get)
+        )
+        return Response({"message"}, status=status.HTTP_200_OK)

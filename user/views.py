@@ -7,12 +7,16 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from user.services.user_profile_category_service import get_category_of_profile
+from user.services.user_profile_category_service import (
+    create_category_of_profile,
+    get_category_of_profile,
+)
 from user.services.user_profile_service import (
     get_user_profile_data,
     update_user_profile_data,
 )
 
+from .models import User as UserModel
 from .models import UserProfile as UserProfileModel
 from .models import UserProfileCategory as UserProfileCategoryModel
 from .serializers import UserSignupSerializer
@@ -90,8 +94,13 @@ class UserProfileCategoryView(APIView):
     def post(self, request: Request) -> Response:
         cur_user = request.user
         categories = request.data["categories"]
-        cur_user.userprofile.categories.add(*categories)
-        return Response({"message": "카테고리가 저장되었습니다."}, status=status.HTTP_200_OK)
+        try:
+            create_category_of_profile(user=cur_user, categories=categories)
+            return Response({"detail": "카테고리가 저장되었습니다."}, status=status.HTTP_200_OK)
+        except UserProfileModel.DoesNotExist:
+            return Response({"detail": "유저 프로필 정보가 없습니다."}, status=status.HTTP_404_OK)
+        except UserModel.DoesNotExist:
+            return Response({"detail": "유저가 없습니다."}, status=status.HTTP_404_OK)
 
     def delete(self, request: Request, p_category: str) -> Response:
         cur_user = request.user

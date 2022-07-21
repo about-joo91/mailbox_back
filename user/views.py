@@ -13,6 +13,7 @@ from user.services.user_profile_service import (
     update_user_profile_data,
 )
 
+from .models import UserProfile as UserProfileModel
 from .models import UserProfileCategory as UserProfileCategoryModel
 from .serializers import UserSignupSerializer
 
@@ -52,10 +53,13 @@ class UserProfileView(APIView):
 
     def get(self, request: Request) -> Response:
         cur_user = request.user
-
-        profile_data = get_user_profile_data(cur_user)
-
-        return Response(profile_data, status=status.HTTP_200_OK)
+        try:
+            profile_data = get_user_profile_data(cur_user)
+            return Response(profile_data, status=status.HTTP_200_OK)
+        except UserProfileModel.DoesNotExist:
+            return Response(
+                {"detail": "프로필이 없습니다. 프로필을 생성해주세요"}, status=status.HTTP_404_NOT_FOUND
+            )
 
     def put(self, request):
         cur_user = request.user

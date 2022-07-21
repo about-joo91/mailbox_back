@@ -2,7 +2,6 @@ from django.db.models import Q
 from django.test import TestCase
 
 from jin.models import Letter, WorryCategory
-from my_page.serializers import LetterSerializer
 from my_page.services.my_page_service import get_letter_data_by_user
 from user.models import User
 from worry_board.models import WorryBoard
@@ -29,11 +28,10 @@ class TestMyLetter(TestCase):
         with self.assertNumQueries(1):
             query = Q(letter_author=letter_author)
             test_letter_this_page = get_letter_data_by_user(query=query, letter_num=0)
-            letter_data = LetterSerializer(test_letter_this_page).data
             # Then
-            self.assertEqual("1", letter_data["category"])
-            self.assertEqual("1", letter_data["title"])
-            self.assertEqual("", letter_data["content"])
+            self.assertEqual("1", test_letter_this_page["category"])
+            self.assertEqual("1", test_letter_this_page["title"])
+            self.assertEqual("", test_letter_this_page["content"])
 
     def test_my_recieved_letter_get(self) -> None:
         # Given
@@ -60,9 +58,8 @@ class TestMyLetter(TestCase):
         with self.assertNumQueries(1):
             query = Q(worryboard__author=worry_board_author)
             test_letter_this_page = get_letter_data_by_user(query=query, letter_num=1)
-            letter_data = LetterSerializer(test_letter_this_page).data
 
             # Then
-            self.assertEqual("1", letter_data["category"])
-            self.assertEqual("1", letter_data["title"])
-            self.assertEqual("", letter_data["content"])
+            self.assertEqual("1", test_letter_this_page["category"])
+            self.assertEqual("1", test_letter_this_page["title"])
+            self.assertEqual("", test_letter_this_page["content"])

@@ -6,7 +6,7 @@ from worry_board.models import WorryBoard
 
 
 class TestMyPage(APITestCase):
-    def test_letter_num_is_not_added(self):
+    def test_letter_num_is_not_added(self) -> None:
         client = APIClient()
         user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
 
@@ -17,7 +17,7 @@ class TestMyPage(APITestCase):
         self.assertEqual("올바른 편지 번호를 입력해주세요.", response.json()["detail"])
         self.assertEqual(400, response.status_code)
 
-    def test_letter_does_not_exist(self):
+    def test_letter_does_not_exist(self) -> None:
         client = APIClient()
         user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
 
@@ -28,7 +28,7 @@ class TestMyPage(APITestCase):
         self.assertEqual("편지가 없습니다. 작성하러 가볼까요?", response.json()["detail"])
         self.assertEqual(404, response.status_code)
 
-    def test_unauthorized_user(self):
+    def test_unauthorized_user(self) -> None:
         client = APIClient()
 
         url = "/my_page/my_letter"
@@ -40,7 +40,7 @@ class TestMyPage(APITestCase):
         )
         self.assertEqual(401, response.status_code)
 
-    def test_get_my_letter(self):
+    def test_get_my_letter(self) -> None:
         client = APIClient()
         letter_author = UserModel.objects.create(
             username="joo", password="1234", nickname="joo"

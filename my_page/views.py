@@ -1,15 +1,13 @@
 from django.db.models import Q
-from django.http import HttpRequest
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from jin.models import Letter as LetterModel
 from my_page.services.my_page_service import get_letter_data_by_user
-
-from .serializers import LetterSerializer
 
 # Create your views here.
 
@@ -22,7 +20,7 @@ class MyLetterView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get(self, request):
+    def get(self, request: Request) -> Response:
         cur_user = request.user
         try:
             letter_num = int(self.request.query_params.get("letter_num"))
@@ -42,7 +40,7 @@ class MyLetterView(APIView):
             )
             return Response(
                 {
-                    "letter": LetterSerializer(letter_this_page).data,
+                    "letter": letter_this_page,
                     "letter_cnt": letter_cnt,
                 },
                 status=status.HTTP_200_OK,
@@ -59,7 +57,7 @@ class MyRecievedLetterView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def get(self, request: HttpRequest) -> Response:
+    def get(self, request: Request) -> Response:
         cur_user = request.user
         try:
             letter_num = int(self.request.query_params.get("letter_num"))
@@ -79,7 +77,7 @@ class MyRecievedLetterView(APIView):
             )
             return Response(
                 {
-                    "letter": LetterSerializer(letter_this_page).data,
+                    "letter": letter_this_page,
                     "letter_cnt": letter_cnt,
                 },
                 status=status.HTTP_200_OK,

@@ -14,7 +14,6 @@ repos:
     rev: 5.10.1 # pick the isort version you'd like to use from https://github.com/timothycrosley/isort/releases
     hooks:
       - id: isort
-        args: ["--profile", "black"]
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.9.2
     hooks:

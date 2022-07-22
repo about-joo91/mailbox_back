@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from unsmile_filtering import pipe
-from worry_board.models import WorryBoard as WorryBoardModel
-from worry_board.serializers import WorryBoardSerializer
+from worry_board.models import WorryBoard as WorryBoardModel, RequestMessage as RequestMessageModel
+from worry_board.serializers import WorryBoardSerializer, RequestMessageSerializer
 
 
 # Create your views here.
@@ -16,7 +16,7 @@ class WorryBoardView(APIView):
     def get(self, request):
         category = int(self.request.query_params.get("category"))
         page_num = int(self.request.query_params.get("page_num"))
-        if category == 1:
+        if category == 0:
             worry_board_list = WorryBoardModel.objects.all().order_by("-create_date")[
                 10 * (page_num - 1) : 10 + 10 * (page_num - 1)
             ]
@@ -73,3 +73,52 @@ class WorryBoardView(APIView):
             delete_worry_board.delete()
             return Response({"message": "고민 게시글이 삭제되었습니다."}, status=status.HTTP_200_OK)
         return Response({"message": "삭제에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class RequestMessageView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request, case):
+        author = int(self.request.query_params.get("user_id"))
+        if case == "sended":
+            request_message = RequestMessageModel.objects.filter(author=author)
+        
+        elif case == "recieved":
+            request_message = RequestMessageModel.objects.filter(worry_board__author=author)
+        return Response(
+            {
+                "request_message": RequestMessageSerializer(
+                    request_message, many=True, context={"request": request}
+                ).data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    def post(self, request, worry_board_id):
+        result = pipe(request.data["request_message"])[0]
+        if result["label"] == "clean":
+            request.data["author"] = request.user.id
+            request.data["worry_board"] = worry_board_id
+            create_request_message = RequestMessageSerializer(data=request.data)
+            create_request_message.is_valid(raise_exception=True)
+            create_request_message.save()
+
+            # geted, created = create_request_message.get_or_create()
+            # if geted:
+            #     return Response(
+            #         {"message": "이미 보낸 요청입니다."},
+            #         status=status.HTTP_400_BAD_REQUEST,
+            #     )
+            # else :
+            #     create_request_message.save()
+            
+            return Response({"message": "게시물 작성자에게 요청하였습니다!"}, status=status.HTTP_200_OK)
+
+
+        else:
+            return Response(
+                {"message": "부적절한 내용이 담겨있어 요청을 보낼 수 없습니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

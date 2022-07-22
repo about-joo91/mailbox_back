@@ -66,7 +66,10 @@ class BoardCommentSerializer(serializers.ModelSerializer):
         return bool(obj.author == cur_user)
 
     def get_is_detail_page_writer(self, obj):
-        return bool(obj.author == obj.board.author)
+        is_detail = obj.author == obj.board.author
+        if is_detail:
+            return 1
+        return 0
 
     class Meta:
         model = BoardCommentModel

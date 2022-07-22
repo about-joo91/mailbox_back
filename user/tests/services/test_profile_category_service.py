@@ -5,6 +5,7 @@ from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
 from user.services.user_profile_category_service import (
     create_category_of_profile,
+    delete_category_of_profile,
     get_category_of_profile,
 )
 
@@ -29,9 +30,18 @@ class TestProfileCategory(TestCase):
         UserProfileModel.objects.create(user=user)
         worry_category = WorryCategory.objects.create(cate_name="가족")
         categories = [worry_category.id]
-        with self.assertNumQueries(3):
-            create_category_of_profile(user.id, categories)
+
+        create_category_of_profile(user.id, categories)
 
         my_categories = user.userprofile.categories.all()
         self.assertEqual(len(categories), len(my_categories))
         self.assertEqual("가족", my_categories[0].cate_name)
+
+    def test_delete_user_profile_category(self) -> None:
+        user = UserModel.objects.create(username="joo", nickname="joo")
+        # user_profile = UserProfileModel.objects.create(user=user)
+        worry_category = WorryCategory.objects.create(cate_name="가족")
+
+        delete_category_of_profile(user_id=user.id, p_category=worry_category.id)
+
+        print("a")

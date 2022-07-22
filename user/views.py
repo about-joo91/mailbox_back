@@ -1,4 +1,3 @@
-from django.db.models import Q
 from django.forms import ValidationError
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -9,6 +8,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from user.services.user_profile_category_service import (
     create_category_of_profile,
+    delete_category_of_profile,
     get_category_of_profile,
 )
 from user.services.user_profile_service import (
@@ -18,7 +18,6 @@ from user.services.user_profile_service import (
 
 from .models import User as UserModel
 from .models import UserProfile as UserProfileModel
-from .models import UserProfileCategory as UserProfileCategoryModel
 from .serializers import UserSignupSerializer
 
 
@@ -100,13 +99,9 @@ class UserProfileCategoryView(APIView):
         except UserProfileModel.DoesNotExist:
             return Response({"detail": "유저 프로필 정보가 없습니다."}, status=status.HTTP_404_OK)
         except UserModel.DoesNotExist:
-            return Response({"detail": "유저가 없습니다."}, status=status.HTTP_404_OK)
+            return Response({"detail": "없는 유저입니다."}, status=status.HTTP_404_OK)
 
     def delete(self, request: Request, p_category: str) -> Response:
         cur_user = request.user
-        cur_user_profile = cur_user.userprofile
-        user_cate = UserProfileCategoryModel.objects.get(
-            Q(id=p_category) & Q(user_profile__id=cur_user_profile.id)
-        )
-        user_cate.delete()
+        delete_category_of_profile(user_id=cur_user.id, p_category=p_category)
         return Response({"message": "카테고리를 지웠습니다."}, status=status.HTTP_200_OK)

@@ -12,7 +12,8 @@ class TestUserProfileServices(TestCase):
     def test_when_seccess_get_profile_data(self) -> None:
         user = UserModel.objects.create(username="joo", nickname="joo")
         UserProfileModel.objects.create(user=user)
-        user_profile_data = get_user_profile_data(user)
+        with self.assertNumQueries(1):
+            user_profile_data = get_user_profile_data(user)
 
         self.assertEqual("joo", user_profile_data["user"])
         self.assertEqual(0, user_profile_data["mongle_level"])

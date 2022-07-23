@@ -12,5 +12,5 @@ def update_user_profile_data(user: User, update_data: Dict) -> None:
     user_profile_serializer = UserProfileSerializer(
         user.userprofile, data=update_data, partial=True
     )
-    if user_profile_serializer.is_valid():
-        user_profile_serializer.save()
+    user_profile_serializer.is_valid(raise_exception=True)
+    user_profile_serializer.save()

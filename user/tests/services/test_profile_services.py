@@ -27,34 +27,15 @@ class TestUserProfileServices(TestCase):
         user = UserModel.objects.create(username="joo", nickname="joo")
         UserProfileModel.objects.create(user=user)
 
-        update_data = {"mongle_level": 1}
+        update_data = {
+            "mongle_level": 1,
+            "fullname": "방가워",
+            "mongle_grade": 1,
+            "description": "desc",
+        }
         update_user_profile_data(user=user, update_data=update_data)
 
         self.assertEqual(1, user.userprofile.mongle_level)
-
-    def test_when_change_name_in_profile_data(self) -> None:
-        user = UserModel.objects.create(username="joo", nickname="joo")
-        UserProfileModel.objects.create(user=user)
-
-        update_data = {"fullname": "방가워"}
-        update_user_profile_data(user=user, update_data=update_data)
-
         self.assertEqual("방가워", user.userprofile.fullname)
-
-    def test_when_grade_up_in_profile_data(self) -> None:
-        user = UserModel.objects.create(username="joo", nickname="joo")
-        UserProfileModel.objects.create(user=user)
-
-        update_data = {"mongle_grade": 1}
-        update_user_profile_data(user=user, update_data=update_data)
-
-        self.assertEqual(1, user.userprofile.mongle_grade)
-
-    def test_when_change_desc_in_profile_data(self) -> None:
-        user = UserModel.objects.create(username="joo", nickname="joo")
-        UserProfileModel.objects.create(user=user)
-
-        update_data = {"description": "desc"}
-        update_user_profile_data(user=user, update_data=update_data)
-
         self.assertEqual("desc", user.userprofile.description)
+        self.assertEqual(1, user.userprofile.mongle_grade)

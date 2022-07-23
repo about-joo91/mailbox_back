@@ -1,3 +1,5 @@
+import json
+
 from rest_framework.test import APIClient, APITestCase
 
 from user.models import User as UserModel
@@ -5,7 +7,14 @@ from user.models import UserProfile as UserProfileModel
 
 
 class TestProfileAPI(APITestCase):
+    """
+    프로필을 가져오고 수정하는 api를 검증하는 클래스
+    """
+
     def test_get_user_profile(self) -> None:
+        """
+        유저를 가져오는 api를 검증
+        """
         client = APIClient()
         user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
         user_profile = UserProfileModel.objects.create(user=user)
@@ -23,12 +32,98 @@ class TestProfileAPI(APITestCase):
         self.assertEqual(result["profile_img"], user_profile.profile_img)
 
     def test_when_user_profile_is_none_in_get_user_profile(self) -> None:
+        """
+        유저프로필이 없을 때를 가정한 검증
+        """
         client = APIClient()
         user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
 
         client.force_authenticate(user=user)
         url = "/user/profile"
         response = client.get(url)
+        result = response.json()
 
-        self.assertEqual("프로필이 없습니다. 프로필을 생성해주세요", response.json()["detail"])
+        self.assertEqual("프로필이 없습니다. 프로필을 생성해주세요", result["detail"])
         self.assertEqual(404, response.status_code)
+
+    def test_put_user_profile(self) -> None:
+        """
+        UserProfileView 의 put 메서드를 검증하는 함수
+        """
+
+        client = APIClient()
+        user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
+        UserProfileModel.objects.create(user=user)
+
+        client.force_authenticate(user=user)
+        url = "/user/profile"
+        response = client.put(
+            url,
+            json.dumps(
+                {
+                    "mongle_level": 1,
+                    "fullname": "방가워",
+                    "mongle_grade": 1,
+                    "description": "desc",
+                }
+            ),
+            content_type="application/json",
+        )
+        result = response.json()
+
+        self.assertEqual("프로필이 수정되었습니다", result["detail"])
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(1, user.userprofile.mongle_level)
+        self.assertEqual("방가워", user.userprofile.fullname)
+        self.assertEqual("desc", user.userprofile.description)
+        self.assertEqual(1, user.userprofile.mongle_grade)
+
+    def test_when_user_profile_is_none_in_put_user_profile(self) -> None:
+        """
+        유저프로필이 없을 때를 가정한 검증
+        """
+        client = APIClient()
+        user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
+
+        client.force_authenticate(user=user)
+        url = "/user/profile"
+        response = client.put(
+            url,
+            json.dumps(
+                {
+                    "mongle_level": 1,
+                    "fullname": "방가워",
+                    "mongle_grade": 1,
+                    "description": "desc",
+                }
+            ),
+            content_type="application/json",
+        )
+        result = response.json()
+
+        self.assertEqual("프로필이 없습니다. 프로필을 생성해주세요", result["detail"])
+        self.assertEqual(404, response.status_code)
+
+    def test_invalid_data_in_put_user_profile(self) -> None:
+        """
+        유저프로필이 없을 때를 가정한 검증
+        """
+        client = APIClient()
+        user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
+        UserProfileModel.objects.create(user=user)
+
+        client.force_authenticate(user=user)
+        url = "/user/profile"
+        response = client.put(
+            url,
+            json.dumps(
+                {
+                    "mongle_level": "알랄라",
+                }
+            ),
+            content_type="application/json",
+        )
+        result = response.json()
+
+        self.assertEqual("프로필 수정에 실패했습니다. 정확한 값을 입력해주세요.", result["detail"])
+        self.assertEqual(400, response.status_code)

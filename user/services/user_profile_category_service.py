@@ -8,7 +8,8 @@ from user.models import UserProfile as UserProfileModel
 from user.models import UserProfileCategory as UserProfileCategoryModel
 
 
-def get_category_of_profile(user_id: int) -> List[Dict]:
+def get_category_of_profile_except_mine(user_id: int) -> List[Dict]:
+
     category_all_except_mine = WorryCategoryModel.objects.all().exclude(
         id__in=UserModel.objects.filter(id=user_id)
         .select_related("userprofile")
@@ -23,13 +24,13 @@ def get_category_of_profile(user_id: int) -> List[Dict]:
 
 
 def create_category_of_profile(user_id: int, categories: List) -> None:
-    user_profile = UserProfileModel.objects.filter(user__id=user_id).get()
+
+    user_profile = UserProfileModel.objects.filter(user_id=user_id).get()
     user_profile.categories.add(*categories)
 
 
 def delete_category_of_profile(user_id: int, p_category: int) -> None:
-    cur_user_profile = UserProfileModel.objects.filter(user__id=user_id).get()
-    user_cate = UserProfileCategoryModel.objects.get(
-        Q(id=p_category) & Q(user_profile__id=cur_user_profile.id)
-    )
-    user_cate.delete()
+
+    UserProfileCategoryModel.objects.filter(
+        Q(user_profile__user_id=user_id) & Q(category_id=p_category)
+    ).delete()

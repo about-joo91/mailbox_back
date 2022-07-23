@@ -1,5 +1,5 @@
 from django.forms import ValidationError
-from rest_framework import status
+from rest_framework import serializers, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -9,14 +9,13 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from user.services.user_profile_category_service import (
     create_category_of_profile,
     delete_category_of_profile,
-    get_category_of_profile,
+    get_category_of_profile_except_mine,
 )
 from user.services.user_profile_service import (
     get_user_profile_data,
     update_user_profile_data,
 )
 
-from .models import User as UserModel
 from .models import UserProfile as UserProfileModel
 from .serializers import UserSignupSerializer
 
@@ -65,15 +64,20 @@ class UserProfileView(APIView):
             )
 
     def put(self, request):
-        cur_user = request.user
-        update_data = request.data
 
         try:
+            cur_user = request.user
+            update_data = request.data
             update_user_profile_data(user=cur_user, update_data=update_data)
             return Response({"detail": "프로필이 수정되었습니다"}, status=status.HTTP_200_OK)
-        except ValidationError:
+        except serializers.ValidationError:
             return Response(
-                {"detail": "프로필 수정에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "프로필 수정에 실패했습니다. 정확한 값을 입력해주세요."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except UserProfileModel.DoesNotExist:
+            return Response(
+                {"detail": "프로필이 없습니다. 프로필을 생성해주세요"}, status=status.HTTP_404_NOT_FOUND
             )
 
 
@@ -86,20 +90,27 @@ class UserProfileCategoryView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get(self, request: Request) -> Response:
-        cur_user = request.user
-        categories = get_category_of_profile(cur_user)
-        return Response(categories, status=status.HTTP_200_OK)
+        try:
+            cur_user = request.user
+            categories = get_category_of_profile_except_mine(cur_user.id)
+            return Response(categories, status=status.HTTP_200_OK)
+        except UserProfileModel.DoesNotExist:
+            return Response(
+                {"detail": "유저프로필 데이터가 없습니다. 생성해주세요"}, status=status.HTTP_404_NOT_FOUND
+            )
 
     def post(self, request: Request) -> Response:
-        cur_user = request.user
-        categories = request.data["categories"]
         try:
-            create_category_of_profile(user=cur_user, categories=categories)
+            cur_user = request.user
+            categories = request.data["categories"]
+            create_category_of_profile(user=cur_user.id, categories=categories)
             return Response({"detail": "카테고리가 저장되었습니다."}, status=status.HTTP_200_OK)
+        except ValidationError:
+            return Response(
+                {"detail": "카테고리 생성에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST
+            )
         except UserProfileModel.DoesNotExist:
             return Response({"detail": "유저 프로필 정보가 없습니다."}, status=status.HTTP_404_OK)
-        except UserModel.DoesNotExist:
-            return Response({"detail": "없는 유저입니다."}, status=status.HTTP_404_OK)
 
     def delete(self, request: Request, p_category: str) -> Response:
         cur_user = request.user

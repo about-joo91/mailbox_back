@@ -5,6 +5,7 @@ from worry_board.models import WorryBoard as WorryBoardModel, RequestMessage as 
 
 class WorryBoardSerializer(serializers.ModelSerializer):
     create_date = serializers.SerializerMethodField()
+    is_worry_board_writer = serializers.SerializerMethodField()
 
     def get_create_date(self, obj):
         format_data = "%m-%d %H:%M"
@@ -14,9 +15,13 @@ class WorryBoardSerializer(serializers.ModelSerializer):
 
         return time_data
 
+    def get_is_worry_board_writer(self, obj):
+        cur_user = self.context["request"].user
+        return bool(obj.author == cur_user)
+
     class Meta:
         model = WorryBoardModel
-        fields = ["id", "author", "category", "create_date", "content"]
+        fields = ["id", "author", "category", "create_date", "content", "is_worry_board_writer"]
 
         extra_kwargs = {
             "author": {"write_only": True},

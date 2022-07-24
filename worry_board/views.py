@@ -99,24 +99,27 @@ class RequestMessageView(APIView):
     def post(self, request, worry_board_id):
         result = pipe(request.data["request_message"])[0]
         if result["label"] == "clean":
-            request.data["author"] = request.user.id
-            request.data["worry_board"] = worry_board_id
-            create_request_message = RequestMessageSerializer(data=request.data)
-            create_request_message.is_valid(raise_exception=True)
-            create_request_message.save()
-
-            # geted, created = create_request_message.get_or_create()
-            # if geted:
-            #     return Response(
-            #         {"message": "이미 보낸 요청입니다."},
-            #         status=status.HTTP_400_BAD_REQUEST,
-            #     )
-            # else :
-            #     create_request_message.save()
+            author = request.user
+            check_my_worry_board_author = WorryBoardModel.objects.get(id=worry_board_id).author
+            request_message = request.data['request_message']
+            if check_my_worry_board_author == author:
+                return Response({"message" : "내가 작성한 worry_board에는 요청할 수 없습니다"}, status=status.HTTP_400_BAD_REQUEST)
             
-            return Response({"message": "게시물 작성자에게 요청하였습니다!"}, status=status.HTTP_200_OK)
+            geted_request_message, created_request_message = RequestMessageModel.objects.get_or_create(author=author, worry_board_id=worry_board_id)
+            if created_request_message:
+                new_request_message = RequestMessageModel.objects.create(
+                    author = author,
+                    worry_board_id = worry_board_id,
+                    request_message = request_message
+                )
+                new_request_message.save()
+                return Response({"message": "게시물 작성자에게 요청하였습니다!"}, status=status.HTTP_200_OK)
 
-
+            return Response(
+                {"message": "이미 보낸 요청입니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+            
         else:
             return Response(
                 {"message": "부적절한 내용이 담겨있어 요청을 보낼 수 없습니다."},

@@ -1,8 +1,11 @@
+import json
+
 from rest_framework.test import APIClient, APITestCase
 
 from jin.models import WorryCategory
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
+from user.services.user_profile_category_service import create_category_of_profile
 
 
 class TestProfileCategoryAPI(APITestCase):
@@ -17,9 +20,9 @@ class TestProfileCategoryAPI(APITestCase):
         client = APIClient()
         user = UserModel.objects.create(username="joo", nickname="joo")
         user_profile = UserProfileModel.objects.create(user=user)
-        WorryCategory.objects.create(cate_name="가족")
+        worry_category_1 = WorryCategory.objects.create(cate_name="가족")
         WorryCategory.objects.create(cate_name="육아")
-        user_profile.categories.add(1)
+        user_profile.categories.add(worry_category_1.id)
 
         client.force_authenticate(user=user)
         url = "/user/profile/category/"
@@ -46,7 +49,7 @@ class TestProfileCategoryAPI(APITestCase):
 
     def test_when_user_is_none_in_get_user_profile_category(self) -> None:
         """
-        유저 프로필이 없을 때를 가정한 검증
+        유저가 없을 때를 가정한 검증
         """
         client = APIClient()
 
@@ -58,3 +61,121 @@ class TestProfileCategoryAPI(APITestCase):
         self.assertEqual(
             "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
         )
+
+    def test_post_userprofile_category(self) -> None:
+        """
+        UserProfileCategoryView의 post 함수에 대한 검증
+        """
+        client = APIClient()
+        user = UserModel.objects.create(username="joo", nickname="joo")
+        UserProfileModel.objects.create(user=user)
+        worry_category = WorryCategory.objects.create(cate_name="가족")
+
+        client.force_authenticate(user=user)
+        url = "/user/profile/category/"
+        response = client.post(
+            url,
+            json.dumps({"categories": [worry_category.id]}),
+            content_type="application/json",
+        )
+        result = response.json()
+        categories = user.userprofile.categories.all()
+
+        self.assertEqual("카테고리가 저장되었습니다.", result["detail"])
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("가족", categories[0].cate_name)
+
+    def test_when_invalid_data_is_given_to_post_userprofile_category(self) -> None:
+        """
+        UserProfileCategoryView의 post 함수에 대한 검증
+        """
+        client = APIClient()
+        user = UserModel.objects.create(username="joo", nickname="joo")
+        UserProfileModel.objects.create(user=user)
+        WorryCategory.objects.create(cate_name="가족")
+
+        client.force_authenticate(user=user)
+        url = "/user/profile/category/"
+        response = client.post(
+            url, json.dumps({"categories": ["가족"]}), content_type="application/json"
+        )
+        result = response.json()
+
+        self.assertEqual("카테고리 생성에 실패했습니다. 정확한 값을 입력해주세요.", result["detail"])
+        self.assertEqual(400, response.status_code)
+
+    def test_when_user_profile_is_none_in_post_user_profile_category(self) -> None:
+        """
+        유저 프로필이 없을 때를 가정한 검증
+        """
+        client = APIClient()
+        user = UserModel.objects.create(username="joo", nickname="joo")
+        worry_category = WorryCategory.objects.create(cate_name="가족")
+
+        client.force_authenticate(user=user)
+        url = "/user/profile/category/"
+        response = client.post(
+            url,
+            json.dumps({"categories": [worry_category.id]}),
+            content_type="application/json",
+        )
+        result = response.json()
+
+        self.assertEqual(404, response.status_code)
+        self.assertEqual("유저 프로필 정보가 없습니다. 생성해주세요", result["detail"])
+
+    def test_delete_userprofile_category(self) -> None:
+        """
+        UserProfileCategoryView의 delete 함수에 대한 검증
+        """
+        client = APIClient()
+        user = UserModel.objects.create(username="joo", nickname="joo")
+        UserProfileModel.objects.create(user=user)
+        worry_category = WorryCategory.objects.create(cate_name="가족")
+        create_category_of_profile(user.id, [worry_category.id])
+        self.assertEqual(1, user.userprofile.categories.all().count())
+
+        client.force_authenticate(user=user)
+        url = "/user/profile/category/" + str(worry_category.id)
+        response = client.delete(url)
+        result = response.json()
+
+        self.assertEqual("카테고리를 지웠습니다.", result["detail"])
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(0, user.userprofile.categories.all().count())
+
+    def test_when_parameter_doesnot_exist_in_delete_userprofile_category(self) -> None:
+        """
+        빈 url 파라미터를 UserProfileCategoryView의 delete에 url로 보냈을 때
+        """
+        client = APIClient()
+        user = UserModel.objects.create(username="joo", nickname="joo")
+        UserProfileModel.objects.create(user=user)
+        worry_category = WorryCategory.objects.create(cate_name="가족")
+        create_category_of_profile(user.id, [worry_category.id])
+        self.assertEqual(1, user.userprofile.categories.all().count())
+
+        client.force_authenticate(user=user)
+        url = "/user/profile/category/"
+        response = client.delete(url)
+        result = response.json()
+
+        self.assertEqual("카테고리를 조회할 수 없습니다. 다시 시도해주세요.", result["detail"])
+        self.assertEqual(404, response.status_code)
+        self.assertEqual(1, user.userprofile.categories.all().count())
+
+    def test_when_category_doesnot_exist_in_delete_userprofile_category(self) -> None:
+        """
+        없는 카테고리 값을 UserProfileCategoryView delete로 보냈을 때
+        """
+        client = APIClient()
+        user = UserModel.objects.create(username="joo", nickname="joo")
+        UserProfileModel.objects.create(user=user)
+
+        client.force_authenticate(user=user)
+        url = "/user/profile/category/" + str(9999)
+        response = client.delete(url)
+        result = response.json()
+
+        self.assertEqual("카테고리를 조회할 수 없습니다. 다시 시도해주세요.", result["detail"])
+        self.assertEqual(404, response.status_code)

@@ -47,6 +47,6 @@ class TestProfileCategory(TestCase):
         create_category_of_profile(user_id=user.id, categories=categories_for_create)
 
         self.assertEqual(1, user.userprofile.categories.all().count())
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(2):
             delete_category_of_profile(user_id=user.id, p_category=worry_category.id)
         self.assertEqual(0, user.userprofile.categories.all().count())

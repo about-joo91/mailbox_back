@@ -30,7 +30,9 @@ def create_category_of_profile(user_id: int, categories: List) -> None:
 
 
 def delete_category_of_profile(user_id: int, p_category: int) -> None:
-
-    UserProfileCategoryModel.objects.filter(
-        Q(user_profile__user_id=user_id) & Q(category_id=p_category)
-    ).delete()
+    if WorryCategoryModel.objects.filter(id=p_category).exists():
+        UserProfileCategoryModel.objects.filter(
+            Q(user_profile__user_id=user_id) & Q(category_id=p_category)
+        ).delete()
+    else:
+        raise WorryCategoryModel.DoesNotExist

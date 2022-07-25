@@ -10,4 +10,5 @@ urlpatterns = [
     path("profile", views.UserProfileView.as_view()),
     path("profile/category/", views.UserProfileCategoryView.as_view()),
     path("profile/category/<int:p_category>", views.UserProfileCategoryView.as_view()),
+    path("report", views.ReportUserView.as_view()),
 ]

@@ -86,6 +86,13 @@ class Report(models.Model):
     reported_user = models.ForeignKey("ReportedUser", on_delete=models.CASCADE)
     report_reason = models.CharField(max_length=150)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["report_user", "reported_user"], name="only_one_report"
+            )
+        ]
+
 
 class ReportedUser(models.Model):
     user = models.ForeignKey("User", on_delete=models.CASCADE)

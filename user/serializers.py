@@ -5,9 +5,21 @@ from .models import UserProfile as UserProfileModel
 
 
 class UserSignupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserModel
-        fields = "__all__"
+    def validate(self, data):
+        if UserModel.objects.filter(nickname=data["nickname"]).exists():
+            raise serializers.ValidationError("닉네임 중복!")
+
+        condition = all(
+            x not in ["!", "@", "#", "$", "%", "^", "&", "*", "_"]
+            for x in data["password"]
+        )
+        if len(data["username"]) < 4:
+            raise serializers.ValidationError("아이디는 4자 이상 입력!")
+        elif len(data["nickname"]) == 0:
+            raise serializers.ValidationError("닉네임 입력!")
+        elif len(data["password"]) < 8 or condition:
+            raise serializers.ValidationError("비밀번호는 8자 이상 특수문자 포함해 입력!")
+        return data
 
     def create(self, *args, **kwargs):
         user = super().create(*args, **kwargs)
@@ -23,6 +35,10 @@ class UserSignupSerializer(serializers.ModelSerializer):
         user.set_password(p)
         user.save()
         return user
+
+    class Meta:
+        model = UserModel
+        fields = "__all__"
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

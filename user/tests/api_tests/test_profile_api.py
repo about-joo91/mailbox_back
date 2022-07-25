@@ -8,7 +8,7 @@ from user.models import UserProfile as UserProfileModel
 
 class TestProfileAPI(APITestCase):
     """
-    프로필을 가져오고 수정하는 api를 검증하는 클래스
+    UserProfileView의 API를 검증하는 클래스
     """
 
     def test_get_user_profile(self) -> None:

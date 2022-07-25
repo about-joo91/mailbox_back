@@ -15,7 +15,7 @@ class TestProfileCategoryAPI(APITestCase):
 
     def test_get_userprofile_category(self) -> None:
         """
-        내 프로필에 저장된 카테고리를 제외한 카테고리 값을 제대로 가져오는지 검증
+        UserProfileCategoryView의 get함수에 대한 검증
         """
         client = APIClient()
         user = UserModel.objects.create(username="joo", nickname="joo")
@@ -34,7 +34,8 @@ class TestProfileCategoryAPI(APITestCase):
 
     def test_when_user_profile_is_none_in_get_user_profile_category(self) -> None:
         """
-        유저 프로필이 없을 때를 가정한 검증
+        UserProfileCategoryView의 get함수에 대한 검증
+        case : 유저프로필이 없을 때
         """
         client = APIClient()
         user = UserModel.objects.create(username="joo", nickname="joo")
@@ -47,9 +48,10 @@ class TestProfileCategoryAPI(APITestCase):
         self.assertEqual(404, response.status_code)
         self.assertEqual("유저프로필 데이터가 없습니다. 생성해주세요", result["detail"])
 
-    def test_when_user_is_none_in_get_user_profile_category(self) -> None:
+    def test_when_user_is_unauthenticated_in_get_user_profile_category(self) -> None:
         """
-        유저가 없을 때를 가정한 검증
+        UserProfileCategoryView의 get함수에 대한 검증
+        case : 인증이 되지 않은 유저일 때
         """
         client = APIClient()
 
@@ -88,6 +90,7 @@ class TestProfileCategoryAPI(APITestCase):
     def test_when_invalid_data_is_given_to_post_userprofile_category(self) -> None:
         """
         UserProfileCategoryView의 post 함수에 대한 검증
+        case : 카테고리 값이 유효하지 않을 때
         """
         client = APIClient()
         user = UserModel.objects.create(username="joo", nickname="joo")
@@ -106,7 +109,8 @@ class TestProfileCategoryAPI(APITestCase):
 
     def test_when_user_profile_is_none_in_post_user_profile_category(self) -> None:
         """
-        유저 프로필이 없을 때를 가정한 검증
+        UserProfileCategoryView의 post 함수에 대한 검증
+        case : 유저프로필이 없을 때
         """
         client = APIClient()
         user = UserModel.objects.create(username="joo", nickname="joo")
@@ -123,6 +127,27 @@ class TestProfileCategoryAPI(APITestCase):
 
         self.assertEqual(404, response.status_code)
         self.assertEqual("유저 프로필 정보가 없습니다. 생성해주세요", result["detail"])
+
+    def test_when_user_is_unauthenticated_in_post_user_profile_category(self) -> None:
+        """
+        UserProfileCategoryView의 post 함수에 대한 검증
+        case : 인증이 되지 않은 유저일 때
+        """
+        client = APIClient()
+        worry_category = WorryCategory.objects.create(cate_name="가족")
+
+        url = "/user/profile/category/"
+        response = client.post(
+            url,
+            json.dumps({"categories": [worry_category.id]}),
+            content_type="application/json",
+        )
+        result = response.json()
+
+        self.assertEqual(401, response.status_code)
+        self.assertEqual(
+            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
+        )
 
     def test_delete_userprofile_category(self) -> None:
         """
@@ -146,7 +171,8 @@ class TestProfileCategoryAPI(APITestCase):
 
     def test_when_parameter_doesnot_exist_in_delete_userprofile_category(self) -> None:
         """
-        빈 url 파라미터를 UserProfileCategoryView의 delete에 url로 보냈을 때
+        UserProfileCategoryView의 delete 함수에 대한 검증
+        case : delete에 url에 빈 파라미터를 보냈을 때
         """
         client = APIClient()
         user = UserModel.objects.create(username="joo", nickname="joo")
@@ -164,9 +190,10 @@ class TestProfileCategoryAPI(APITestCase):
         self.assertEqual(404, response.status_code)
         self.assertEqual(1, user.userprofile.categories.all().count())
 
-    def test_when_category_doesnot_exist_in_delete_userprofile_category(self) -> None:
+    def test_when_category_does_not_exist_in_delete_userprofile_category(self) -> None:
         """
-        없는 카테고리 값을 UserProfileCategoryView delete로 보냈을 때
+        UserProfileCategoryView의 delete 함수에 대한 검증
+        case : 카테고리가 없을 때
         """
         client = APIClient()
         user = UserModel.objects.create(username="joo", nickname="joo")
@@ -179,3 +206,39 @@ class TestProfileCategoryAPI(APITestCase):
 
         self.assertEqual("카테고리를 조회할 수 없습니다. 다시 시도해주세요.", result["detail"])
         self.assertEqual(404, response.status_code)
+
+    def test_when_userprofile_does_not_exist_in_delete_userprofile_category(
+        self,
+    ) -> None:
+        """
+        UserProfileCategoryView의 delete 함수에 대한 검증
+        case : 유저프로필이 없을 때
+        """
+        client = APIClient()
+        user = UserModel.objects.create(username="joo", nickname="joo")
+        worry_category = WorryCategory.objects.create(cate_name="가족")
+
+        client.force_authenticate(user=user)
+        url = "/user/profile/category/" + str(worry_category.id)
+        response = client.delete(url)
+        result = response.json()
+
+        self.assertEqual(404, response.status_code)
+        self.assertEqual("유저 프로필 정보가 없습니다. 생성해주세요", result["detail"])
+
+    def test_when_user_is_unauthenticated_in_delete_user_profile_category(self) -> None:
+        """
+        UserProfileCategoryView의 delete 함수에 대한 검증
+        case : 인증이 되지 않은 유저일 때
+        """
+        client = APIClient()
+        worry_category = WorryCategory.objects.create(cate_name="가족")
+
+        url = "/user/profile/category/" + str(worry_category.id)
+        response = client.delete(url)
+        result = response.json()
+
+        self.assertEqual(401, response.status_code)
+        self.assertEqual(
+            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
+        )

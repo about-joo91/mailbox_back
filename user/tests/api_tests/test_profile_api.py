@@ -13,7 +13,7 @@ class TestProfileAPI(APITestCase):
 
     def test_get_user_profile(self) -> None:
         """
-        유저를 가져오는 api를 검증
+        UserProfileView 의 get 함수를 검증하는 함수
         """
         client = APIClient()
         user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
@@ -25,7 +25,6 @@ class TestProfileAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(result["fullname"], user_profile.fullname)
-        self.assertEqual(result["user"], user_profile.user.username)
         self.assertEqual(result["description"], user_profile.description)
         self.assertEqual(result["mongle_level"], user_profile.mongle_level)
         self.assertEqual(result["mongle_grade"], user_profile.mongle_grade)
@@ -33,7 +32,8 @@ class TestProfileAPI(APITestCase):
 
     def test_when_user_profile_is_none_in_get_user_profile(self) -> None:
         """
-        유저프로필이 없을 때를 가정한 검증
+        UserProfileView 의 get 함수를 검증하는 함수
+        case : 유저프로필이 없을 때
         """
         client = APIClient()
         user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
@@ -46,9 +46,25 @@ class TestProfileAPI(APITestCase):
         self.assertEqual("프로필이 없습니다. 프로필을 생성해주세요", result["detail"])
         self.assertEqual(404, response.status_code)
 
+    def test_when_user_is_unauthenticated_in_get_user_profile(self) -> None:
+        """
+        UserProfileView 의 get 함수를 검증하는 함수
+        case : 인증되지 않은 유저일 때
+        """
+        client = APIClient()
+
+        url = "/user/profile"
+        response = client.get(url)
+        result = response.json()
+
+        self.assertEqual(401, response.status_code)
+        self.assertEqual(
+            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
+        )
+
     def test_put_user_profile(self) -> None:
         """
-        UserProfileView 의 put 메서드를 검증하는 함수
+        UserProfileView 의 put 함수를 검증하는 함수
         """
 
         client = APIClient()
@@ -71,16 +87,19 @@ class TestProfileAPI(APITestCase):
         )
         result = response.json()
 
+        userprofile = UserProfileModel.objects.filter(user=user).get()
+
         self.assertEqual("프로필이 수정되었습니다", result["detail"])
         self.assertEqual(200, response.status_code)
-        self.assertEqual(1, user.userprofile.mongle_level)
-        self.assertEqual("방가워", user.userprofile.fullname)
-        self.assertEqual("desc", user.userprofile.description)
-        self.assertEqual(1, user.userprofile.mongle_grade)
+        self.assertEqual(1, userprofile.mongle_level)
+        self.assertEqual("방가워", userprofile.fullname)
+        self.assertEqual("desc", userprofile.description)
+        self.assertEqual(1, userprofile.mongle_grade)
 
     def test_when_user_profile_is_none_in_put_user_profile(self) -> None:
         """
-        유저프로필이 없을 때를 가정한 검증
+        UserProfileView 의 put 함수를 검증하는 함수
+        case : 유저프로필이 없을 때
         """
         client = APIClient()
         user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
@@ -106,7 +125,8 @@ class TestProfileAPI(APITestCase):
 
     def test_invalid_data_in_put_user_profile(self) -> None:
         """
-        유저프로필이 없을 때를 가정한 검증
+        UserProfileView 의 put 함수를 검증하는 함수
+        case : 데이터가 유효하지 않을 때
         """
         client = APIClient()
         user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
@@ -127,3 +147,19 @@ class TestProfileAPI(APITestCase):
 
         self.assertEqual("프로필 수정에 실패했습니다. 정확한 값을 입력해주세요.", result["detail"])
         self.assertEqual(400, response.status_code)
+
+    def test_when_user_is_unauthenticated_in_put_user_profile(self) -> None:
+        """
+        UserProfileView 의 put 함수를 검증하는 함수
+        case : 인증되지 않은 유저일 때
+        """
+        client = APIClient()
+
+        url = "/user/profile"
+        response = client.get(url)
+        result = response.json()
+
+        self.assertEqual(401, response.status_code)
+        self.assertEqual(
+            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
+        )

@@ -65,3 +65,15 @@ class TestUserReportService(TestCase):
         self.assertEqual(1, Report.objects.all().count())
         self.assertEqual("reported_test", reported_user_name)
         self.assertEqual(report_reason, this_report_object.report_reason)
+
+    def test_when_reported_user_is_none_in_create_user_report(self):
+        """
+        신고대상 유저가 없을 때를 검증
+        """
+
+        user = UserModel.objects.create(username="test", nickname="test")
+        report_reason = "편지에 욕설을 적었습니다."
+        with self.assertRaises(UserModel.DoesNotExist):
+            create_user_report(
+                user_id=user.id, target_user_id=999, report_reason=report_reason
+            )

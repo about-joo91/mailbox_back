@@ -138,6 +138,9 @@ class ReportUserView(APIView):
     유저를 신고하는 기능을 담당하는 View
     """
 
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
     def post(self, request: Request) -> Response:
         try:
             cur_user = request.user

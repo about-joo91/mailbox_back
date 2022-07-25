@@ -1,4 +1,3 @@
-from django.db import IntegrityError
 from django.db.models import Count
 
 from user.models import Report as ReportModel
@@ -10,21 +9,16 @@ REPORT_CONDITION_CNT = 3
 
 def create_user_report(user_id: int, target_user_id: int, report_reason: str) -> str:
     """
-    유저를 신고하는 service
+    유저를 신고하는 함수
     """
-    try:
-        target_user = UserModel.objects.filter(id=target_user_id).filter().get()
-        reported_user, _ = ReportedUserModel.objects.get_or_create(user=target_user)
-        ReportModel.objects.create(
-            report_user_id=user_id,
-            report_reason=report_reason,
-            reported_user=reported_user,
-        )
-        return reported_user.user.username
-    except UserModel.DoesNotExist:
-        raise UserModel.DoesNotExist
-    except IntegrityError:
-        raise IntegrityError
+    target_user = UserModel.objects.filter(id=target_user_id).filter().get()
+    reported_user, _ = ReportedUserModel.objects.get_or_create(user=target_user)
+    ReportModel.objects.create(
+        report_user_id=user_id,
+        report_reason=report_reason,
+        reported_user=reported_user,
+    )
+    return reported_user.user.username
 
 
 def get_reported_user_over_condition_cnt() -> None:

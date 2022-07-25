@@ -13,7 +13,7 @@ from user.services.user_profile_category_service import (
 
 class TestProfileCategory(TestCase):
     """
-    프로필 카테고리 View를 검증하는 클래스
+    프로필 카테고리의 get, put 함수를 검증하는 클래스
     """
 
     def test_get_category_of_profile_except_mine(self) -> None:

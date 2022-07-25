@@ -8,8 +8,14 @@ from user.services.report_service import create_user_report
 
 
 class ReportUserView(APITestCase):
-    def test_report_post(self):
+    """
+    ReportUserView를 검증하는 클래스
+    """
 
+    def test_report_post(self):
+        """
+        ReportUserView의 포스트를 검증하는 함수
+        """
         client = APIClient()
         user = UserModel.objects.create(username="test", nickname="test")
         target_user = UserModel.objects.create(
@@ -38,8 +44,11 @@ class ReportUserView(APITestCase):
         self.assertEqual(1, report_model_cnt)
         self.assertEqual(report_reason, report_model.report_reason)
 
-    def test_when_report_is_already_exist_report_post(self):
-
+    def test_when_report_is_already_exist_in_report_post(self):
+        """
+        ReportUserView의 포스트를 검증하는 함수
+        case:유저가 이미 신고를 했을 때
+        """
         client = APIClient()
         user = UserModel.objects.create(username="test", nickname="test")
         target_user = UserModel.objects.create(
@@ -54,10 +63,59 @@ class ReportUserView(APITestCase):
         url = "/user/report"
         response = client.post(
             url,
-            json.dumps({"target_user_id": target_user.id, "report_reason": "사실 욕 안함"}),
+            json.dumps(
+                {"target_user_id": target_user.id, "report_reason": report_reason}
+            ),
             content_type="application/json",
         )
         result = response.json()
 
         self.assertEqual(400, response.status_code)
         self.assertEqual("이미 신고하셨습니다.", result["detail"])
+
+    def test_when_target_user_does_not_exist_in_report_post(self):
+        """
+        ReportUserView의 포스트를 검증하는 함수
+        case:대상유저가 없을 때
+        """
+        client = APIClient()
+        user = UserModel.objects.create(username="test", nickname="test")
+        report_reason = "욕했어요!"
+
+        client.force_authenticate(user=user)
+        url = "/user/report"
+        response = client.post(
+            url,
+            json.dumps({"target_user_id": 999, "report_reason": report_reason}),
+            content_type="application/json",
+        )
+        result = response.json()
+
+        self.assertEqual(404, response.status_code)
+        self.assertEqual("999는 없는 유저입니다.", result["detail"])
+
+    def test_when_user_is_unauthenticated_in_report_post(self):
+        """
+        ReportUserView의 포스트를 검증하는 함수
+        case:인증되지 않은 유저일 때
+        """
+        client = APIClient()
+        target_user = UserModel.objects.create(
+            username="reported_user", nickname="reported_user"
+        )
+        report_reason = "욕했어요!"
+
+        url = "/user/report"
+        response = client.post(
+            url,
+            json.dumps(
+                {"target_user_id": target_user.id, "report_reason": report_reason}
+            ),
+            content_type="application/json",
+        )
+        result = response.json()
+
+        self.assertEqual(401, response.status_code)
+        self.assertEqual(
+            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
+        )

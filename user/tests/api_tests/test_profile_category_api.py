@@ -10,7 +10,7 @@ from user.services.user_profile_category_service import create_category_of_profi
 
 class TestProfileCategoryAPI(APITestCase):
     """
-    유저 프로필 카테고리 api를 검증하는 클래스
+    유UserProfileCategoryViewd의 API를 검증하는 클래스
     """
 
     def test_get_userprofile_category(self) -> None:

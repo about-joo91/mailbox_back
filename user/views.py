@@ -18,6 +18,7 @@ from user.services.user_profile_service import (
     update_user_profile_data,
 )
 
+from .models import User as UserModel
 from .models import UserProfile as UserProfileModel
 from .serializers import UserSignupSerializer
 
@@ -58,19 +59,18 @@ class UserProfileView(APIView):
     def get(self, request: Request) -> Response:
         cur_user = request.user
         try:
-            profile_data = get_user_profile_data(cur_user)
+            profile_data = get_user_profile_data(cur_user.id)
             return Response(profile_data, status=status.HTTP_200_OK)
         except UserProfileModel.DoesNotExist:
             return Response(
                 {"detail": "프로필이 없습니다. 프로필을 생성해주세요"}, status=status.HTTP_404_NOT_FOUND
             )
 
-    def put(self, request):
-
+    def put(self, request: Request) -> Response:
         try:
             cur_user = request.user
             update_data = request.data
-            update_user_profile_data(user=cur_user, update_data=update_data)
+            update_user_profile_data(user_id=cur_user.id, update_data=update_data)
             return Response({"detail": "프로필이 수정되었습니다"}, status=status.HTTP_200_OK)
         except serializers.ValidationError:
             return Response(
@@ -127,22 +127,34 @@ class UserProfileCategoryView(APIView):
                 {"detail": "카테고리를 조회할 수 없습니다. 다시 시도해주세요."},
                 status=status.HTTP_404_NOT_FOUND,
             )
+        except UserProfileModel.DoesNotExist:
+            return Response(
+                {"detail": "유저 프로필 정보가 없습니다. 생성해주세요"}, status=status.HTTP_404_NOT_FOUND
+            )
 
 
 class ReportUserView(APIView):
     """
-    유저를 신고할 수 있는  API
+    유저를 신고하는 기능을 담당하는 View
     """
 
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         try:
             cur_user = request.user
             target_user_id = request.data["target_user_id"]
+            report_reason = request.data["report_reason"]
             target_username = create_user_report(
-                user_id=cur_user.id, target_user_id=target_user_id
+                user_id=cur_user.id,
+                target_user_id=target_user_id,
+                report_reason=report_reason,
             )
             return Response({"detail": f"{target_username}유저를 신고하셨습니다."})
         except IntegrityError:
             return Response(
                 {"detail": "이미 신고하셨습니다."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        except UserModel.DoesNotExist:
+            return Response(
+                {"detail": f"{target_user_id}는 없는 유저입니다."},
+                status=status.HTTP_404_NOT_FOUND,
             )

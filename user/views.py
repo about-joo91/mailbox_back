@@ -1,4 +1,4 @@
-from django.forms import ValidationError
+from django.db import IntegrityError
 from rest_framework import serializers, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from jin.models import WorryCategory
+from user.services.report_service import create_user_report
 from user.services.user_profile_category_service import (
     create_category_of_profile,
     delete_category_of_profile,
@@ -103,16 +105,44 @@ class UserProfileCategoryView(APIView):
         try:
             cur_user = request.user
             categories = request.data["categories"]
-            create_category_of_profile(user=cur_user.id, categories=categories)
+            create_category_of_profile(user_id=cur_user.id, categories=categories)
             return Response({"detail": "카테고리가 저장되었습니다."}, status=status.HTTP_200_OK)
-        except ValidationError:
+        except ValueError:
             return Response(
-                {"detail": "카테고리 생성에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST
+                {"detail": "카테고리 생성에 실패했습니다. 정확한 값을 입력해주세요."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
         except UserProfileModel.DoesNotExist:
-            return Response({"detail": "유저 프로필 정보가 없습니다."}, status=status.HTTP_404_OK)
+            return Response(
+                {"detail": "유저 프로필 정보가 없습니다. 생성해주세요"}, status=status.HTTP_404_NOT_FOUND
+            )
 
-    def delete(self, request: Request, p_category: str) -> Response:
-        cur_user = request.user
-        delete_category_of_profile(user_id=cur_user.id, p_category=p_category)
-        return Response({"message": "카테고리를 지웠습니다."}, status=status.HTTP_200_OK)
+    def delete(self, request: Request, p_category: str = None) -> Response:
+        try:
+            cur_user = request.user
+            delete_category_of_profile(user_id=cur_user.id, p_category=p_category)
+            return Response({"detail": "카테고리를 지웠습니다."}, status=status.HTTP_200_OK)
+        except WorryCategory.DoesNotExist:
+            return Response(
+                {"detail": "카테고리를 조회할 수 없습니다. 다시 시도해주세요."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+
+class ReportUserView(APIView):
+    """
+    유저를 신고할 수 있는  API
+    """
+
+    def post(self, request):
+        try:
+            cur_user = request.user
+            target_user_id = request.data["target_user_id"]
+            target_username = create_user_report(
+                user_id=cur_user.id, target_user_id=target_user_id
+            )
+            return Response({"detail": f"{target_username}유저를 신고하셨습니다."})
+        except IntegrityError:
+            return Response(
+                {"detail": "이미 신고하셨습니다."}, status=status.HTTP_400_BAD_REQUEST
+            )

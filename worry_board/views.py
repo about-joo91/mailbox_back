@@ -3,9 +3,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from unsmile_filtering import pipe
-from worry_board.models import WorryBoard as WorryBoardModel, RequestMessage as RequestMessageModel
-from worry_board.serializers import WorryBoardSerializer, RequestMessageSerializer
+import unsmile_filtering
+from worry_board.models import RequestMessage as RequestMessageModel
+from worry_board.models import WorryBoard as WorryBoardModel
+from worry_board.serializers import RequestMessageSerializer, WorryBoardSerializer
 
 
 # Create your views here.
@@ -39,8 +40,9 @@ class WorryBoardView(APIView):
         )
 
     def post(self, request):
+        filtering_sys = unsmile_filtering.post_filtering
+        result = filtering_sys.unsmile_filter(request.data["content"])
         request.data["author"] = request.user.id
-        result = pipe(request.data["content"])[0]
         if result["label"] == "clean":
             create_worry_board_serializer = WorryBoardSerializer(data=request.data)
             if create_worry_board_serializer.is_valid(raise_exception=True):
@@ -60,12 +62,20 @@ class WorryBoardView(APIView):
 
     def put(self, request, worry_board_id):
         update_worry_board = WorryBoardModel.objects.get(id=worry_board_id)
-        update_worry_board_serializer = WorryBoardSerializer(
-            update_worry_board, data=request.data, partial=True
-        )
-        update_worry_board_serializer.is_valid(raise_exception=True)
-        update_worry_board_serializer.save()
-        return Response({"message": "고민 게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
+        filtering_sys = unsmile_filtering.post_filtering
+        result = filtering_sys.unsmile_filter(request.data["content"])
+        if result["label"] == "clean":
+            update_worry_board_serializer = WorryBoardSerializer(
+                update_worry_board, data=request.data, partial=True
+            )
+            update_worry_board_serializer.is_valid(raise_exception=True)
+            update_worry_board_serializer.save()
+            return Response({"message": "고민 게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def delete(self, request, worry_board_id):
         delete_worry_board = WorryBoardModel.objects.get(id=worry_board_id)
@@ -73,7 +83,6 @@ class WorryBoardView(APIView):
             delete_worry_board.delete()
             return Response({"message": "고민 게시글이 삭제되었습니다."}, status=status.HTTP_200_OK)
         return Response({"message": "삭제에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 class RequestMessageView(APIView):
@@ -84,9 +93,11 @@ class RequestMessageView(APIView):
         author = int(self.request.query_params.get("user_id"))
         if case == "sended":
             request_message = RequestMessageModel.objects.filter(author=author)
-        
+
         elif case == "recieved":
-            request_message = RequestMessageModel.objects.filter(worry_board__author=author)
+            request_message = RequestMessageModel.objects.filter(
+                worry_board__author=author
+            )
         return Response(
             {
                 "request_message": RequestMessageSerializer(
@@ -97,7 +108,8 @@ class RequestMessageView(APIView):
         )
 
     def post(self, request, worry_board_id):
-        result = pipe(request.data["request_message"])[0]
+        filtering_sys = unsmile_filtering.post_filtering
+        result = filtering_sys.unsmile_filter(request.data["content"])
         if result["label"] == "clean":
             request.data["author"] = request.user.id
             request.data["worry_board"] = worry_board_id
@@ -113,9 +125,10 @@ class RequestMessageView(APIView):
             #     )
             # else :
             #     create_request_message.save()
-            
-            return Response({"message": "게시물 작성자에게 요청하였습니다!"}, status=status.HTTP_200_OK)
 
+            return Response(
+                {"message": "게시물 작성자에게 요청하였습니다!"}, status=status.HTTP_200_OK
+            )
 
         else:
             return Response(

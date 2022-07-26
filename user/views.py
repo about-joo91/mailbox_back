@@ -29,14 +29,14 @@ from .models import UserProfile as UserProfileModel
 # Create your views here.
 class UserView(APIView):
     """
-    회원정보 조회 및 추가, 수정 및 탈퇴
+    회원정보 조회 및 회원가입
     """
 
-    def get(self, request):
+    def get(self, request: Request) -> Response:
         user_data = get_user_signup_data(request.user)
         return Response(user_data, status=status.HTTP_200_OK)
 
-    def post(self, request):
+    def post(self, request: Request) -> Response:
         post_user_signup_data(request.data)
         return Response({"message": "회원가입 성공하였습니다"}, status=status.HTTP_200_OK)
 

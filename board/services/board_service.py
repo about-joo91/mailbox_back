@@ -44,16 +44,24 @@ def delete_board_data(board_id : int, author_id : int) -> None:
     delete_model = BoardModel.objects.get(id=board_id, author=author_id)
     delete_model.delete()
 
-def make_or_delete_like_data(author : int, board_id : int) -> None:
+def make_like_data(author : int, board_id : int) -> None:
     """
-    like 데이터를 만들어거나 삭제하는 service
+    like 데이터를 만드는 service
     """
     target_board = BoardModel.objects.get(id=board_id)
-    liked_board, created = BoardLikeModel.objects.get_or_create(
+    like_board= BoardLikeModel.objects.create(
         author=author, board=target_board
     )
-    if created:
-        liked_board.save()
+
+
+def delete_like_data(author : int, board_id : int) -> None:
+    """
+    like 데이터를 삭제하는 service
+    """
+    target_board = BoardModel.objects.get(id=board_id)
+    liked_board= BoardLikeModel.objects.get(
+        author=author, board=target_board
+    )
     liked_board.delete()
 
 

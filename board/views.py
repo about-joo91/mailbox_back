@@ -37,8 +37,11 @@ class BoardView(APIView):
     def post(self, request):
         result = pipe(request.data["content"])[0]
         if result["label"] == "clean":
-            board_service.create_board_data(request.data, request.user.id)
-            return Response({"message": "게시글이 생성되었습니다."}, status=status.HTTP_200_OK)
+            try :
+                board_service.create_board_data(request.data, request.user.id)
+                return Response({"message": "게시글이 생성되었습니다."}, status=status.HTTP_200_OK)
+            except  BoardModel.DoesNotExist:
+                return Response({"message": "게시글이 생성에 실패하였습니다."}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(
                 {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
@@ -75,9 +78,12 @@ class BorderLikeView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def post(self, request, board_id):
-        # 후에 like 됐을 때, 취소됐을 때 구분을 해주어야함
-        board_service.make_or_delete_like_data(request.user, board_id)
-        return Response({"message": "좋아요가 눌렸습니다!!"}, status=status.HTTP_200_OK)
+        try : 
+            board_service.delete_like_data(request.user, board_id) 
+            return Response({"message": "좋아요가 삭제되었습니다!!"}, status=status.HTTP_200_OK)
+        except:
+            board_service.make_like_data(request.user, board_id) 
+            return Response({"message": "좋아요가 되었습니다!!"}, status=status.HTTP_200_OK)
 
 
 class BorderCommentView(APIView):

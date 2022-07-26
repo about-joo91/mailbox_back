@@ -81,8 +81,8 @@ def create_board_comment_data(author : int, board_id : int, create_data : Dict )
     create_board_comment_serializer = BoardCommentSerializer(data=create_data.data)
     create_board_comment_serializer.is_valid(raise_exception=True)
     create_board_comment_serializer.save()
-
-def update_board_comment_data(update_data : Dict, comment_id : int):
+date_board_comment_data(update_data : Dict, comment_id : int) -> None:
+def up
     """
     board comment 데이터를 수정하는 service
     """

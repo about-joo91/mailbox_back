@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
 
 from .models import Letter as LetterModel
@@ -9,9 +10,9 @@ from .models import LetterReviewLike as LetterreviewLikeModel
 
 class LetterSerilaizer(serializers.ModelSerializer):
     def create(self, validated_data):
-        new_post = LetterModel.objects.create(**validated_data)
-        new_post.save()
-        return new_post
+        new_letter = LetterModel.objects.create(**validated_data)
+        new_letter.save()
+        return new_letter
 
     class Meta:
         model = LetterModel
@@ -24,20 +25,37 @@ class LetterSerilaizer(serializers.ModelSerializer):
         ]
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class MainPageDataSerializer(serializers.ModelSerializer):
     rank_list = serializers.SerializerMethodField()
+    user_profile_data = serializers.SerializerMethodField()
 
     def get_rank_list(self, obj):
-        rank_list_get = UserProfileModel.objects.all().order_by("-mongle_grade")[:10]
+        user_profile_get = (
+            UserModel.objects.select_related("userprofile")
+            .all()
+            .order_by("-monglegrade")[:10]
+        )
         rank_list = [
-            {"user": rank_list.user.username, "profile_img": rank_list.profile_img}
-            for rank_list in rank_list_get
+            {
+                "username": rank_list.username,
+                "profile_img": rank_list.userprofile.profile_img,
+            }
+            for rank_list in user_profile_get
         ]
         return rank_list
 
+    def get_user_profile_data(self, obj):
+        user_profile_get = UserModel.objects.select_related("userprofile").get(
+            id=obj.id
+        )
+        return {
+            "grade": user_profile_get.userprofile.mongle_grade,
+            "profile_img": user_profile_get.userprofile.profile_img,
+        }
+
     class Meta:
-        model = UserProfileModel
-        fields = ["rank_list"]
+        model = UserModel
+        fields = ["user_profile_data", "rank_list"]
 
 
 class BestReviewSerializer(serializers.ModelSerializer):
@@ -49,14 +67,14 @@ class BestReviewSerializer(serializers.ModelSerializer):
         cur_user = self.context["request"].user
 
         return bool(
-            LetterreviewLikeModel.objects.filter(user_id=cur_user, review_id=obj)
+            LetterreviewLikeModel.objects.filter(user=cur_user, letter_review=obj)
         )
 
     def get_review_id(self, obj):
         return obj.id
 
     def get_like_count(self, obj):
-        return LetterreviewLikeModel.objects.filter(review_id=obj).count()
+        return LetterreviewLikeModel.objects.filter(letter_review=obj).count()
 
     class Meta:
         model = LetterReviewModel
@@ -79,14 +97,14 @@ class LiveReviewSerializer(serializers.ModelSerializer):
     def get_is_liked(self, obj):
         cur_user = self.context["request"].user
         return bool(
-            LetterreviewLikeModel.objects.filter(user_id=cur_user, review_id=obj)
+            LetterreviewLikeModel.objects.filter(user=cur_user, letter_review=obj)
         )
 
     def get_review_id(self, obj):
         return obj.id
 
     def get_like_count(self, obj):
-        return LetterreviewLikeModel.objects.filter(review_id=obj).count()
+        return LetterreviewLikeModel.objects.filter(letter_review=obj).count()
 
     class Meta:
         model = LetterReviewModel

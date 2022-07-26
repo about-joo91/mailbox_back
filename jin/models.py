@@ -27,5 +27,12 @@ class LetterReview(models.Model):
 
 
 class LetterReviewLike(models.Model):
-    review_id = models.OneToOneField("LetterReview", on_delete=models.CASCADE)
-    user_id = models.ForeignKey("user.User", on_delete=models.CASCADE)
+    letter_review = models.OneToOneField("LetterReview", on_delete=models.CASCADE)
+    user = models.ForeignKey("user.User", on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["letter_review", "user"], name="only_one_like"
+            )
+        ]

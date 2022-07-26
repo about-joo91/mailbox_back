@@ -17,35 +17,28 @@ from user.services.user_profile_service import (
     get_user_profile_data,
     update_user_profile_data,
 )
+from user.services.user_signup_login_service import (
+    get_user_signup_data,
+    post_user_signup_data,
+)
 
 from .models import User as UserModel
 from .models import UserProfile as UserProfileModel
-from .serializers import UserSignupSerializer
 
 
 # Create your views here.
 class UserView(APIView):
     """
-    회원정보 조회 및 추가, 수정 및 탈퇴
+    회원정보 조회 및 회원가입
     """
 
-    def get(self, request):
-        return Response(
-            UserSignupSerializer(request.user).data, status=status.HTTP_200_OK
-        )
+    def get(self, request: Request) -> Response:
+        user_data = get_user_signup_data(request.user)
+        return Response(user_data, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        serializer = UserSignupSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "회원가입 성공하였습니다"}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def put(self, request):
-        return Response({"message": "수정이 완료되었습니다!"}, status=status.HTTP_200_OK)
-
-    def delete(self, request):
-        return Response({"message": "탈퇴가 완료되었습니다!"}, status=status.HTTP_200_OK)
+    def post(self, request: Request) -> Response:
+        post_user_signup_data(request.data)
+        return Response({"message": "회원가입 성공하였습니다"}, status=status.HTTP_200_OK)
 
 
 class UserProfileView(APIView):

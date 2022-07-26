@@ -3,7 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from unsmile_filtering import pipe
+
+import unsmile_filtering
 from board.models import Board as BoardModel
 from board.models import BoardComment as BoardCommentModel
 from board.models import BoardLike as BoardLikeModel
@@ -35,7 +36,8 @@ class BoardView(APIView):
         )
 
     def post(self, request):
-        result = pipe(request.data["content"])[0]
+        filtering_sys = unsmile_filtering.post_filtering
+        result = filtering_sys.unsmile_filter(request.data["content"])
         if result["label"] == "clean":
             try :
                 board_service.create_board_data(request.data, request.user.id)
@@ -49,7 +51,8 @@ class BoardView(APIView):
             )
 
     def put(self, request, board_id):
-        result = pipe(request.data["content"])[0]
+        filtering_sys = unsmile_filtering.post_filtering
+        result = filtering_sys.unsmile_filter(request.data["content"])
         if result["label"] == "clean":
             board_service.update_board_data(board_id, request.data)
             return Response({"message": "게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
@@ -107,13 +110,30 @@ class BorderCommentView(APIView):
         )
 
     def post(self, request):
-        board_id = int(self.request.query_params.get("board_id"))
-        board_service.create_board_comment_data(request.user, board_id, request.data)
-        return Response({"message": "댓글이 생성되었습니다."}, status=status.HTTP_200_OK)
+        filtering_sys = unsmile_filtering.post_filtering
+        result = filtering_sys.unsmile_filter(request.data["content"])
+        if result["label"] == "clean":
+            board_id = int(self.request.query_params.get("board_id"))
+            board_service.create_board_comment_data(request.user, board_id, request.data)
+            return Response({"message": "댓글이 생성되었습니다."}, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def put(self, request, comment_id):
-        board_service.update_board_comment_data(request.data, comment_id)
-        return Response({"message": "댓글이 수정되었습니다."}, status=status.HTTP_200_OK)
+        update_comment = BoardCommentModel.objects.get(id=comment_id)
+        filtering_sys = unsmile_filtering.post_filtering
+        result = filtering_sys.unsmile_filter(request.data["content"])
+        if result["label"] == "clean":
+            board_service.update_board_comment_data(request.data, comment_id)
+            return Response({"message": "댓글이 수정되었습니다."}, status=status.HTTP_200_OK)
+        else:
+            return Response(
+                {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def delete(self, request, comment_id):
 

@@ -6,7 +6,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from unsmile_filtering import pipe
+import unsmile_filtering
+
+# from unsmile_filtering import pipe
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import WorryBoardSerializer
 
@@ -115,8 +117,9 @@ class LetterView(APIView):
     def post(self, request):
         data_content = request.data["content"]
         repeat_num = math.ceil(len(data_content) / 900)
+        filtering_sys = unsmile_filtering.post_filtering
         for i in range(repeat_num):
-            result = pipe(data_content[900 * i : 900 * (i + 1)])[0]
+            result = filtering_sys.unsmile_filter(data_content[900 * i : 900 * (i + 1)])
             if result["label"] != "clean":
                 return Response(
                     {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
@@ -131,4 +134,4 @@ class LetterView(APIView):
         letterserialzier.save(
             worryboard=WorryBoardModel.objects.get(id=worry_board_get)
         )
-        return Response({"message"}, status=status.HTTP_200_OK)
+        return Response({"message: 편지 작성 완료했습니다"}, status=status.HTTP_200_OK)

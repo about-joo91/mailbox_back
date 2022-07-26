@@ -79,7 +79,9 @@ class WorryBoardView(APIView):
 class RequestMessageView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
-
+    """
+    보내거나 받은 request_message를 조회하는 view
+    """
     def get(self, request, case):
         author = int(self.request.query_params.get("user_id"))
         if case == "sended":
@@ -97,6 +99,9 @@ class RequestMessageView(APIView):
         )
 
     def post(self, request, worry_board_id):
+        """
+        request 요청을 보내는 view
+        """
         result = pipe(request.data["request_message"])[0]
         if result["label"] == "clean":
             author = request.user
@@ -125,3 +130,20 @@ class RequestMessageView(APIView):
                 {"message": "부적절한 내용이 담겨있어 요청을 보낼 수 없습니다."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+    
+    def put(self, request, request_message_id):
+        update_request_message = RequestMessageModel.objects.get(id=request_message_id)
+        update_request_message_serializer = RequestMessageSerializer(
+            update_request_message, data=request.data, partial=True
+        )
+        update_request_message_serializer.is_valid(raise_exception=True)
+        update_request_message_serializer.save()
+        return Response({"message": "요청 메세지가 수정되었습니다."}, status=status.HTTP_200_OK)
+
+    def delete(self, request, request_message_id):
+        delete_request_message = RequestMessageModel.objects.get(id=request_message_id)
+        if delete_request_message:
+            delete_request_message.delete()
+            return Response({"message": "요청 메세지 삭제되었습니다."}, status=status.HTTP_200_OK)
+        return Response({"message": "삭제에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)

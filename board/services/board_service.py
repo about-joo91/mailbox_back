@@ -11,7 +11,7 @@ def get_board_data(page_num : int) -> Tuple[List , int]:
     all_board_list = BoardModel.objects.all().order_by("-create_date")[
         10 * (page_num - 1) : 10 + 10 * (page_num - 1)
     ]
-    total_count = BoardModel.objects.all().count()
+    total_count = BoardModel.objects.count()
     return all_board_list, total_count
 
 def create_board_data(board_data : Dict, author_id:int) -> None:
@@ -76,9 +76,10 @@ def create_board_comment_data(author : int, board_id : int, create_data : Dict )
     """
     board comment 데이터를 만드는 service
     """
-    create_data["author"] = author
-    create_data["author"] = board_id
-    create_board_comment_serializer = BoardCommentSerializer(data=create_data.data)
+    print(author.id)
+    create_data["author"] = author.id
+    create_data["board"] = board_id
+    create_board_comment_serializer = BoardCommentSerializer(data=create_data)
     create_board_comment_serializer.is_valid(raise_exception=True)
     create_board_comment_serializer.save()
 

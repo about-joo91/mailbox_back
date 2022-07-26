@@ -68,8 +68,7 @@ class BoardView(APIView):
             board_service.delete_board_data(board_id, request.user.id)
             return Response({"message": "게시글이 삭제되었습니다."}, status=status.HTTP_200_OK)
         except BoardModel.DoesNotExist:
-            return Response({"message": "게시글이 존재x 되었습니다."}, status=status.HTTP_200_OK)
-            # 에러 메시지를 보고 except 뒤에 붙일 것
+            return Response({"message": "게시글이 존재하지 않습니다"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BorderLikeView(APIView):
@@ -98,12 +97,12 @@ class BorderCommentView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
-        board_id = int(self.request.query_params.get("board_id")
-        )
+        board_id = int(self.request.query_params.get("board_id"))
+        board_comment_data = board_service.get_board_comment_data(board_id)
         return Response(
             {
                 "board_comments": BoardSerializer(
-                    board_service.get_board_comment_data(board_id), many=True, context={"request": request}
+                    board_comment_data, many=True, context={"request": request}
                 ).data,
             },
             status=status.HTTP_200_OK,
@@ -114,7 +113,7 @@ class BorderCommentView(APIView):
         result = filtering_sys.unsmile_filter(request.data["content"])
         if result["label"] == "clean":
             board_id = int(self.request.query_params.get("board_id"))
-            board_service.create_board_comment_data(request.user, board_id, request.data)
+            board_service.create_board_comment_data(request.user.id, board_id, request.data)
             return Response({"message": "댓글이 생성되었습니다."}, status=status.HTTP_200_OK)
         else:
             return Response(

@@ -88,7 +88,9 @@ class WorryBoardView(APIView):
 class RequestMessageView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
-
+    """
+    보내거나 받은 request_message를 조회하는 view
+    """
     def get(self, request, case):
         author = int(self.request.query_params.get("user_id"))
         if case == "sended":
@@ -108,30 +110,54 @@ class RequestMessageView(APIView):
         )
 
     def post(self, request, worry_board_id):
+        """
+        request 요청을 보내는 view
+        """
         filtering_sys = unsmile_filtering.post_filtering
         result = filtering_sys.unsmile_filter(request.data["content"])
         if result["label"] == "clean":
-            request.data["author"] = request.user.id
-            request.data["worry_board"] = worry_board_id
-            create_request_message = RequestMessageSerializer(data=request.data)
-            create_request_message.is_valid(raise_exception=True)
-            create_request_message.save()
-
-            # geted, created = create_request_message.get_or_create()
-            # if geted:
-            #     return Response(
-            #         {"message": "이미 보낸 요청입니다."},
-            #         status=status.HTTP_400_BAD_REQUEST,
-            #     )
-            # else :
-            #     create_request_message.save()
-
+            author = request.user
+            check_my_worry_board = WorryBoardModel.objects.filter(id=worry_board_id)
+            if check_my_worry_board:
+                request_message = request.data['request_message']
+                if check_my_worry_board.author == author:
+                    return Response({"message" : "내가 작성한 worry_board에는 요청할 수 없습니다"}, status=status.HTTP_400_BAD_REQUEST)
+                
+                geted_request_message, created_request_message = RequestMessageModel.objects.get_or_create(author=author, worry_board_id=worry_board_id)
+                if created_request_message:
+                    new_request_message = RequestMessageModel.objects.create(
+                        author = author,
+                        worry_board_id = worry_board_id,
+                        request_message = request_message
+                    )
+                    new_request_message.save()
+                    return Response({"message": "게시물 작성자에게 요청하였습니다!"}, status=status.HTTP_200_OK)
+                return Response(
+                    {"message": "이미 보낸 요청입니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             return Response(
-                {"message": "게시물 작성자에게 요청하였습니다!"}, status=status.HTTP_200_OK
+                {"message": "존재하지 않는 게시물입니다."},
+                status=status.HTTP_400_BAD_REQUEST,
             )
-
         else:
             return Response(
                 {"message": "부적절한 내용이 담겨있어 요청을 보낼 수 없습니다."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+    
+    def put(self, request, request_message_id):
+        update_request_message = RequestMessageModel.objects.get(id=request_message_id)
+        update_request_message_serializer = RequestMessageSerializer(
+            update_request_message, data=request.data, partial=True
+        )
+        update_request_message_serializer.is_valid(raise_exception=True)
+        update_request_message_serializer.save()
+        return Response({"message": "요청 메세지가 수정되었습니다."}, status=status.HTTP_200_OK)
+
+    def delete(self, request, request_message_id):
+        delete_request_message = RequestMessageModel.objects.get(id=request_message_id)
+        if delete_request_message:
+            delete_request_message.delete()
+            return Response({"message": "요청 메세지 삭제되었습니다."}, status=status.HTTP_200_OK)
+        return Response({"message": "삭제에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)

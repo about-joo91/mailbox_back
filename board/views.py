@@ -3,11 +3,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+
 import unsmile_filtering
 from board.models import Board as BoardModel
 from board.models import BoardComment as BoardCommentModel
 from board.models import BoardLike as BoardLikeModel
 from board.serializers import BoardCommentSerializer, BoardSerializer
+from board.services import board_service
 
 # Create your views here.
 
@@ -22,10 +24,7 @@ class BoardView(APIView):
 
     def get(self, request):
         page_num = int(self.request.query_params.get("page_num"))
-        all_board_list = BoardModel.objects.all().order_by("-create_date")[
-            10 * (page_num - 1) : 10 + 10 * (page_num - 1)
-        ]
-        total_count = BoardModel.objects.all().count()
+        all_board_list, total_count = board_service.get_board_data(page_num)
         return Response(
             {
                 "boards": BoardSerializer(
@@ -40,11 +39,11 @@ class BoardView(APIView):
         filtering_sys = unsmile_filtering.post_filtering
         result = filtering_sys.unsmile_filter(request.data["content"])
         if result["label"] == "clean":
-            request.data["author"] = request.user.id
-            create_board_serializer = BoardSerializer(data=request.data)
-            create_board_serializer.is_valid(raise_exception=True)
-            create_board_serializer.save()
-            return Response({"message": "게시글이 생성되었습니다."}, status=status.HTTP_200_OK)
+            try :
+                board_service.create_board_data(request.data, request.user.id)
+                return Response({"message": "게시글이 생성되었습니다."}, status=status.HTTP_200_OK)
+            except  BoardModel.DoesNotExist:
+                return Response({"message": "게시글이 생성에 실패하였습니다."}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(
                 {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
@@ -55,12 +54,7 @@ class BoardView(APIView):
         filtering_sys = unsmile_filtering.post_filtering
         result = filtering_sys.unsmile_filter(request.data["content"])
         if result["label"] == "clean":
-            update_board = BoardModel.objects.get(id=board_id)
-            update_board_serializer = BoardSerializer(
-                update_board, data=request.data, partial=True
-            )
-            update_board_serializer.is_valid(raise_exception=True)
-            update_board_serializer.save()
+            board_service.update_board_data(board_id, request.data)
             return Response({"message": "게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
         else:
             return Response(
@@ -69,11 +63,12 @@ class BoardView(APIView):
             )
 
     def delete(self, request, board_id):
-        delete_board = BoardModel.objects.get(id=board_id)
-        if delete_board:
-            delete_board.delete()
+        
+        try:
+            board_service.delete_board_data(board_id, request.user.id)
             return Response({"message": "게시글이 삭제되었습니다."}, status=status.HTTP_200_OK)
-        return Response({"message": "삭제에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)
+        except BoardModel.DoesNotExist:
+            return Response({"message": "게시글이 존재하지 않습니다"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class BorderLikeView(APIView):
@@ -85,16 +80,12 @@ class BorderLikeView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def post(self, request, board_id):
-        author = request.user
-        target_board = BoardModel.objects.get(id=board_id)
-        liked_board, created = BoardLikeModel.objects.get_or_create(
-            author=author, board=target_board
-        )
-        if created:
-            liked_board.save()
-            return Response({"message": "좋아요가 완료 되었습니다!!"}, status=status.HTTP_200_OK)
-        liked_board.delete()
-        return Response({"message": "좋아요가 취소 되었습니다!!"}, status=status.HTTP_200_OK)
+        try : 
+            board_service.delete_like_data(request.user, board_id) 
+            return Response({"message": "좋아요가 삭제되었습니다!!"}, status=status.HTTP_200_OK)
+        except:
+            board_service.make_like_data(request.user, board_id) 
+            return Response({"message": "좋아요가 되었습니다!!"}, status=status.HTTP_200_OK)
 
 
 class BorderCommentView(APIView):
@@ -107,11 +98,11 @@ class BorderCommentView(APIView):
 
     def get(self, request):
         board_id = int(self.request.query_params.get("board_id"))
-        board_comment = BoardModel.objects.filter(id=board_id)
+        board_comment_data = board_service.get_board_comment_data(board_id)
         return Response(
             {
                 "board_comments": BoardSerializer(
-                    board_comment, many=True, context={"request": request}
+                    board_comment_data, many=True, context={"request": request}
                 ).data,
             },
             status=status.HTTP_200_OK,
@@ -122,11 +113,7 @@ class BorderCommentView(APIView):
         result = filtering_sys.unsmile_filter(request.data["content"])
         if result["label"] == "clean":
             board_id = int(self.request.query_params.get("board_id"))
-            request.data["author"] = request.user.id
-            request.data["board"] = board_id
-            create_board_comment_serializer = BoardCommentSerializer(data=request.data)
-            create_board_comment_serializer.is_valid(raise_exception=True)
-            create_board_comment_serializer.save()
+            board_service.create_board_comment_data(request.user.id, board_id, request.data)
             return Response({"message": "댓글이 생성되었습니다."}, status=status.HTTP_200_OK)
         else:
             return Response(
@@ -139,11 +126,7 @@ class BorderCommentView(APIView):
         filtering_sys = unsmile_filtering.post_filtering
         result = filtering_sys.unsmile_filter(request.data["content"])
         if result["label"] == "clean":
-            update_comment_serializer = BoardCommentSerializer(
-                update_comment, data=request.data, partial=True
-            )
-            update_comment_serializer.is_valid(raise_exception=True)
-            update_comment_serializer.save()
+            board_service.update_board_comment_data(request.data, comment_id)
             return Response({"message": "댓글이 수정되었습니다."}, status=status.HTTP_200_OK)
         else:
             return Response(
@@ -152,8 +135,9 @@ class BorderCommentView(APIView):
             )
 
     def delete(self, request, comment_id):
-        delete_comment = BoardCommentModel.objects.get(id=comment_id)
-        if delete_comment:
-            delete_comment.delete()
+
+        try:
+            board_service.delete_board_comment_data(comment_id, request.user.id)
             return Response({"message": "댓글이 삭제되었습니다."}, status=status.HTTP_200_OK)
-        return Response({"message": "삭제에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)
+        except BoardCommentModel.DoesNotExist:
+            return Response({"message": "댓글이 존재하지 않습니다.."}, status=status.HTTP_400_BAD_REQUEST)

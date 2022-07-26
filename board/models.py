@@ -10,11 +10,24 @@ class Board(models.Model):
     create_date = models.DateTimeField(auto_now_add=True)
     update_date = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["author", "id"], name="user_only_one_board"
+            )
+        ]
+
 
 class BoardLike(models.Model):
     author = models.ForeignKey("user.User", on_delete=models.CASCADE)
     board = models.ForeignKey("board.Board", on_delete=models.CASCADE)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["author", "board"], name="user_only_one_board_like"
+            )
+        ]
 
 class BoardComment(models.Model):
     author = models.ForeignKey("user.User", on_delete=models.CASCADE)

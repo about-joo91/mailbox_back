@@ -7,7 +7,7 @@ import unsmile_filtering
 from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import RequestMessageSerializer, WorryBoardSerializer
-
+from worry_board.services import worry_board_service
 
 # Create your views here.
 class WorryBoardView(APIView):
@@ -17,17 +17,7 @@ class WorryBoardView(APIView):
     def get(self, request):
         category = int(self.request.query_params.get("category"))
         page_num = int(self.request.query_params.get("page_num"))
-        if category == 0:
-            worry_board_list = WorryBoardModel.objects.all().order_by("-create_date")[
-                10 * (page_num - 1) : 10 + 10 * (page_num - 1)
-            ]
-            total_count = WorryBoardModel.objects.all().count()
-
-        else:
-            worry_board_list = WorryBoardModel.objects.filter(
-                category=category
-            ).order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
-            total_count = WorryBoardModel.objects.filter(category=category).count()
+        worry_board_list, total_count = worry_board_service.get_worry_board_data(page_num, category)
 
         return Response(
             {
@@ -40,19 +30,16 @@ class WorryBoardView(APIView):
         )
 
     def post(self, request):
-        filtering_sys = unsmile_filtering.post_filtering
-        result = filtering_sys.unsmile_filter(request.data["content"])
-        request.data["author"] = request.user.id
-        if result["label"] == "clean":
-            create_worry_board_serializer = WorryBoardSerializer(data=request.data)
-            if create_worry_board_serializer.is_valid(raise_exception=True):
-                create_worry_board_serializer.save()
+        author_id = request.user.id
+        if worry_board_service.test_is_it_clean_text(request.data):
+            worry_board_service.create_worry_board_data(request.data, author_id)
+            try : 
                 return Response(
-                    {"message": "고민 게시글을 게시하였습니다."}, status=status.HTTP_200_OK
+                    {"detail": "고민 게시글을 게시하였습니다."}, status=status.HTTP_200_OK
                 )
-            else:
+            except:
                 return Response(
-                    {"message": "게시에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST
+                    {"detail": "게시에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST
                 )
         else:
             return Response(
@@ -61,19 +48,15 @@ class WorryBoardView(APIView):
             )
 
     def put(self, request, worry_board_id):
-        update_worry_board = WorryBoardModel.objects.get(id=worry_board_id)
-        filtering_sys = unsmile_filtering.post_filtering
-        result = filtering_sys.unsmile_filter(request.data["content"])
-        if result["label"] == "clean":
-            update_worry_board_serializer = WorryBoardSerializer(
-                update_worry_board, data=request.data, partial=True
-            )
-            update_worry_board_serializer.is_valid(raise_exception=True)
-            update_worry_board_serializer.save()
-            return Response({"message": "고민 게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
+        if worry_board_service.test_is_it_clean_text(request.data):
+            try : 
+                worry_board_service.update_worry_board_data(worry_board_id, request.data)
+                return Response({"detail": "고민 게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
+            except:
+                return Response({"detail": "수정에 실패하였습니다."}, status=status.HTTP_200_OK)
         else:
             return Response(
-                {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                {"detail": "부적절한 내용이 담겨있어 게시글을 수정 할 수 없습니다"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
@@ -92,19 +75,18 @@ class RequestMessageView(APIView):
     보내거나 받은 request_message를 조회하는 view
     """
     def get(self, request, case):
-        author = int(self.request.query_params.get("user_id"))
+        author = request.user
         if case == "sended":
-            request_message = RequestMessageModel.objects.filter(author=author)
-
+            request_message = RequestMessageModel.objects.filter(author=author).order_by("-create_date")
         elif case == "recieved":
-            request_message = RequestMessageModel.objects.filter(
-                worry_board__author=author
-            )
+            request_message = RequestMessageModel.objects.filter(worry_board__author=author).order_by("-create_date")
+        total_count = request_message.count()
         return Response(
             {
                 "request_message": RequestMessageSerializer(
                     request_message, many=True, context={"request": request}
                 ).data,
+                "total_count" : total_count
             },
             status=status.HTTP_200_OK,
         )
@@ -114,13 +96,19 @@ class RequestMessageView(APIView):
         request 요청을 보내는 view
         """
         filtering_sys = unsmile_filtering.post_filtering
-        result = filtering_sys.unsmile_filter(request.data["content"])
+        result = filtering_sys.unsmile_filter(request.data["request_message"])
         if result["label"] == "clean":
             author = request.user
-            check_my_worry_board = WorryBoardModel.objects.filter(id=worry_board_id)
-            if check_my_worry_board:
+            try :
+                check_my_worry_board_author = WorryBoardModel.objects.get(id=worry_board_id).author
+            except:
+                return Response(
+                {"message": "존재하지 않는 게시물입니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+            if check_my_worry_board_author:
                 request_message = request.data['request_message']
-                if check_my_worry_board.author == author:
+                if check_my_worry_board_author == author:
                     return Response({"message" : "내가 작성한 worry_board에는 요청할 수 없습니다"}, status=status.HTTP_400_BAD_REQUEST)
                 
                 geted_request_message, created_request_message = RequestMessageModel.objects.get_or_create(author=author, worry_board_id=worry_board_id)
@@ -136,10 +124,7 @@ class RequestMessageView(APIView):
                     {"message": "이미 보낸 요청입니다."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            return Response(
-                {"message": "존재하지 않는 게시물입니다."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            
         else:
             return Response(
                 {"message": "부적절한 내용이 담겨있어 요청을 보낼 수 없습니다."},

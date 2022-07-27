@@ -72,12 +72,11 @@ def get_board_comment_data(board_id : int) -> List:
     board_comment = BoardModel.objects.filter(id=board_id)
     return board_comment
 
-def create_board_comment_data(author : int, board_id : int, create_data : Dict ) -> None:
+def create_board_comment_data(author_id : int, board_id : int, create_data : Dict ) -> None:
     """
     board comment 데이터를 만드는 service
     """
-    print(author.id)
-    create_data["author"] = author.id
+    create_data["author"] = author_id
     create_data["board"] = board_id
     create_board_comment_serializer = BoardCommentSerializer(data=create_data)
     create_board_comment_serializer.is_valid(raise_exception=True)

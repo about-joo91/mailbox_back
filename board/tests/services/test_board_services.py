@@ -32,7 +32,7 @@ class TestBoardService(TestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["message"], "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다")
+        self.assertEqual(result["detail"], "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다")
 
     def test_exceeding_limited_num_of_char_on_post_board_title(self) -> None:
         """
@@ -117,7 +117,7 @@ class TestBoardService(TestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["message"], "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다")
+        self.assertEqual(result["detail"], "부적절한 내용이 담겨있어 게시글을 수정 할 수 없습니다")
         
         
     def test_exceeding_limited_num_of_char_on_post_board_title(self) -> None:

@@ -34,17 +34,20 @@ class BoardView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
-        page_num = int(self.request.query_params.get("page_num"))
-        paginated_board, total_count = get_paginated_board_data(page_num)
-        return Response(
-            {
-                "boards": BoardSerializer(
-                    paginated_board, many=True, context={"request": request}
-                ).data,
-                "total_count": total_count,
-            },
-            status=status.HTTP_200_OK,
-        )
+        try:
+            page_num = int(self.request.query_params.get("page_num"))
+            paginated_board, total_count = get_paginated_board_data(page_num)
+            return Response(
+                {
+                    "boards": BoardSerializer(
+                        paginated_board, many=True, context={"request": request}
+                    ).data,
+                    "total_count": total_count,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except TypeError:
+            return Response({"detail": "빈파라미터"}, status=status.HTTP_404_NOT_FOUND)
         
     def post(self, request):
         if check_is_it_clean_text(request.data["content"]):
@@ -56,22 +59,26 @@ class BoardView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    def put(self, request, board_id):
-        if check_is_it_clean_text(request.data["content"]):
-            update_board_data(board_id, request.data)
-            return Response({"detail": "게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
-        else:
-            return Response(
-                {"detail": "부적절한 내용이 담겨있어 게시글을 수정 할 수 없습니다"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+    def put(self, request, board_id: str = None):
+        try:
+            if check_is_it_clean_text(request.data["content"]):
+                update_board_data(board_id, request.data)
+                return Response({"detail": "게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {"detail": "부적절한 내용이 담겨있어 게시글을 수정 할 수 없습니다"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except BoardModel.DoesNotExist:
+            return Response({"detail": "게시글이 존재하지 않습니다"}, status=status.HTTP_404_NOT_FOUND)
 
-    def delete(self, request, board_id):
+
+    def delete(self, request, board_id: str = None):
         try:
             delete_board_data(board_id, request.user.id)
             return Response({"detail": "게시글이 삭제되었습니다."}, status=status.HTTP_200_OK)
         except BoardModel.DoesNotExist:
-            return Response({"detail": "게시글이 존재하지 않습니다"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "게시글이 존재하지 않습니다"}, status=status.HTTP_404_NOT_FOUND)
 
 
 class BorderLikeView(APIView):

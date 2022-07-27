@@ -156,6 +156,9 @@ class MainPageView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+        ####
+
+        
 
 
 class LetterView(APIView):

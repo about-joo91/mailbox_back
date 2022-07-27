@@ -21,20 +21,16 @@ class TestUserRegistrationAPI(APITestCase):
         url = reverse("user_view")
         user_data = {"username": "won", "password": "qwer1234%", "nickname": "won1122"}
         response = self.client.post(url, user_data)
-        print(dir(response))
-        print(response)
-        print(response.content)
+        result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content["non_field_errors"][0], "아이디는 4자 이상 입력!")
+        self.assertEqual(result["non_field_errors"][0], "아이디는 4자 이상 입력!")
 
-        # with CaptureQueriesContext(connection) as ctx:
-        #     post_user_signup_data(user_data)
-        #     print("dd")
-        with self.assertRaises(serializers.ValidationError):
-            UserModel.objects.create(
-                username=user_data["username"], nickname=user_data["nickname"]
-            )
+
+        # with self.assertRaises(serializers.ValidationError):
+        #     UserModel.objects.create(
+        #         username=user_data["username"], nickname=user_data["nickname"]
+        #     )
 
     def test_nickname_blank_check(self) -> None:
         """
@@ -43,14 +39,17 @@ class TestUserRegistrationAPI(APITestCase):
         url = reverse("user_view")
         user_data = {"username": "won1", "password": "qwer1234%", "nickname": ""}
         response = self.client.post(url, user_data)
+        result = response.json()
+        print(response)
+        print(result)
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response["none_field_errors"])
+        self.assertEqual(result["nickname"][0], "이 필드는 blank일 수 없습니다.")
 
-        with self.assertRaises(serializers.ValidationError):
-            UserModel.objects.create(
-                username=user_data["username"], nickname=user_data["nickname"]
-            )
+        # with self.assertRaises(serializers.ValidationError):
+        #     UserModel.objects.create(
+        #         username=user_data["username"], nickname=user_data["nickname"]
+        #     )
 
     def test_nickname_duplicate_check(self) -> None:
         """

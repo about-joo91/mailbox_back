@@ -133,12 +133,6 @@ class TestMainPageServices(TestCase):
         self.assertEqual(18, worry_worryboard_union(worry_categories).count())
         self.assertEqual(3, count)
 
-        # for i in range(test_board.count()):
-
-
-
-
-
 
 
     def test_when_not_queryset_worryboard_union_service(self) -> None:

@@ -111,7 +111,6 @@ class MainPageView(APIView):
     def get(self, request):
         cur_user = request.user
 
-
         user_letters = LetterModel.objects.filter(letter_author=cur_user).order_by(
             "-create_date"
         )[:1]
@@ -120,16 +119,15 @@ class MainPageView(APIView):
         final_worryboard_list = recomendation_sys.recommend_worries(
             latest_worryboard_id
         )
-
         not_read_my_letter_count = my_letter_count(request.user.id)
 
         worry_categories = WorryCategoryModel.objects.prefetch_related(
             "worryboard_set"
         ).all()
-        worry_list = worry_worryboard_union(worry_categories)
+        order_by_cate_worry_list = worry_worryboard_union(worry_categories)
         user_profile_data = {}
         try:
-            user_profile_data = MainPageDataSerializer(cur_user).data
+            user_profile_data = MainPageDataSerializer(UserModel.objects.select_related("userprofile").get(id=cur_user.id)).data
         except UserModel.userprofile.RelatedObjectDoesNotExist:
             return Response({"detail":"유저프로필이 없습니다 생성해주세요."},status=status.HTTP_404_NOT_FOUND)
             
@@ -139,7 +137,7 @@ class MainPageView(APIView):
             {
                 "letter_count": not_read_my_letter_count,
                 "user_profile_data": user_profile_data,
-                "worry_list": WorryBoardSerializer(worry_list,context={"request": request},many=True).data,
+                "order_by_cate_worry_list": WorryBoardSerializer(order_by_cate_worry_list,context={"request": request},many=True).data,
                 "best_review": BestReviewSerializer(
                     grade_order_best_reviews, context={"request": request}, many=True
                 ).data,

@@ -1,8 +1,6 @@
 from rest_framework import serializers
 
 from user.models import User as UserModel
-from user.models import UserProfile as UserProfileModel
-
 from .models import Letter as LetterModel
 from .models import LetterReview as LetterReviewModel
 from .models import LetterReviewLike as LetterreviewLikeModel
@@ -45,12 +43,9 @@ class MainPageDataSerializer(serializers.ModelSerializer):
         return rank_list
 
     def get_user_profile_data(self, obj):
-        my_user_profile = UserModel.objects.select_related("userprofile").get(
-            id=obj.id
-        )
         return {
-            "grade": my_user_profile.userprofile.mongle_grade,
-            "profile_img": my_user_profile.userprofile.profile_img,
+            "grade": obj.userprofile.mongle_grade,
+            "profile_img": obj.userprofile.profile_img,
         }
 
     class Meta:

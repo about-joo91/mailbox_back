@@ -1,3 +1,4 @@
+from django.db.models import F
 from main_page.models import Letter as LetterModel
 from main_page.models import LetterReview as LetterReviewModel
 from main_page.models import LetterReviewLike as LetterReviewLikeModel
@@ -27,11 +28,12 @@ def letter_review_like_service(letter_review_id: int, user_id: int) -> None:
     편지 리뷰의 라이크를 담당하는 service
     """
     target_board = LetterReviewModel.objects.get(id=letter_review_id)
-    LetterReviewLikeModel.objects.create(
+    like_create = LetterReviewLikeModel.objects.create(
         user_id=user_id, letter_review=target_board
         )
-    LetterReviewModel.objects.filter(id=letter_review_id).update(
-        grade=target_board.grade + 100
+    if like_create:
+        LetterReviewModel.objects.filter(id=letter_review_id).update(
+        grade=F("grade") + 100
     )
 
 
@@ -42,11 +44,12 @@ def letter_review_like_delete_service(letter_review_id: int, user_id: int) -> No
     target_board = LetterReviewModel.objects.get(
         id=letter_review_id
         )
-    LetterReviewLikeModel.objects.filter(
+    like_delete = LetterReviewLikeModel.objects.filter(
         letter_review_id=target_board.id,
         user_id=user_id
         ).delete()
-    LetterReviewModel.objects.filter(id=letter_review_id).update(
-        grade=target_board.grade - 100
+    if like_delete:
+        LetterReviewModel.objects.filter(id=letter_review_id).update(
+        grade= F("grade")- 100
     )
 

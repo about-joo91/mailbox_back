@@ -150,9 +150,9 @@ class MainPageView(APIView):
                 "live_review": LiveReviewSerializer(
                     create_order_live_reviews, context={"request": request}, many=True
                 ).data,
-                "recommend_worry_board_list": WorryBoardSerializer(
-                    final_worryboard_list, context={"request": request}, many=True
-                ),
+                # "recommend_worry_board_list": WorryBoardSerializer(
+                #     final_worryboard_list, context={"request": request}, many=True
+                # ),
             },
             status=status.HTTP_200_OK,
         )

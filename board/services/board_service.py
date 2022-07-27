@@ -1,18 +1,28 @@
 from typing import Dict, List, Tuple
 
-from board.models import Board
 from board.models import Board as BoardModel, BoardLike as BoardLikeModel, BoardComment as BoardCommentModel
 from board.serializers import BoardSerializer, BoardCommentSerializer
+import unsmile_filtering
 
-def get_board_data(page_num : int) -> Tuple[List , int]:
+def check_is_it_clean_text(check_content):
     """
-    board 데이터를 가져오는 service
+    작성하는 데이터에 욕설이 있는지 검증하는 service 
     """
-    all_board_list = BoardModel.objects.all().order_by("-create_date")[
+    filtering_sys = unsmile_filtering.post_filtering
+    result = filtering_sys.unsmile_filter(check_content)
+    if result["label"] == "clean":
+        return True
+    return False
+
+def get_pagenation_board_data(page_num : int) -> Tuple[List , int]:
+    """
+    page_num을 통해서 board 데이터를 가져오는 service
+    """
+    paginated_board = BoardModel.objects.all().order_by("-create_date")[
         10 * (page_num - 1) : 10 + 10 * (page_num - 1)
     ]
     total_count = BoardModel.objects.count()
-    return all_board_list, total_count
+    return paginated_board, total_count
 
 def create_board_data(board_data : Dict, author_id:int) -> None:
     """
@@ -67,14 +77,14 @@ def delete_like_data(author : int, board_id : int) -> None:
 
 def get_board_comment_data(board_id : int) -> List:
     """
-    board comment 데이터의 댓글을 불러오는 service
+    해당 board의 comment 데이터의 댓글을 불러오는 service
     """
     board_comment = BoardModel.objects.filter(id=board_id)
     return board_comment
 
 def create_board_comment_data(author_id : int, board_id : int, create_data : Dict ) -> None:
     """
-    board comment 데이터를 만드는 service
+    해당 board의 comment 데이터를 만드는 service
     """
     create_data["author"] = author_id
     create_data["board"] = board_id
@@ -84,7 +94,7 @@ def create_board_comment_data(author_id : int, board_id : int, create_data : Dic
 
 def update_board_comment_data(update_data : Dict, comment_id : int) -> None:
     """
-    board comment 데이터를 수정하는 service
+    해당 board의 comment 데이터를 수정하는 service
     """
     update_comment = BoardCommentModel.objects.get(id=comment_id)
     update_comment_serializer = BoardCommentSerializer(
@@ -95,7 +105,7 @@ def update_board_comment_data(update_data : Dict, comment_id : int) -> None:
 
 def delete_board_comment_data(comment_id : int, author_id : int) -> None:
     """
-    board comment 데이터를 삭제하는 service
+    해당 board의 comment 데이터를 삭제하는 service
     """
     delete_comment = BoardCommentModel.objects.get(id=comment_id, author = author_id)
     delete_comment.delete()

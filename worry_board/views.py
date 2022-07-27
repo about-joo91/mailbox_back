@@ -9,13 +9,12 @@ from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import RequestMessageSerializer, WorryBoardSerializer
 from worry_board.services.worry_board_service import(
     delete_request_message_data,
-    get_worry_board_data,
+    get_paginated_request_message_data,
+    get_paginated_worry_board_data,
     create_worry_board_data,
-    test_is_it_clean_text,
+    check_is_it_clean_text,
     update_request_message_data,
     update_worry_board_data,
-    update_worry_board_data_check_is_mine,
-    check_is_worry_board_true,
     delete_worry_board_data,
     create_request_message_data
 )
@@ -28,12 +27,12 @@ class WorryBoardView(APIView):
     def get(self, request):
         category = int(self.request.query_params.get("category"))
         page_num = int(self.request.query_params.get("page_num"))
-        worry_board_list, total_count = get_worry_board_data(page_num, category)
-
+        paginated_worry_board, total_count = get_paginated_worry_board_data(page_num, category)
+        
         return Response(
             {
                 "boards": WorryBoardSerializer(
-                    worry_board_list, many=True, context={"request": request}
+                    paginated_worry_board, many=True, context={"request": request}
                 ).data,
                 "total_count": total_count,
             },
@@ -42,43 +41,49 @@ class WorryBoardView(APIView):
 
     def post(self, request):
         author_id = request.user.id
-        create_worry_board_data(request.data, author_id)
-        return Response(
-            {"detail": "고민 게시글을 게시하였습니다."}, status=status.HTTP_200_OK
+        for_create_data = request.data
+        if check_is_it_clean_text:
+            create_worry_board_data(for_create_data.data, author_id)
+            return Response(
+                {"detail": "고민 게시글을 게시하였습니다."}, status=status.HTTP_200_OK
+            )
+        else :
+            return Response(
+            {"detail": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+            status=status.HTTP_400_BAD_REQUEST,
         )
+
         # return Response(
         #     {"detail": "게시에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST
         # )
 
-        # return Response(
-        #     {"detail": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
-        #     status=status.HTTP_400_BAD_REQUEST,
-        # )
 
     def put(self, request, worry_board_id):
-
-        update_worry_board_data(worry_board_id, request.data)
-        return Response({"detail": "고민 게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
+        update_data = request.data
+        if check_is_it_clean_text(update_data):
+            update_worry_board_data(worry_board_id, update_data)
+            return Response({"detail": "고민 게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
+        return Response(
+            {"detail": "부적절한 내용이 담겨있어 게시글을 수정 할 수 없습니다"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
         # return Response(
         #         {"detail": "존재하지 않는 게시물입니다."},
         #         status=status.HTTP_400_BAD_REQUEST,
         #     )
         # return Response({"detail": "수정에 실패하였습니다."}, status=status.HTTP_200_OK)
         # return Response(
-        #     {"detail": "부적절한 내용이 담겨있어 게시글을 수정 할 수 없습니다"},
-        #     status=status.HTTP_400_BAD_REQUEST,
-        # )
-        # return Response(
         #         {"detail": "자기가 작성하지 않은 게시물은 수정이 불가합니다."},
         #         status=status.HTTP_400_BAD_REQUEST,
         #     )
 
     def delete(self, request, worry_board_id):
+        author_id = request.user.id
         try : 
-            delete_worry_board_data(worry_board_id, request.user.id)
+            delete_worry_board_data(worry_board_id, author_id)
             return Response({"detail": "고민 게시글이 삭제되었습니다."}, status=status.HTTP_200_OK)
-        except:
-            return Response({"detail": "삭제에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)
+        except WorryBoardModel.DoesNotExist:
+            return Response({"detail": "게시글이 존재하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RequestMessageView(APIView):
@@ -90,15 +95,12 @@ class RequestMessageView(APIView):
     def get(self, request, case):
         page_num = int(self.request.query_params.get("page_num"))
         author = request.user
-        if case == "sended":
-            request_message = RequestMessageModel.objects.filter(author=author).order_by("-create_date")
-        elif case == "recieved":
-            request_message = RequestMessageModel.objects.filter(worry_board__author=author).order_by("-create_date")
-        total_count = request_message.count()
+        paginated_request_message, total_count = get_paginated_request_message_data(page_num, case, author)
+        
         return Response(
             {
                 "request_message": RequestMessageSerializer(
-                    request_message, many=True, context={"request": request}
+                    paginated_request_message, many=True, context={"request": request}
                 ).data,
                 "total_count" : total_count
             },
@@ -111,9 +113,17 @@ class RequestMessageView(APIView):
         """
         
         author = request.user
-        create_request_message_data(request.user, worry_board_id, request.data["request_message"])  
-        return Response({"detail": "게시물 작성자에게 요청하였습니다!"}, status=status.HTTP_200_OK)
+        check_content = request.data["request_message"]
+        if check_is_it_clean_text(check_content):
+            create_request_message_data(author, worry_board_id, check_content)  
+            return Response({"detail": "게시물 작성자에게 요청하였습니다!"}, status=status.HTTP_200_OK)
         
+        else :
+            return Response(
+            {"detail": "부적절한 내용이 담겨있어 요청을 보낼 수 없습니다."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
         # return Response(
         # {"detail": "존재하지 않는 게시물입니다."},
         # status=status.HTTP_400_BAD_REQUEST)
@@ -126,13 +136,10 @@ class RequestMessageView(APIView):
         # )
         
 
-        # return Response(
-        #     {"detail": "부적절한 내용이 담겨있어 요청을 보낼 수 없습니다."},
-        #     status=status.HTTP_400_BAD_REQUEST,
-        # )
     
     def put(self, request, request_message_id):
-        update_request_message_data(request.data, request_message_id )
+        for_update_data = request.data
+        update_request_message_data(for_update_data.data, request_message_id )
         return Response({"detail": "요청 메세지가 수정되었습니다."}, status=status.HTTP_200_OK)
 
     def delete(self, request, request_message_id):

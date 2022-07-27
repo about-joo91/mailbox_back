@@ -40,10 +40,10 @@ class WorryBoardView(APIView):
         )
 
     def post(self, request):
-        author_id = request.user.id
+        author = request.user
         for_create_data = request.data
         if check_is_it_clean_text:
-            create_worry_board_data(for_create_data.data, author_id)
+            create_worry_board_data(for_create_data.data, author)
             return Response(
                 {"detail": "고민 게시글을 게시하였습니다."}, status=status.HTTP_200_OK
             )
@@ -59,9 +59,8 @@ class WorryBoardView(APIView):
 
 
     def put(self, request, worry_board_id):
-        update_data = request.data
-        if check_is_it_clean_text(update_data):
-            update_worry_board_data(worry_board_id, update_data)
+        if check_is_it_clean_text(request.data):
+            update_worry_board_data(worry_board_id, request.data)
             return Response({"detail": "고민 게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
         return Response(
             {"detail": "부적절한 내용이 담겨있어 게시글을 수정 할 수 없습니다"},
@@ -78,9 +77,9 @@ class WorryBoardView(APIView):
         #     )
 
     def delete(self, request, worry_board_id):
-        author_id = request.user.id
+        author = request.user
         try : 
-            delete_worry_board_data(worry_board_id, author_id)
+            delete_worry_board_data(worry_board_id, author)
             return Response({"detail": "고민 게시글이 삭제되었습니다."}, status=status.HTTP_200_OK)
         except WorryBoardModel.DoesNotExist:
             return Response({"detail": "게시글이 존재하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
@@ -93,7 +92,11 @@ class RequestMessageView(APIView):
     보내거나 받은 request_message를 조회하는 view
     """
     def get(self, request, case):
-        page_num = int(self.request.query_params.get("page_num"))
+        
+        try: 
+            page_num = int(self.request.query_params.get("page_num"))
+        except:
+            page_num = 1
         author = request.user
         paginated_request_message, total_count = get_paginated_request_message_data(page_num, case, author)
         

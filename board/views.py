@@ -4,14 +4,13 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
-import unsmile_filtering
 from board.models import Board as BoardModel
 from board.models import BoardComment as BoardCommentModel
 from board.models import BoardLike as BoardLikeModel
 from board.serializers import BoardCommentSerializer, BoardSerializer
 from board.services.board_service import(
     check_is_it_clean_text,
-    get_pagenation_board_data,
+    get_paginated_board_data,
     create_board_data,
     update_board_data,
     delete_board_data,
@@ -36,7 +35,7 @@ class BoardView(APIView):
 
     def get(self, request):
         page_num = int(self.request.query_params.get("page_num"))
-        paginated_board, total_count = get_pagenation_board_data(page_num)
+        paginated_board, total_count = get_paginated_board_data(page_num)
         return Response(
             {
                 "boards": BoardSerializer(
@@ -48,8 +47,7 @@ class BoardView(APIView):
         )
 
     def post(self, request):
-        create_data = request.data
-        if check_is_it_clean_text(create_data["content"]):
+        if check_is_it_clean_text(request.data["content"]):
             create_board_data(request.data, request.user.id)
             return Response({"detail": "게시글이 생성되었습니다."}, status=status.HTTP_200_OK)
         else :
@@ -59,8 +57,7 @@ class BoardView(APIView):
             )
 
     def put(self, request, board_id):
-        update_data = request.data
-        if check_is_it_clean_text(update_data["content"]):
+        if check_is_it_clean_text(request.data["content"]):
             update_board_data(board_id, request.data)
             return Response({"detail": "게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
         else:
@@ -116,11 +113,10 @@ class BorderCommentView(APIView):
         )
 
     def post(self, request):
-        create_data = request.data
-        author_id = request.user.id
+        author = request.user
         board_id = int(self.request.query_params.get("board_id"))
-        if check_is_it_clean_text(create_data["content"]):
-            create_board_comment_data(author_id, board_id, request.data)
+        if check_is_it_clean_text(request.data["content"]):
+            create_board_comment_data(author, board_id, request.data)
             return Response({"detail": "댓글이 생성되었습니다."}, status=status.HTTP_200_OK)
         else:
             return Response(
@@ -129,9 +125,8 @@ class BorderCommentView(APIView):
             )
 
     def put(self, request, comment_id):
-        update_data = request.data
-        if check_is_it_clean_text(update_data["content"]):
-            update_board_comment_data(update_data, comment_id)
+        if check_is_it_clean_text(request.data["content"]):
+            update_board_comment_data(request.data, comment_id)
             return Response({"detail": "댓글이 수정되었습니다."}, status=status.HTTP_200_OK)
         else:
             return Response(

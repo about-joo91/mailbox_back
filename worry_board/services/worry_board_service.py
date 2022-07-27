@@ -22,11 +22,11 @@ def get_paginated_worry_board_data(page_num : int, category : int) -> Tuple[List
     return paginated_worry_board, total_count
 
 
-def create_worry_board_data(create_data : Dict, author_id : int) -> None:
+def create_worry_board_data(create_data : Dict, author : str) -> None:
     """
     worry_board의 데이터를 만드는 service
     """
-    create_data["author"] = author_id
+    create_data["author"] = author.id
     create_worry_board_serializer = WorryBoardSerializer(data=create_data)
     create_worry_board_serializer.is_valid(raise_exception=True)
     create_worry_board_serializer.save()
@@ -52,11 +52,11 @@ def update_worry_board_data(worry_board_id : int , update_worry_board_data : Dic
     update_worry_board_serializer.is_valid(raise_exception=True)
     update_worry_board_serializer.save()
 
-def delete_worry_board_data(worry_board_id : int, author_id : int) -> None:
+def delete_worry_board_data(worry_board_id : int, author : str) -> None:
     """
     worry_board 데이터를 삭제하는 service
     """
-    delete_model = WorryBoardModel.objects.get(id=worry_board_id, author=author_id)
+    delete_model = WorryBoardModel.objects.get(id=worry_board_id, author=author.id)
     delete_model.delete()
 
 def get_paginated_request_message_data(page_num : int, case : str, author : str) -> Tuple[List , int]:
@@ -78,10 +78,8 @@ def create_request_message_data(author : str, worry_board_id : int, request_mess
     """
     request_message를 만드는 service
     """
-    geted_request_message = RequestMessageModel.objects.filter(author=author, worry_board_id=worry_board_id)
-    if geted_request_message:
-        return False
-    else :
+    get_request_message = RequestMessageModel.objects.filter(author=author, worry_board_id=worry_board_id).exists()
+    if get_request_message == False:
         RequestMessageModel.objects.create(
             author = author,
             worry_board_id = worry_board_id,

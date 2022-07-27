@@ -1,48 +1,98 @@
 
-from django.test.utils import CaptureQueriesContext 
-from django.db import connection 
-from django.test import TestCase
-from django.urls import reverse
-from rest_framework.test import APITestCase
-from rest_framework import status
-from user.models import User
-from user.models import UserProfile
-from worry_board.models import WorryBoard
-from main_page.serializers import MainPageDataSerializer
+from rest_framework.test import APIClient, APITestCase
+
+from user.models import User as UserModel
+from user.models import UserProfile as UserProfileModel
+from main_page.models import WorryCategory as WorryCategoryModel
+from main_page.models import Letter as LetterModel
+from main_page.models import LetterReview as LetterReviewModel
+from worry_board.models import WorryBoard as WorryBoardModel
 
 
-class TestLoginUser(APITestCase):
-    def setUp(self):
+
+class TestMaingPageAPI(APITestCase):
+    """
+    MainPageView의 API를 검증하는 클래스
+    """
+    def test_get_main_page(self) -> None:
         """
-        API setup 을 담당, 기본유저랑, 유저프로필 셋팅
+        MainPageView의 의 get 함수를 검증하는 함수
         """
-        self.data = {'username':'hajin','password':'asdfasdf'}
-        self.user = User.objects.create_user('hajin','asdfasdf')
-        user_profile = UserProfile.objects.filter(user=self.user.id)
-        info = ({
-            "user_id" : self.user.id,
-            "mongle_grade" : 100,
-            "profile_img" : "sdfsdf.com",
-        })
-        user_profile.create(**info)
-
-    def test_login(self):
+        client = APIClient()
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
+        user_profile_info ={
+            "user" : user,
+            "mongle_grade" : 100
+        }
+        user_profile = UserProfileModel.objects.create(**user_profile_info)
         
-        url = "/user/login"
-        response = self.client.post(url, self.data)
-        self.assertEqual(response.status_code, 200)
+        category_list = ["일상", "연애", "학업", "가족", "인간관계", "육아"]
+        for cate_name in category_list:
+            WorryCategoryModel.objects.create(cate_name=cate_name)
 
-    def test_get_main(self):
-        access_token = self.client.post(("/user/login"),self.data).data['access']
-        response = self.client.get(
-            path="/jin/main/",
-            HTTP_AUTHORIZATION = f"Bearer {access_token}"
+        first_cate = WorryCategoryModel.objects.get(cate_name="일상").id
+        last_cate = WorryCategoryModel.objects.get(cate_name="육아").id
+
+        for woory_board_count in range(5):
+            for cate_idx in range(first_cate, last_cate + 1):
+                WorryBoardModel.objects.create(
+                    author_id=user.id, content="test", category_id=cate_idx
+                )
+
+
+        first_worry_obj = WorryBoardModel.objects.order_by("create_date")[:1].get().id
+        last_worry_obj = WorryBoardModel.objects.order_by("-create_date")[:1].get().id
+
+        for worry_idx in range(first_worry_obj, last_worry_obj +1):
+            LetterModel.objects.create(
+                letter_author=user,
+                worryboard_id=worry_idx,
+                title="test",
+                content="test",
             )
 
-        with CaptureQueriesContext(connection) as ctx:
-            user_profile_data = MainPageDataSerializer(self.user).data
-            my_worry_get = WorryBoard.objects.select_related("letter").filter(author=self.user)
-        # self.assertEqual(response.status_code, 200)
-        self.assertEqual({"user_profile_data":user_profile_data},{"user_profile_data":user_profile_data})
+        first_letter_obj = LetterModel.objects.order_by("create_date")[:1].get().id
+        last_letter_obj = LetterModel.objects.order_by("-create_date")[:1].get().id
 
-        
+        for letter_review_count in range(first_letter_obj, last_letter_obj +1):
+            LetterReviewModel.objects.create(
+                review_author=user,
+                letter_id=letter_review_count,
+                content="test",
+                grade=100,
+            )
+
+
+        client.force_authenticate(user=user)
+        url = "/main_page/main/"
+        response = client.get(url)
+        result = response.json()
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(result["letter_count"], 30)
+        self.assertEqual(result["main_page_data_and_user_profile"]["user_profile_data"]["grade"], 100)
+        self.assertEqual(result["main_page_data_and_user_profile"]["rank_list"][0]["username"], "hajin")
+        self.assertEqual(len(result["order_by_cate_worry_list"]), 18)
+        self.assertEqual(len(result["best_review"]), 10)
+        self.assertEqual(len(result["live_review"]), 10)
+
+
+    def test_when_user_is_unauthenticated_in_get_main_page(self) -> None:
+        """
+        Mainpage 의 get 함수를 검증하는 함수
+        case : 인증되지 않은 유저일 때
+        """
+        client = APIClient()
+
+        url = "/main_page/main/"
+        response = client.get(url)
+        result = response.json()
+
+        self.assertEqual(401, response.status_code)
+        self.assertEqual(
+            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
+        )    
+    
+
+
+

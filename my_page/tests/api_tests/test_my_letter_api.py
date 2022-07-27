@@ -1,6 +1,6 @@
 from rest_framework.test import APIClient, APITestCase
 
-from jin.models import Letter, WorryCategory
+from main_page.models import Letter, WorryCategory
 from user.models import User as UserModel
 from worry_board.models import WorryBoard
 

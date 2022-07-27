@@ -52,14 +52,14 @@ class ReviewLikeView(APIView):
             )
             return Response(
                 {
-                    "message": "좋아요가 완료 되었습니다!!",
+                    "detail": "좋아요가 완료 되었습니다!!",
                 },
                 status=status.HTTP_200_OK,
             )
         except django.db.utils.IntegrityError:
             return Response(
                 {
-                    "message": "좋아요를 이미 누르셨습니다!!",
+                    "detail": "좋아요를 이미 누르셨습니다!!",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -70,7 +70,7 @@ class ReviewLikeView(APIView):
             )
         return Response(
             {
-                "message": "좋아요가 취소 되었습니다!!",
+                "detail": "좋아요가 취소 되었습니다!!",
             },
             status=status.HTTP_200_OK,
         )
@@ -86,7 +86,6 @@ class LikeisGet(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
-
         return Response(
             {
                 "best_review": BestReviewSerializer(
@@ -111,14 +110,14 @@ class MainPageView(APIView):
     def get(self, request):
         cur_user = request.user
 
-        user_letters = LetterModel.objects.filter(letter_author=cur_user).order_by(
-            "-create_date"
-        )[:1]
-        latest_worryboard_id = [obj.worryboard.id for obj in user_letters][0]
-        recomendation_sys = recommender.recommend_worryboard
-        final_worryboard_list = recomendation_sys.recommend_worries(
-            latest_worryboard_id
-        )
+        # user_letters = LetterModel.objects.filter(letter_author=cur_user).order_by(
+        #     "-create_date"
+        # )[:1]
+        # latest_worryboard_id = [obj.worryboard.id for obj in user_letters][0]
+        # recomendation_sys = recommender.recommend_worryboard
+        # final_worryboard_list = recomendation_sys.recommend_worries(
+        #     latest_worryboard_id
+        # )
         not_read_my_letter_count = my_letter_count(request.user.id)
 
         worry_categories = WorryCategoryModel.objects.prefetch_related(
@@ -136,7 +135,7 @@ class MainPageView(APIView):
         return Response(
             {
                 "letter_count": not_read_my_letter_count,
-                "user_profile_data": user_profile_data,
+                "main_page_data_and_user_profile": user_profile_data,
                 "order_by_cate_worry_list": WorryBoardSerializer(order_by_cate_worry_list,context={"request": request},many=True).data,
                 "best_review": BestReviewSerializer(
                     grade_order_best_reviews, context={"request": request}, many=True
@@ -164,7 +163,7 @@ class LetterView(APIView):
             result = filtering_sys.unsmile_filter(data_content[900 * i : 900 * (i + 1)])
             if result["label"] != "clean":
                 return Response(
-                    {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                    {"detail": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             break

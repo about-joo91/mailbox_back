@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from jin.models import WorryCategory as WorryCategoryModel
+from main_page.models import WorryCategory as WorryCategoryModel
 from user.models import UserProfile as UserProfileModel
 
 

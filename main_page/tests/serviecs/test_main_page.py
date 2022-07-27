@@ -1,13 +1,13 @@
 from django.test import TestCase
 
-from jin.models import Letter as LetterModel
-from jin.models import LetterReview as LetterReviewModel
-from jin.models import WorryCategory as WorryCategoryModel
-from jin.services.main_gage_service import (
+from main_page.models import Letter as LetterModel
+from main_page.models import LetterReview as LetterReviewModel
+from main_page.models import WorryCategory as WorryCategoryModel
+from main_page.services.main_gage_service import (
     best_review_list_service,
     live_review_list_service,
-    worry_obj_my_letter,
     worry_worryboard_union,
+    my_letter_count
 )
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
@@ -50,20 +50,12 @@ class TestMainPageServices(TestCase):
             content="test",
         )
 
-        my_worrys = worry_obj_my_letter(user.id)
-
-        letter_count = 0
-        for letter_get in my_worrys:
-            try:
-                if letter_get.letter.is_read == False:
-                    letter_count += 1
-            except WorryBoardModel.letter.RelatedObjectDoesNotExist:
-                break
+            
         self.assertEqual("일상", WorryCategoryModel.objects.get(id=first_cate).cate_name)
         self.assertEqual(
             test_user.id, LetterModel.objects.get(id=letter_obj1.id).letter_author.id
         )
-        self.assertEqual(2, letter_count)
+        self.assertEqual(2, my_letter_count(user.id))
 
     def test_when_none_user_letter_count_service(self) -> None:
         """
@@ -88,7 +80,7 @@ class TestMainPageServices(TestCase):
             author=user, content="ttttt", category_id=last_cate
         )
 
-        letter_obj1 = LetterModel.objects.create(
+        LetterModel.objects.create(
             letter_author_id=test_user.id,
             worryboard_id=worry_obj1.id,
             title="test",
@@ -101,10 +93,8 @@ class TestMainPageServices(TestCase):
             content="test",
         )
 
-        fake_user = UserModel.objects.filter(id=9999)
-
         with self.assertRaises(UserModel.DoesNotExist):
-            worry_obj_my_letter(fake_user.get().id)
+            my_letter_count(UserModel.objects.get(id=9999).id)
 
     def test_worryboard_union_service(self) -> None:
         """
@@ -126,20 +116,30 @@ class TestMainPageServices(TestCase):
                     author_id=user.id, content="ttttt", category_id=cate_idx
                 )
 
-        woory_categorys = WorryCategoryModel.objects.prefetch_related(
+        worry_categories = WorryCategoryModel.objects.prefetch_related(
             "worryboard_set"
         ).all()
-        worry_worryboard_union(woory_categorys)
+        worry_worryboard_union(worry_categories)
 
         test_board = WorryBoardModel.objects.filter(category_id=first_cate).order_by(
             "-create_date"
         )[:3]
 
-        self.assertEqual(18, worry_worryboard_union(woory_categorys).count())
-        for i in range(test_board.count()):
-            self.assertEqual(
-                True, worry_worryboard_union(woory_categorys)[i] == test_board[i]
-            )
+        count = 0
+        for worry_union_idx in worry_worryboard_union(worry_categories):
+            if worry_union_idx in test_board:
+                count += 1
+
+        self.assertEqual(18, worry_worryboard_union(worry_categories).count())
+        self.assertEqual(3, count)
+
+        # for i in range(test_board.count()):
+
+
+
+
+
+
 
     def test_when_not_queryset_worryboard_union_service(self) -> None:
         """
@@ -162,12 +162,12 @@ class TestMainPageServices(TestCase):
                     author_id=user.id, content="ttttt", category_id=cate_idx
                 )
 
-        worry_categorys = WorryCategoryModel.objects.prefetch_related(
+        worry_categories = WorryCategoryModel.objects.prefetch_related(
             "worryboard_set"
         ).all()
 
         with self.assertRaises(WorryCategoryModel.MultipleObjectsReturned):
-            worry_worryboard_union(worry_categorys.get())
+            worry_worryboard_union(worry_categories.get())
 
     def test_live_reveiw_list_service(self) -> None:
         """
@@ -211,11 +211,11 @@ class TestMainPageServices(TestCase):
                 grade=50,
             )
 
-        live_review_list_service()
+        create_order_live_reviews = live_review_list_service()
         live_reivew = LetterReviewModel.objects.order_by("-create_date")[:10]
-        self.assertEqual(10, live_review_list_service().count())
-        self.assertEqual(True, live_reivew[0] == live_review_list_service()[0])
-        self.assertEqual(50, live_review_list_service()[0].grade)
+        self.assertEqual(10, create_order_live_reviews.count())
+        self.assertEqual(True, live_reivew[0] == create_order_live_reviews[0])
+        self.assertEqual(50, create_order_live_reviews[0].grade)
 
     def test_best_reveiw_list_service(self) -> None:
         """
@@ -276,12 +276,12 @@ class TestMainPageServices(TestCase):
             grade=200,
         )
 
-        best_review_list_service()
+        grade_order_best_reviews= best_review_list_service()
         best_review = LetterReviewModel.objects.order_by("-grade")[:10]
 
-        self.assertEqual(10, best_review_list_service().count())
-        self.assertEqual(True, best_review[0] == best_review_list_service()[0])
-        self.assertEqual(200, best_review_list_service()[0].grade)
+        self.assertEqual(10, grade_order_best_reviews.count())
+        self.assertEqual(True, best_review[0] == grade_order_best_reviews[0])
+        self.assertEqual(200, grade_order_best_reviews[0].grade)
         self.assertEqual(
-            100, best_review_list_service()[len(best_review_list_service()) - 1].grade
+            100, grade_order_best_reviews[len(grade_order_best_reviews) - 1].grade
         )

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from jin.models import Letter as LetterModel
+from main_page.models import Letter as LetterModel
 
 
 class LetterSerializer(serializers.ModelSerializer):

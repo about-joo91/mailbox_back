@@ -67,7 +67,7 @@ class UserProfile(models.Model):
     mongle_grade = models.IntegerField(default=0)
     fullname = models.TextField(default="")
     categories = models.ManyToManyField(
-        "jin.WorryCategory", through="UserProfileCategory"
+        "main_page.WorryCategory", through="UserProfileCategory"
     )
     profile_img = models.URLField(
         default="https://user-images.githubusercontent.com/55477835/178631292-f381c6e2-2541-4a2c-ba67-b5bb4369e3d0.jpeg"
@@ -77,7 +77,7 @@ class UserProfile(models.Model):
 class UserProfileCategory(models.Model):
     user_profile = models.ForeignKey("UserProfile", on_delete=models.CASCADE)
     category = models.ForeignKey(
-        "jin.WorryCategory", on_delete=models.SET_NULL, null=True
+        "main_page.WorryCategory", on_delete=models.SET_NULL, null=True
     )
 
 

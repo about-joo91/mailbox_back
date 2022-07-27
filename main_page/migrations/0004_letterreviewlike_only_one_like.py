@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("jin", "0003_rename_review_id_letterreviewlike_letter_review_and_more"),
+        ("main_page", "0003_rename_review_id_letterreviewlike_letter_review_and_more"),
     ]
 
     operations = [

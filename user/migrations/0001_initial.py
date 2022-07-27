@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('jin', '0001_initial'),
+        ('main_page', '0001_initial'),
     ]
 
     operations = [
@@ -46,14 +46,14 @@ class Migration(migrations.Migration):
             name='UserProfileCategory',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('category', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='jin.worrycategory')),
+                ('category', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='main_page.worrycategory')),
                 ('user_profile', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='user.userprofile')),
             ],
         ),
         migrations.AddField(
             model_name='userprofile',
             name='categories',
-            field=models.ManyToManyField(through='user.UserProfileCategory', to='jin.worrycategory'),
+            field=models.ManyToManyField(through='user.UserProfileCategory', to='main_page.worrycategory'),
         ),
         migrations.AddField(
             model_name='userprofile',

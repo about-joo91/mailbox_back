@@ -1,7 +1,7 @@
 from django.db import IntegrityError
 from django.test import TestCase
 
-from jin.models import WorryCategory
+from main_page.models import WorryCategory
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
 from user.services.user_profile_category_service import (

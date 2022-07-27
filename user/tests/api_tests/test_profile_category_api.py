@@ -2,7 +2,7 @@ import json
 
 from rest_framework.test import APIClient, APITestCase
 
-from jin.models import WorryCategory
+from main_page.models import WorryCategory
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
 from user.services.user_profile_category_service import create_category_of_profile

@@ -30,7 +30,7 @@ class MainPageDataSerializer(serializers.ModelSerializer):
     user_profile_data = serializers.SerializerMethodField()
 
     def get_rank_list(self, obj):
-        user_profile_get = (
+        grade_in_order_user_list = (
             UserModel.objects.select_related("userprofile")
             .all()
             .order_by("-monglegrade")[:10]
@@ -40,17 +40,17 @@ class MainPageDataSerializer(serializers.ModelSerializer):
                 "username": rank_list.username,
                 "profile_img": rank_list.userprofile.profile_img,
             }
-            for rank_list in user_profile_get
+            for rank_list in grade_in_order_user_list
         ]
         return rank_list
 
     def get_user_profile_data(self, obj):
-        user_profile_get = UserModel.objects.select_related("userprofile").get(
+        my_user_profile = UserModel.objects.select_related("userprofile").get(
             id=obj.id
         )
         return {
-            "grade": user_profile_get.userprofile.mongle_grade,
-            "profile_img": user_profile_get.userprofile.profile_img,
+            "grade": my_user_profile.userprofile.mongle_grade,
+            "profile_img": my_user_profile.userprofile.profile_img,
         }
 
     class Meta:
@@ -66,15 +66,14 @@ class BestReviewSerializer(serializers.ModelSerializer):
     def get_is_liked(self, obj):
         cur_user = self.context["request"].user
 
-        return bool(
-            LetterreviewLikeModel.objects.filter(user=cur_user, letter_review=obj)
-        )
+        return LetterreviewLikeModel.objects.filter(user=cur_user, letter_review=obj).exists()
+        
 
     def get_review_id(self, obj):
         return obj.id
 
     def get_like_count(self, obj):
-        return LetterreviewLikeModel.objects.filter(letter_review=obj).count()
+        return obj.letterreviewlike_set.filter(letter_review=obj).count()
 
     class Meta:
         model = LetterReviewModel
@@ -96,15 +95,14 @@ class LiveReviewSerializer(serializers.ModelSerializer):
 
     def get_is_liked(self, obj):
         cur_user = self.context["request"].user
-        return bool(
-            LetterreviewLikeModel.objects.filter(user=cur_user, letter_review=obj)
-        )
+        return LetterreviewLikeModel.objects.filter(user=cur_user, letter_review=obj).exists()
+
 
     def get_review_id(self, obj):
         return obj.id
 
     def get_like_count(self, obj):
-        return LetterreviewLikeModel.objects.filter(letter_review=obj).count()
+        return obj.letterreviewlike_set.filter(letter_review=obj).count()
 
     class Meta:
         model = LetterReviewModel

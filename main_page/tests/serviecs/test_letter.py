@@ -1,16 +1,17 @@
 from django.db import IntegrityError
 from django.test import TestCase
 
-from jin.models import Letter as LetterModel
-from jin.models import LetterReview as letterReviewModel
-from jin.models import LetterReviewLike as letterReivewLikeModel
-from jin.models import WorryCategory as WorryCategoryModel
-from jin.services.letter_service import (
+from main_page.models import Letter as LetterModel
+from main_page.models import LetterReview as letterReviewModel
+from main_page.models import LetterReviewLike as letterReivewLikeModel
+from main_page.models import WorryCategory as WorryCategoryModel
+from main_page.services.letter_service import (
     letter_is_read_service,
     letter_post_service,
     letter_review_like_service,
+
 )
-from jin.services.main_gage_service import worry_obj_my_letter
+from main_page.services.main_gage_service import my_letter_count
 from user.models import User as UserModel
 from worry_board.models import WorryBoard as WorryBoardModel
 
@@ -32,18 +33,18 @@ class TestLetterServices(TestCase):
             "title": "제목입니다",
             "content": "내용입니다",
             "worry_board_id": worry_obj.id,
+            "letter_author" : author.id
         }
-        request_data["letter_author"] = author.id
-        worry_board_id = request_data["worry_board_id"]
 
-        letter_post_service(worry_board_id=worry_board_id, request_data=request_data)
+
+        letter_post_service(worry_board_id=worry_obj.id, request_data=request_data)
 
         self.assertEqual(
             author.id,
             LetterModel.objects.get(letter_author_id=author.id).letter_author.id,
         )
         self.assertEqual(
-            worry_board_id,
+            worry_obj.id,
             LetterModel.objects.get(letter_author_id=author.id).worryboard.id,
         )
         self.assertEqual(
@@ -126,16 +127,10 @@ class TestLetterServices(TestCase):
             content="tist",
         )
 
+
         letter_is_read_service(letter_id=letter_obj.id)
-        my_worrys = worry_obj_my_letter(user.id)
-        letter_count = 0
-        for letter_get in my_worrys:
-            try:
-                if letter_get.letter.is_read == False:
-                    letter_count += 1
-            except WorryBoardModel.letter.RelatedObjectDoesNotExist:
-                break
-        self.assertEqual(1, letter_count)
+
+        self.assertEqual(0, my_letter_count(user_id=user.id))
 
     def test_when_letter_does_not_exist__letter_is_read_service(self) -> None:
         """
@@ -205,11 +200,10 @@ class TestLetterServices(TestCase):
             title="test",
             content="tist",
         )
-        fake_letter_review_obj = letterReviewModel.objects.filter(id=9999)
 
         with self.assertRaises(letterReviewModel.DoesNotExist):
             letter_review_like_service(
-                letter_review_id=fake_letter_review_obj.get().id, user_id=user.id
+                letter_review_id=9999, user_id=user.id
             )
 
     def test_letter_review_like_service(self) -> None:
@@ -233,9 +227,7 @@ class TestLetterServices(TestCase):
             review_author_id=user.id, letter_id=letter_obj.id, grade=100, content="test"
         )
 
-        fake_user = UserModel.objects.filter(id=9999)
-
-        with self.assertRaises(UserModel.DoesNotExist):
+        with self.assertRaises(IntegrityError):
             letter_review_like_service(
-                letter_review_id=letter_review_obj.id, user_id=fake_user.get().id
+                letter_review_id=letter_review_obj.id, user_id=9999
             )

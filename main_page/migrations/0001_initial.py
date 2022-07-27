@@ -42,7 +42,7 @@ class Migration(migrations.Migration):
             name='LetterReviewLike',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('review_id', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='jin.letterreview')),
+                ('review_id', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='main_page.letterreview')),
             ],
         ),
     ]

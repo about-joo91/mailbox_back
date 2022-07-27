@@ -3,7 +3,7 @@ from apscheduler.triggers.cron import CronTrigger
 from django.conf import settings
 from django_apscheduler.jobstores import register_events
 
-from user.services.report_service import get_reported_user_over_condition_cnt
+from user.services.report_service import get_reported_user_over_condition
 
 from .views import db_to_csv
 
@@ -17,7 +17,7 @@ def start():
         db_to_csv()
 
     scheduler.add_job(
-        get_reported_user_over_condition_cnt,
+        get_reported_user_over_condition,
         trigger=CronTrigger(day_of_week="sun", hour="20", minute="06"),
         max_instances=1,
         name="check_reported_user",

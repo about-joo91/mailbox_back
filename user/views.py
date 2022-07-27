@@ -38,7 +38,7 @@ class UserView(APIView):
 
     def post(self, request: Request) -> Response:
         post_user_signup_data(request.data)
-        return Response({"message": "회원가입 성공하였습니다"}, status=status.HTTP_200_OK)
+        return Response({"detail": "회원가입을 성공하였습니다"}, status=status.HTTP_200_OK)
 
 
 class UserProfileView(APIView):

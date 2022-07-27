@@ -1,12 +1,7 @@
-# from django.db import connection
-# from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
-from rest_framework import serializers
 from rest_framework.test import APITestCase
 
 from user.models import User as UserModel
-
-# from user.services.user_signup_login_service import post_user_signup_data
 
 
 class TestUserRegistrationAPI(APITestCase):
@@ -24,13 +19,8 @@ class TestUserRegistrationAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["non_field_errors"][0], "아이디는 4자 이상 입력!")
+        self.assertEqual(result["non_field_errors"][0], "아이디는 4자 이상 입력해주세요.")
 
-
-        # with self.assertRaises(serializers.ValidationError):
-        #     UserModel.objects.create(
-        #         username=user_data["username"], nickname=user_data["nickname"]
-        #     )
 
     def test_nickname_blank_check(self) -> None:
         """
@@ -40,16 +30,10 @@ class TestUserRegistrationAPI(APITestCase):
         user_data = {"username": "won1", "password": "qwer1234%", "nickname": ""}
         response = self.client.post(url, user_data)
         result = response.json()
-        print(response)
-        print(result)
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(result["nickname"][0], "이 필드는 blank일 수 없습니다.")
 
-        # with self.assertRaises(serializers.ValidationError):
-        #     UserModel.objects.create(
-        #         username=user_data["username"], nickname=user_data["nickname"]
-        #     )
 
     def test_nickname_duplicate_check(self) -> None:
         """
@@ -59,13 +43,11 @@ class TestUserRegistrationAPI(APITestCase):
         UserModel.objects.create(username="joo", nickname="won")
         user_data = {"username": "won1", "password": "qwer1234%", "nickname": "won"}
         response = self.client.post(url, user_data)
+        result = response.json()
 
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(result["non_field_errors"][0], "중복된 닉네임이 존재합니다.")
 
-        # with self.assertRaises(serializers.ValidationError):
-        #     UserModel.objects.create(
-        #         username=user_data["username"], nickname=user_data["nickname"]
-        #     )
 
     def test_password_under_8_char_check(self) -> None:
         """
@@ -74,15 +56,12 @@ class TestUserRegistrationAPI(APITestCase):
         url = reverse("user_view")
         user_data = {"username": "won1", "password": "qwer123", "nickname": "won1122"}
         response = self.client.post(url, user_data)
+        result = response.json()
+
 
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(result["non_field_errors"][0], "비밀번호는 8자 이상 특수문자 포함해 입력해주세요")
 
-        # with self.assertRaises(serializers.ValidationError):
-        #     UserModel.objects.create(
-        #         username=user_data["username"],
-        #         nickname=user_data["nickname"],
-        #         password=user_data["password"],
-        #     )
 
     def test_password_including_special_char_check(self) -> None:
         """
@@ -91,5 +70,8 @@ class TestUserRegistrationAPI(APITestCase):
         url = reverse("user_view")
         user_data = {"username": "won1", "password": "qwer1234", "nickname": "won1122"}
         response = self.client.post(url, user_data)
+        result = response.json()
+
 
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(result["non_field_errors"][0], "비밀번호는 8자 이상 특수문자 포함해 입력해주세요")

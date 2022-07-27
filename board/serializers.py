@@ -5,6 +5,7 @@ from board.models import BoardComment as BoardCommentModel
 
 
 class BoardSerializer(serializers.ModelSerializer):
+    
     like_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     is_board_writer = serializers.SerializerMethodField()

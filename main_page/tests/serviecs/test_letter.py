@@ -16,7 +16,7 @@ from user.models import User as UserModel
 from worry_board.models import WorryBoard as WorryBoardModel
 
 
-class TestLetterServices(TestCase):
+class TestLoginUser(TestCase):
     def test_letter_post_service(self) -> None:
         """
         편지 보내는 함수 검증
@@ -69,11 +69,10 @@ class TestLetterServices(TestCase):
             "content": "내용입니다",
         }
         request_data["letter_author"] = author.id
-        fake_worry_board_id = WorryBoardModel.objects.filter(id=9999)
 
         with self.assertRaises(WorryBoardModel.DoesNotExist):
             letter_post_service(
-                worry_board_id=fake_worry_board_id.get().id, request_data=request_data
+                worry_board_id=9999, request_data=request_data
             )
 
     def test_when_letter_overlap_post_service(self) -> None:
@@ -183,7 +182,7 @@ class TestLetterServices(TestCase):
             user.id, letterReivewLikeModel.objects.get(user_id=user.id).user.id
         )
 
-    def test_letter_review_like_service(self) -> None:
+    def test_then_not_valid_letter_review_like_service(self) -> None:
         """
         편지 리뷰 좋아요 함수 검증
         case : 편지 리뷰가  유효하지 않을 경우
@@ -206,7 +205,7 @@ class TestLetterServices(TestCase):
                 letter_review_id=9999, user_id=user.id
             )
 
-    def test_letter_review_like_service(self) -> None:
+    def test_thne_like_user_not_valid_letter_review_like_service(self) -> None:
         """
         편지 리뷰 좋아요 함수 검증
         case : 좋아요를 누른 유저가 유효하지 않을 경우

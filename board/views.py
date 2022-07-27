@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -22,6 +23,7 @@ from board.services.board_service import(
     delete_board_comment_data
 )
 
+from mail_box.permissions import IsAuthorOrReadonly
 # Create your views here.
 
 
@@ -32,6 +34,7 @@ class BoardView(APIView):
 
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
+
 
     def get(self, request):
         try:
@@ -47,7 +50,7 @@ class BoardView(APIView):
                 status=status.HTTP_200_OK,
             )
         except TypeError:
-            return Response({"detail": "빈파라미터"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "게시판을 조회할 수 없습니다. 다시 시도해주세요."}, status=status.HTTP_404_NOT_FOUND)
         
     def post(self, request):
         if check_is_it_clean_text(request.data["content"]):

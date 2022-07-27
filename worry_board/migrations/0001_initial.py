@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('jin', '0001_initial'),
+        ('main_page', '0001_initial'),
     ]
 
     operations = [
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('content', models.TextField(max_length=90, verbose_name='내용')),
                 ('create_date', models.DateTimeField(auto_now_add=True)),
                 ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='jin.worrycategory')),
+                ('category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='main_page.worrycategory')),
             ],
         ),
         migrations.CreateModel(

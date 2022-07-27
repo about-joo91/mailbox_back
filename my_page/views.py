@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from jin.models import Letter as LetterModel
+from main_page.models import Letter as LetterModel
 from my_page.services.my_page_service import get_letter_data_by_user
 
 # Create your views here.

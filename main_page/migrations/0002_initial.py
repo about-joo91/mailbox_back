@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('worry_board', '0001_initial'),
-        ('jin', '0001_initial'),
+        ('main_page', '0001_initial'),
     ]
 
     operations = [
@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='letterreview',
             name='letter',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='jin.letter'),
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='main_page.letter'),
         ),
         migrations.AddField(
             model_name='letterreview',

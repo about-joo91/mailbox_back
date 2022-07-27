@@ -2,7 +2,7 @@ from typing import Dict
 
 from django.db.models import Q
 
-from jin.models import Letter as LetterModel
+from main_page.models import Letter as LetterModel
 from my_page.serializers import LetterSerializer
 
 

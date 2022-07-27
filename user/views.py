@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from jin.models import WorryCategory
+from main_page.models import WorryCategory
 from user.services.report_service import create_user_report
 from user.services.user_profile_category_service import (
     create_category_of_profile,

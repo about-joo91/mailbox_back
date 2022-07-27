@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     "django_apscheduler",
     "my_page",
     "board",
-    "jin",
+    "main_page",
     "worry_board",
     "user",
     "recommendation",

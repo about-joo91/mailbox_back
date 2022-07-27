@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.test import TestCase
 
-from jin.models import Letter, WorryCategory
+from main_page.models import Letter, WorryCategory
 from my_page.services.my_page_service import get_letter_data_by_user
 from user.models import User
 from worry_board.models import WorryBoard

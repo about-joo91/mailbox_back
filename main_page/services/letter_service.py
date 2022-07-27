@@ -1,18 +1,30 @@
 from django.db.models import F
+
 from main_page.models import Letter as LetterModel
 from main_page.models import LetterReview as LetterReviewModel
 from main_page.models import LetterReviewLike as LetterReviewLikeModel
 from main_page.serializers import LetterSerilaizer
+from user.models import User as UserModel
 from worry_board.models import WorryBoard as WorryBoardModel
 
 
-def letter_post_service(worry_board_id: int, request_data: dict) -> None:
+def letter_post_service(letter_author: UserModel, request_data: dict) -> None:
     """
     편지 보내는 기능을 담당하는 service
     """
+    worry_board_id = request_data.pop("worry_board_id")
+    worry_board = WorryBoardModel.objects.select_related("author").get(
+        id=worry_board_id
+    )
     letterserialzier = LetterSerilaizer(data=request_data)
     letterserialzier.is_valid(raise_exception=True)
-    letterserialzier.save(worryboard=WorryBoardModel.objects.get(id=worry_board_id))
+    letterserialzier.save(worryboard=worry_board, letter_author=letter_author)
+
+    letter_author.sent_letter_cnt = F("sent_letter_cnt") + 1
+    letter_author.save()
+
+    worry_board.author.received_letter_cnt = F("received_letter_cnt") + 1
+    worry_board.author.save()
 
 
 def letter_is_read_service(letter_id) -> None:
@@ -30,26 +42,22 @@ def letter_review_like_service(letter_review_id: int, user_id: int) -> None:
     target_board = LetterReviewModel.objects.get(id=letter_review_id)
     like_create = LetterReviewLikeModel.objects.create(
         user_id=user_id, letter_review=target_board
-        )
+    )
     if like_create:
         LetterReviewModel.objects.filter(id=letter_review_id).update(
-        grade=F("grade") + 100
-    )
+            grade=F("grade") + 100
+        )
 
 
 def letter_review_like_delete_service(letter_review_id: int, user_id: int) -> None:
     """
     편지 리뷰의 라이크 삭제 를 담당하는 service
     """
-    target_board = LetterReviewModel.objects.get(
-        id=letter_review_id
-        )
+    target_board = LetterReviewModel.objects.get(id=letter_review_id)
     like_delete = LetterReviewLikeModel.objects.filter(
-        letter_review_id=target_board.id,
-        user_id=user_id
-        ).delete()
+        letter_review_id=target_board.id, user_id=user_id
+    ).delete()
     if like_delete:
         LetterReviewModel.objects.filter(id=letter_review_id).update(
-        grade= F("grade")- 100
-    )
-
+            grade=F("grade") - 100
+        )

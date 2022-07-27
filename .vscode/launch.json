@@ -12,7 +12,7 @@
             "args": [
                 "test",
                 "${workspaceFolder}/user/tests"
-
+                
             ],
             "django": true,
             "justMyCode": true

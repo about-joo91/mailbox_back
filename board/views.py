@@ -34,7 +34,7 @@ class BoardView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-
+        
     def post(self, request):
         filtering_sys = unsmile_filtering.post_filtering
         result = filtering_sys.unsmile_filter(request.data["content"])

@@ -6,16 +6,20 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('board', '0002_initial'),
+        ("board", "0002_initial"),
     ]
 
     operations = [
         migrations.AddConstraint(
-            model_name='board',
-            constraint=models.UniqueConstraint(fields=('author', 'id'), name='user_only_one_board'),
+            model_name="board",
+            constraint=models.UniqueConstraint(
+                fields=("author", "id"), name="user_only_one_board"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='boardlike',
-            constraint=models.UniqueConstraint(fields=('author', 'board'), name='user_only_one_board_like'),
+            model_name="boardlike",
+            constraint=models.UniqueConstraint(
+                fields=("author", "board"), name="user_only_one_board_like"
+            ),
         ),
     ]

@@ -17,6 +17,7 @@ def my_letter_count(user_id: int) -> list[dict]:
             break
     return letter_count
 
+
 def worry_worryboard_union(worry_categorys: list[dict]) -> list[dict]:
     """
     메인페이지 카테고리별로 3개씩 게시물을 가져오기 위한 service

@@ -1,12 +1,15 @@
 from typing import Dict, List, Tuple
 
-from board.models import Board as BoardModel, BoardLike as BoardLikeModel, BoardComment as BoardCommentModel
-from board.serializers import BoardSerializer, BoardCommentSerializer
 import unsmile_filtering
+from board.models import Board as BoardModel
+from board.models import BoardComment as BoardCommentModel
+from board.models import BoardLike as BoardLikeModel
+from board.serializers import BoardCommentSerializer, BoardSerializer
+
 
 def check_is_it_clean_text(check_content):
     """
-    작성하는 데이터에 욕설이 있는지 검증하는 service 
+    작성하는 데이터에 욕설이 있는지 검증하는 service
     """
     filtering_sys = unsmile_filtering.post_filtering
     result = filtering_sys.unsmile_filter(check_content)
@@ -14,7 +17,8 @@ def check_is_it_clean_text(check_content):
         return True
     return False
 
-def get_paginated_board_data(page_num : int) -> Tuple[List , int]:
+
+def get_paginated_board_data(page_num: int) -> Tuple[List, int]:
     """
     page_num을 통해서 board 데이터를 가져오는 service
     """
@@ -24,17 +28,18 @@ def get_paginated_board_data(page_num : int) -> Tuple[List , int]:
     total_count = BoardModel.objects.count()
     return paginated_board, total_count
 
-def create_board_data(board_data : Dict, author_id:int) -> None:
+
+def create_board_data(board_data: Dict, author_id: int) -> None:
     """
     board 데이터를 작성하는 service
     """
-    board_data['author'] = author_id
+    board_data["author"] = author_id
     create_board_serializer = BoardSerializer(data=board_data)
     create_board_serializer.is_valid(raise_exception=True)
     create_board_serializer.save()
 
 
-def update_board_data(board_id : int , update_data : Dict) -> None:
+def update_board_data(board_id: int, update_data: Dict) -> None:
     """
     board 데이터를 업데이트 하는 service
     """
@@ -46,43 +51,40 @@ def update_board_data(board_id : int , update_data : Dict) -> None:
     update_board_serializer.save()
 
 
-
-def delete_board_data(board_id : int, author_id : int) -> None:
+def delete_board_data(board_id: int, author_id: int) -> None:
     """
     board 데이터를 삭제하는 service
     """
     delete_model = BoardModel.objects.get(id=board_id, author=author_id)
     delete_model.delete()
 
-def make_like_data(author : int, board_id : int) -> None:
+
+def make_like_data(author: int, board_id: int) -> None:
     """
     like 데이터를 만드는 service
     """
     target_board = BoardModel.objects.get(id=board_id)
-    like_board= BoardLikeModel.objects.create(
-        author=author, board=target_board
-    )
+    like_board = BoardLikeModel.objects.create(author=author, board=target_board)
 
 
-def delete_like_data(author : int, board_id : int) -> None:
+def delete_like_data(author: int, board_id: int) -> None:
     """
     like 데이터를 삭제하는 service
     """
     target_board = BoardModel.objects.get(id=board_id)
-    liked_board= BoardLikeModel.objects.get(
-        author=author, board=target_board
-    )
+    liked_board = BoardLikeModel.objects.get(author=author, board=target_board)
     liked_board.delete()
 
 
-def get_board_comment_data(board_id : int) -> List:
+def get_board_comment_data(board_id: int) -> List:
     """
     해당 board의 comment 데이터의 댓글을 불러오는 service
     """
     board_comment = BoardModel.objects.filter(id=board_id)
     return board_comment
 
-def create_board_comment_data(author : str, board_id : int, create_data : Dict ) -> None:
+
+def create_board_comment_data(author: str, board_id: int, create_data: Dict) -> None:
     """
     해당 board의 comment 데이터를 만드는 service
     """
@@ -92,7 +94,8 @@ def create_board_comment_data(author : str, board_id : int, create_data : Dict )
     create_board_comment_serializer.is_valid(raise_exception=True)
     create_board_comment_serializer.save()
 
-def update_board_comment_data(update_data : Dict, comment_id : int) -> None:
+
+def update_board_comment_data(update_data: Dict, comment_id: int) -> None:
     """
     해당 board의 comment 데이터를 수정하는 service
     """
@@ -103,10 +106,10 @@ def update_board_comment_data(update_data : Dict, comment_id : int) -> None:
     update_comment_serializer.is_valid(raise_exception=True)
     update_comment_serializer.save()
 
-def delete_board_comment_data(comment_id : int, author_id : int) -> None:
+
+def delete_board_comment_data(comment_id: int, author_id: int) -> None:
     """
     해당 board의 comment 데이터를 삭제하는 service
     """
-    delete_comment = BoardCommentModel.objects.get(id=comment_id, author = author_id)
+    delete_comment = BoardCommentModel.objects.get(id=comment_id, author=author_id)
     delete_comment.delete()
-

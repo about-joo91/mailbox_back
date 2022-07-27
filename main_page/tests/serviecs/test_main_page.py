@@ -6,8 +6,8 @@ from main_page.models import WorryCategory as WorryCategoryModel
 from main_page.services.main_gage_service import (
     best_review_list_service,
     live_review_list_service,
+    my_letter_count,
     worry_worryboard_union,
-    my_letter_count
 )
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
@@ -50,7 +50,6 @@ class TestMainPageServices(TestCase):
             content="test",
         )
 
-            
         self.assertEqual("일상", WorryCategoryModel.objects.get(id=first_cate).cate_name)
         self.assertEqual(
             test_user.id, LetterModel.objects.get(id=letter_obj1.id).letter_author.id
@@ -132,8 +131,6 @@ class TestMainPageServices(TestCase):
 
         self.assertEqual(18, worry_worryboard_union(worry_categories).count())
         self.assertEqual(3, count)
-
-
 
     def test_when_not_queryset_worryboard_union_service(self) -> None:
         """
@@ -270,7 +267,7 @@ class TestMainPageServices(TestCase):
             grade=200,
         )
 
-        grade_order_best_reviews= best_review_list_service()
+        grade_order_best_reviews = best_review_list_service()
         best_review = LetterReviewModel.objects.order_by("-grade")[:10]
 
         self.assertEqual(10, grade_order_best_reviews.count())

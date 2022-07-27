@@ -9,7 +9,6 @@ from main_page.services.letter_service import (
     letter_is_read_service,
     letter_post_service,
     letter_review_like_service,
-
 )
 from main_page.services.main_gage_service import my_letter_count
 from user.models import User as UserModel
@@ -33,9 +32,8 @@ class TestLoginUser(TestCase):
             "title": "제목입니다",
             "content": "내용입니다",
             "worry_board_id": worry_obj.id,
-            "letter_author" : author.id
+            "letter_author": author.id,
         }
-
 
         letter_post_service(worry_board_id=worry_obj.id, request_data=request_data)
 
@@ -71,9 +69,7 @@ class TestLoginUser(TestCase):
         request_data["letter_author"] = author.id
 
         with self.assertRaises(WorryBoardModel.DoesNotExist):
-            letter_post_service(
-                worry_board_id=9999, request_data=request_data
-            )
+            letter_post_service(worry_board_id=9999, request_data=request_data)
 
     def test_when_letter_overlap_post_service(self) -> None:
         """
@@ -125,7 +121,6 @@ class TestLoginUser(TestCase):
             title="test",
             content="tist",
         )
-
 
         letter_is_read_service(letter_id=letter_obj.id)
 
@@ -201,9 +196,7 @@ class TestLoginUser(TestCase):
         )
 
         with self.assertRaises(letterReviewModel.DoesNotExist):
-            letter_review_like_service(
-                letter_review_id=9999, user_id=user.id
-            )
+            letter_review_like_service(letter_review_id=9999, user_id=user.id)
 
     def test_thne_like_user_not_valid_letter_review_like_service(self) -> None:
         """

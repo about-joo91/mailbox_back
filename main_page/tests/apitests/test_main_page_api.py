@@ -1,31 +1,29 @@
-
 from rest_framework.test import APIClient, APITestCase
 
-from user.models import User as UserModel
-from user.models import UserProfile as UserProfileModel
-from main_page.models import WorryCategory as WorryCategoryModel
 from main_page.models import Letter as LetterModel
 from main_page.models import LetterReview as LetterReviewModel
+from main_page.models import WorryCategory as WorryCategoryModel
+from user.models import User as UserModel
+from user.models import UserProfile as UserProfileModel
 from worry_board.models import WorryBoard as WorryBoardModel
-
 
 
 class TestMaingPageAPI(APITestCase):
     """
     MainPageView의 API를 검증하는 클래스
     """
+
     def test_get_main_page(self) -> None:
         """
         MainPageView의 의 get 함수를 검증하는 함수
         """
         client = APIClient()
-        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
-        user_profile_info ={
-            "user" : user,
-            "mongle_grade" : 100
-        }
+        user = UserModel.objects.create(
+            username="hajin", password="1234", nickname="hajin"
+        )
+        user_profile_info = {"user": user, "mongle_grade": 100}
         user_profile = UserProfileModel.objects.create(**user_profile_info)
-        
+
         category_list = ["일상", "연애", "학업", "가족", "인간관계", "육아"]
         for cate_name in category_list:
             WorryCategoryModel.objects.create(cate_name=cate_name)
@@ -39,11 +37,10 @@ class TestMaingPageAPI(APITestCase):
                     author_id=user.id, content="test", category_id=cate_idx
                 )
 
-
         first_worry_obj = WorryBoardModel.objects.order_by("create_date")[:1].get().id
         last_worry_obj = WorryBoardModel.objects.order_by("-create_date")[:1].get().id
 
-        for worry_idx in range(first_worry_obj, last_worry_obj +1):
+        for worry_idx in range(first_worry_obj, last_worry_obj + 1):
             LetterModel.objects.create(
                 letter_author=user,
                 worryboard_id=worry_idx,
@@ -54,14 +51,13 @@ class TestMaingPageAPI(APITestCase):
         first_letter_obj = LetterModel.objects.order_by("create_date")[:1].get().id
         last_letter_obj = LetterModel.objects.order_by("-create_date")[:1].get().id
 
-        for letter_review_count in range(first_letter_obj, last_letter_obj +1):
+        for letter_review_count in range(first_letter_obj, last_letter_obj + 1):
             LetterReviewModel.objects.create(
                 review_author=user,
                 letter_id=letter_review_count,
                 content="test",
                 grade=100,
             )
-
 
         client.force_authenticate(user=user)
         url = "/main_page/main/"
@@ -70,12 +66,16 @@ class TestMaingPageAPI(APITestCase):
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(result["letter_count"], 30)
-        self.assertEqual(result["main_page_data_and_user_profile"]["user_profile_data"]["grade"], 100)
-        self.assertEqual(result["main_page_data_and_user_profile"]["rank_list"][0]["username"], "hajin")
+        self.assertEqual(
+            result["main_page_data_and_user_profile"]["user_profile_data"]["grade"], 100
+        )
+        self.assertEqual(
+            result["main_page_data_and_user_profile"]["rank_list"][0]["username"],
+            "hajin",
+        )
         self.assertEqual(len(result["order_by_cate_worry_list"]), 18)
         self.assertEqual(len(result["best_review"]), 10)
         self.assertEqual(len(result["live_review"]), 10)
-
 
     def test_when_user_is_unauthenticated_in_get_main_page(self) -> None:
         """
@@ -91,8 +91,4 @@ class TestMaingPageAPI(APITestCase):
         self.assertEqual(401, response.status_code)
         self.assertEqual(
             "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
-        )    
-    
-
-
-
+        )

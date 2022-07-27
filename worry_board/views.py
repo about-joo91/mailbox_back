@@ -3,20 +3,21 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-import unsmile_filtering
-from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import RequestMessageSerializer, WorryBoardSerializer
 from worry_board.services.worry_board_service import(
-    delete_request_message_data,
-    get_paginated_request_message_data,
     get_paginated_worry_board_data,
     create_worry_board_data,
     check_is_it_clean_text,
-    update_request_message_data,
     update_worry_board_data,
     delete_worry_board_data,
-    create_request_message_data
+    
+)
+from worry_board.services.worry_board_request_message_service import(
+    get_paginated_request_message_data,
+    create_request_message_data,
+    update_request_message_data,
+    delete_request_message_data,
 )
 
 # Create your views here.
@@ -41,9 +42,8 @@ class WorryBoardView(APIView):
 
     def post(self, request):
         author = request.user
-        for_create_data = request.data
-        if check_is_it_clean_text:
-            create_worry_board_data(for_create_data.data, author)
+        if check_is_it_clean_text(request.data["content"]):
+            create_worry_board_data(request.data, author)
             return Response(
                 {"detail": "고민 게시글을 게시하였습니다."}, status=status.HTTP_200_OK
             )
@@ -57,9 +57,9 @@ class WorryBoardView(APIView):
         #     {"detail": "게시에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST
         # )
 
-
     def put(self, request, worry_board_id):
-        if check_is_it_clean_text(request.data):
+        
+        if check_is_it_clean_text(request.data["content"]):
             update_worry_board_data(worry_board_id, request.data)
             return Response({"detail": "고민 게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
         return Response(

@@ -21,7 +21,7 @@ def create_user_report(user_id: int, target_user_id: int, report_reason: str) ->
     return reported_user.user.username
 
 
-def get_reported_user_over_condition_cnt() -> None:
+def get_reported_user_over_condition() -> None:
     """
     condition 이상으로 신고된 유저를 찾고 그 유저의 active값을 변경하는 함수
     """

@@ -1,4 +1,6 @@
 from django.db.models import F
+from django.db.models.query_utils import Q
+from rest_framework import exceptions
 
 from main_page.models import Letter as LetterModel
 from main_page.models import LetterReview as LetterReviewModel
@@ -27,11 +29,15 @@ def letter_post_service(letter_author: UserModel, request_data: dict) -> None:
     worry_board.author.save()
 
 
-def letter_is_read_service(letter_id) -> None:
+def letter_is_read_service(letter_id: LetterModel, user_id=UserModel) -> None:
     """
     유저가 받은 편지 읽음 post 를 담당하는 service
     """
-    letter = LetterModel.objects.filter(id=letter_id)
+
+    letter = LetterModel.objects.filter(Q(id=letter_id) & Q(worryboard__author=user_id))
+    if not letter:
+        raise LetterModel.DoesNotExist
+
     letter.update(is_read=True)
 
 
@@ -49,15 +55,16 @@ def letter_review_like_service(letter_review_id: int, user_id: int) -> None:
         )
 
 
-def letter_review_like_delete_service(letter_review_id: int, user_id: int) -> None:
+def letter_review_like_delete_service(letter_review_like_id: int, user_id: int) -> None:
     """
     편지 리뷰의 라이크 삭제 를 담당하는 service
     """
-    target_board = LetterReviewModel.objects.get(id=letter_review_id)
-    like_delete = LetterReviewLikeModel.objects.filter(
-        letter_review_id=target_board.id, user_id=user_id
-    ).delete()
-    if like_delete:
-        LetterReviewModel.objects.filter(id=letter_review_id).update(
-            grade=F("grade") - 100
-        )
+
+    target_review_like = LetterReviewLikeModel.objects.get(id=letter_review_like_id)
+
+    if target_review_like.user.id != user_id:
+        raise exceptions.PermissionDenied
+    target_review_like.delete()
+    LetterReviewModel.objects.filter(id=target_review_like.letter_review.id).update(
+        grade=F("grade") - 100
+    )

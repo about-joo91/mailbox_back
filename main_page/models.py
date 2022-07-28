@@ -29,6 +29,7 @@ class LetterReview(models.Model):
 class LetterReviewLike(models.Model):
     letter_review = models.ForeignKey("LetterReview", on_delete=models.CASCADE)
     user = models.ForeignKey("user.User", on_delete=models.CASCADE)
+
     class Meta:
         constraints = [
             models.UniqueConstraint(

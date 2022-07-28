@@ -3,23 +3,22 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-
 from board.models import Board as BoardModel
 from board.models import BoardComment as BoardCommentModel
 from board.models import BoardLike as BoardLikeModel
 from board.serializers import BoardCommentSerializer, BoardSerializer
-from board.services.board_service import(
+from board.services.board_service import (
     check_is_it_clean_text,
-    get_paginated_board_data,
+    create_board_comment_data,
     create_board_data,
-    update_board_data,
+    delete_board_comment_data,
     delete_board_data,
-    make_like_data,
     delete_like_data,
     get_board_comment_data,
-    create_board_comment_data,
+    get_paginated_board_data,
+    make_like_data,
     update_board_comment_data,
-    delete_board_comment_data
+    update_board_data,
 )
 
 # Create your views here.
@@ -50,7 +49,7 @@ class BoardView(APIView):
         if check_is_it_clean_text(request.data["content"]):
             create_board_data(request.data, request.user.id)
             return Response({"detail": "게시글이 생성되었습니다."}, status=status.HTTP_200_OK)
-        else :
+        else:
             return Response(
                 {"detail": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -71,7 +70,9 @@ class BoardView(APIView):
             delete_board_data(board_id, request.user.id)
             return Response({"detail": "게시글이 삭제되었습니다."}, status=status.HTTP_200_OK)
         except BoardModel.DoesNotExist:
-            return Response({"detail": "게시글이 존재하지 않습니다"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "게시글이 존재하지 않습니다"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class BorderLikeView(APIView):
@@ -84,11 +85,11 @@ class BorderLikeView(APIView):
 
     def post(self, request, board_id):
         author = request.user
-        try : 
-            delete_like_data(author, board_id) 
+        try:
+            delete_like_data(author, board_id)
             return Response({"detail": "좋아요가 삭제되었습니다!!"}, status=status.HTTP_200_OK)
         except:
-            make_like_data(author, board_id) 
+            make_like_data(author, board_id)
             return Response({"detail": "좋아요가 되었습니다!!"}, status=status.HTTP_200_OK)
 
 
@@ -140,4 +141,6 @@ class BorderCommentView(APIView):
             delete_board_comment_data(comment_id, request.user.id)
             return Response({"detail": "댓글이 삭제되었습니다."}, status=status.HTTP_200_OK)
         except BoardCommentModel.DoesNotExist:
-            return Response({"detail": "댓글이 존재하지 않습니다.."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "댓글이 존재하지 않습니다.."}, status=status.HTTP_400_BAD_REQUEST
+            )

@@ -12,9 +12,7 @@ class Board(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(
-                fields=["author", "id"], name="user_only_one_board"
-            )
+            models.UniqueConstraint(fields=["author", "id"], name="user_only_one_board")
         ]
 
 
@@ -28,6 +26,7 @@ class BoardLike(models.Model):
                 fields=["author", "board"], name="user_only_one_board_like"
             )
         ]
+
 
 class BoardComment(models.Model):
     author = models.ForeignKey("user.User", on_delete=models.CASCADE)

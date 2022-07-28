@@ -2,6 +2,7 @@ import json
 
 from rest_framework.test import APIClient, APITestCase
 
+from user.models import MongleGrade
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
 
@@ -18,6 +19,7 @@ class TestProfileAPI(APITestCase):
         client = APIClient()
         user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
         user_profile = UserProfileModel.objects.create(user=user)
+        mongle_grade = MongleGrade.objects.create(user=user)
 
         client.force_authenticate(user=user)
         url = "/user/profile"
@@ -26,8 +28,8 @@ class TestProfileAPI(APITestCase):
 
         self.assertEqual(result["fullname"], user_profile.fullname)
         self.assertEqual(result["description"], user_profile.description)
-        self.assertEqual(result["mongle_level"], user_profile.mongle_level)
-        self.assertEqual(result["mongle_grade"], user_profile.mongle_grade)
+        self.assertEqual(result["mongle_level"], mongle_grade.level)
+        self.assertEqual(result["mongle_grade"], mongle_grade.grade)
         self.assertEqual(result["profile_img"], user_profile.profile_img)
 
     def test_when_user_profile_is_none_in_get_user_profile(self) -> None:
@@ -43,8 +45,8 @@ class TestProfileAPI(APITestCase):
         response = client.get(url)
         result = response.json()
 
-        self.assertEqual("프로필이 없습니다. 프로필을 생성해주세요", result["detail"])
-        self.assertEqual(404, response.status_code)
+        self.assertEqual("잘못된 접근입니다. 다시 시도해주세요.", result["detail"])
+        self.assertEqual(400, response.status_code)
 
     def test_when_user_is_unauthenticated_in_get_user_profile(self) -> None:
         """
@@ -77,9 +79,7 @@ class TestProfileAPI(APITestCase):
             url,
             json.dumps(
                 {
-                    "mongle_level": 1,
                     "fullname": "방가워",
-                    "mongle_grade": 1,
                     "description": "desc",
                 }
             ),
@@ -91,10 +91,8 @@ class TestProfileAPI(APITestCase):
 
         self.assertEqual("프로필이 수정되었습니다", result["detail"])
         self.assertEqual(200, response.status_code)
-        self.assertEqual(1, userprofile.mongle_level)
         self.assertEqual("방가워", userprofile.fullname)
         self.assertEqual("desc", userprofile.description)
-        self.assertEqual(1, userprofile.mongle_grade)
 
     def test_when_user_profile_is_none_in_put_user_profile(self) -> None:
         """
@@ -110,9 +108,7 @@ class TestProfileAPI(APITestCase):
             url,
             json.dumps(
                 {
-                    "mongle_level": 1,
                     "fullname": "방가워",
-                    "mongle_grade": 1,
                     "description": "desc",
                 }
             ),
@@ -120,8 +116,8 @@ class TestProfileAPI(APITestCase):
         )
         result = response.json()
 
-        self.assertEqual("프로필이 없습니다. 프로필을 생성해주세요", result["detail"])
-        self.assertEqual(404, response.status_code)
+        self.assertEqual("잘못된 접근입니다. 다시 시도해주세요.", result["detail"])
+        self.assertEqual(400, response.status_code)
 
     def test_invalid_data_in_put_user_profile(self) -> None:
         """
@@ -138,7 +134,7 @@ class TestProfileAPI(APITestCase):
             url,
             json.dumps(
                 {
-                    "mongle_level": "알랄라",
+                    "profile_img": 1234431,
                 }
             ),
             content_type="application/json",

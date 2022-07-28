@@ -16,5 +16,7 @@ def post_user_signup_data(user_data: Dict) -> None:
     회원가입
     """
     user_data_serializer = UserSignupSerializer(data=user_data)
-    user_data_serializer.is_valid(raise_exception=True)
-    user_data_serializer.save()
+    if user_data_serializer.is_valid():
+        user_data_serializer.save()
+        return "성공"
+    return user_data_serializer.errors

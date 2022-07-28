@@ -32,8 +32,6 @@ from .serializers import (
     MainPageDataSerializer,
 )
 
-# from . import recommender
-
 
 # Create your views here.
 
@@ -111,14 +109,14 @@ class MainPageView(APIView):
     def get(self, request):
         cur_user = request.user
 
-        # user_letters = LetterModel.objects.filter(letter_author=cur_user).order_by(
-        #     "-create_date"
-        # )[:1]
-        # latest_worryboard_id = [obj.worryboard.id for obj in user_letters][0]
-        # recomendation_sys = recommender.recommend_worryboard
-        # final_worryboard_list = recomendation_sys.recommend_worries(
-        #     latest_worryboard_id
-        # )
+        latest_user_letter = LetterModel.objects.filter(letter_author=cur_user).order_by(
+            "-create_date"
+        )[:1][0]
+        worryboard_id_of_letter = latest_user_letter.worryboard.id
+        recomendation_sys = recommender.recommend_worryboard
+        final_worryboard_list = recomendation_sys.recommend_worries(
+            worryboard_id_of_letter
+        )
         not_read_my_letter_count = my_letter_count(request.user.id)
 
         worry_categories = WorryCategoryModel.objects.prefetch_related(

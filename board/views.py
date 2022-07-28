@@ -54,13 +54,18 @@ class BoardView(APIView):
         
     def post(self, request):
         if check_is_it_clean_text(request.data["content"]):
-            create_board_data(request.data, request.user.id)
+            result = create_board_data(request.data, request.user.id)
+            if not "저장" in result:
+                for key, values in result.items():
+                    error = [value[:] for value in values][0]
+                return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
             return Response({"detail": "게시글이 생성되었습니다."}, status=status.HTTP_200_OK)
         else :
             return Response(
                 {"detail": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+            
 
     def put(self, request, board_id: str = None):
         try:

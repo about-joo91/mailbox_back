@@ -19,7 +19,7 @@ class TestUserRegistrationAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["non_field_errors"][0], "아이디는 4자 이상 입력해주세요.")
+        self.assertEqual(result["detail"], "아이디는 4자 이상 입력해주세요.")
 
 
     def test_nickname_blank_check(self) -> None:
@@ -32,7 +32,7 @@ class TestUserRegistrationAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["nickname"][0], "이 필드는 blank일 수 없습니다.")
+        self.assertEqual(result["detail"], "이 필드는 blank일 수 없습니다.")
 
 
     def test_nickname_duplicate_check(self) -> None:
@@ -46,7 +46,7 @@ class TestUserRegistrationAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["non_field_errors"][0], "중복된 닉네임이 존재합니다.")
+        self.assertEqual(result["detail"], "중복된 닉네임이 존재합니다.")
 
 
     def test_password_under_8_char_check(self) -> None:
@@ -60,7 +60,7 @@ class TestUserRegistrationAPI(APITestCase):
 
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["non_field_errors"][0], "비밀번호는 8자 이상 특수문자 포함해 입력해주세요")
+        self.assertEqual(result["detail"], "비밀번호는 8자 이상 특수문자 포함해 입력해주세요")
 
 
     def test_password_including_special_char_check(self) -> None:
@@ -74,4 +74,4 @@ class TestUserRegistrationAPI(APITestCase):
 
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["non_field_errors"][0], "비밀번호는 8자 이상 특수문자 포함해 입력해주세요")
+        self.assertEqual(result["detail"], "비밀번호는 8자 이상 특수문자 포함해 입력해주세요")

@@ -43,7 +43,7 @@ class WorryBoardView(APIView):
         author = request.user
         for_create_data = request.data
         if check_is_it_clean_text:
-            create_worry_board_data(for_create_data.data, author)
+            create_worry_board_data(for_create_data, author)
             return Response(
                 {"detail": "고민 게시글을 게시하였습니다."}, status=status.HTTP_200_OK
             )

@@ -37,8 +37,13 @@ class UserView(APIView):
         return Response(user_data, status=status.HTTP_200_OK)
 
     def post(self, request: Request) -> Response:
-        post_user_signup_data(request.data)
-        return Response({"detail": "회원가입을 성공하였습니다"}, status=status.HTTP_200_OK)
+        result = post_user_signup_data(request.data)
+        if "성공" in result:
+            return Response({"detail": "회원가입을 성공하였습니다"}, status=status.HTTP_200_OK)
+        else:
+            for key, values in result.items():
+                error = [value[:] for value in values][0]
+            return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserProfileView(APIView):

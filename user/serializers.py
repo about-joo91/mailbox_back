@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from .models import MongleGrade
 from .models import User as UserModel
 from .models import UserProfile as UserProfileModel
 
@@ -27,6 +28,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
         user.set_password(p)
         user.save()
         UserProfileModel(user=user).save()
+        MongleGrade(user=user).save()
         return user
 
     def update(ser, *args, **kwargs):
@@ -44,12 +46,20 @@ class UserSignupSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     categories = serializers.SerializerMethodField()
+    mongle_level = serializers.SerializerMethodField(read_only=True)
+    mongle_grade = serializers.SerializerMethodField(read_only=True)
 
     def get_categories(self, obj):
         return [
             {"id": cate.id, "cate_name": cate.category.cate_name}
             for cate in obj.userprofilecategory_set.all()
         ]
+
+    def get_mongle_level(self, obj):
+        return obj.user.monglegrade.level
+
+    def get_mongle_grade(self, obj):
+        return obj.user.monglegrade.grade
 
     def get_user(self, obj):
         return obj.user.nickname

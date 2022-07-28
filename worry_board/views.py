@@ -34,7 +34,6 @@ class WorryBoardView(APIView):
             page_num = int(self.request.query_params.get("page_num"))
         except TypeError:
             page_num = 1
-
         paginated_worry_board, total_count = get_paginated_worry_board_data(
             page_num, category
         )
@@ -53,6 +52,7 @@ class WorryBoardView(APIView):
         author = request.user
         if check_is_it_clean_text(request.data["content"]):
             create_worry_board_data(author, request.data)
+
             return Response({"detail": "고민 게시글을 게시하였습니다."}, status=status.HTTP_200_OK)
         else:
             return Response(

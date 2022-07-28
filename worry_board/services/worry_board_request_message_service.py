@@ -14,7 +14,7 @@ def get_paginated_request_message_data(
         paginated_request_message = RequestMessageModel.objects.filter(
             author=author
         ).order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
-    elif case == "recieve":
+    elif case == "recieved":
         paginated_request_message = RequestMessageModel.objects.filter(
             worry_board__author=author
         ).order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]

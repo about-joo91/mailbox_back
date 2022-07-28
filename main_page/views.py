@@ -1,7 +1,7 @@
 import math
 
 import django
-from rest_framework import status
+from rest_framework import exceptions, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -25,6 +25,7 @@ from worry_board.serializers import WorryBoardSerializer
 
 from . import recommender
 from .models import Letter as LetterModel
+from .models import LetterReviewLike as LetterReviewLikeModel
 from .models import WorryCategory as WorryCategoryModel
 from .serializers import (
     BestReviewSerializer,
@@ -46,35 +47,45 @@ class ReviewLikeView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def post(self, request, letter_review_id):
+    def post(self, request, letter_review_like_id):
         try:
             letter_review_like_service(
-                letter_review_id=letter_review_id, user_id=request.user.id
+                letter_review_id=letter_review_like_id, user_id=request.user.id
             )
             return Response(
                 {
-                    "message": "좋아요가 완료 되었습니다!!",
+                    "detail": "좋아요가 완료 되었습니다!!",
                 },
                 status=status.HTTP_200_OK,
             )
         except django.db.utils.IntegrityError:
             return Response(
                 {
-                    "message": "좋아요를 이미 누르셨습니다!!",
+                    "detail": "좋아요를 이미 누르셨습니다!!",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    def delete(self, request, letter_review_id):
-        letter_review_like_delete_service(
-            letter_review_id=letter_review_id, user_id=request.user.id
-        )
-        return Response(
-            {
-                "message": "좋아요가 취소 되었습니다!!",
-            },
-            status=status.HTTP_200_OK,
-        )
+    def delete(self, request, letter_review_like_id) -> Response:
+        try:
+            letter_review_like_delete_service(
+                letter_review_like_id=letter_review_like_id, user_id=request.user.id
+            )
+            return Response(
+                {
+                    "detail": "좋아요가 취소 되었습니다!!",
+                },
+                status=status.HTTP_200_OK,
+            )
+        except LetterReviewLikeModel.DoesNotExist:
+            return Response(
+                {"detail": "없는 리뷰 입니다."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        except exceptions.PermissionDenied:
+            return Response(
+                {"detail": "이 작업을 수행할 권한(permission)이 없습니다."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
 
 class LikeisGet(APIView):
@@ -87,7 +98,6 @@ class LikeisGet(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
-
         return Response(
             {
                 "best_review": BestReviewSerializer(
@@ -126,22 +136,26 @@ class MainPageView(APIView):
             "worryboard_set"
         ).all()
         order_by_cate_worry_list = worry_worryboard_union(worry_categories)
-        user_profile_data = {}
+        main_page_data_and_user_profile = {}
         try:
-            user_profile_data = MainPageDataSerializer(
+            main_page_data_and_user_profile = MainPageDataSerializer(
                 UserModel.objects.select_related("userprofile").get(id=cur_user.id)
             ).data
         except UserModel.userprofile.RelatedObjectDoesNotExist:
             return Response(
                 {"detail": "유저프로필이 없습니다 생성해주세요."}, status=status.HTTP_404_NOT_FOUND
             )
-
+        except UserModel.monglegrade.RelatedObjectDoesNotExist:
+            return Response(
+                {"detail": "몽글그레이드 정보가 없습니다 생성해주세요."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         grade_order_best_reviews = best_review_list_service()
         create_order_live_reviews = live_review_list_service()
         return Response(
             {
                 "letter_count": not_read_my_letter_count,
-                "user_profile_data": user_profile_data,
+                "main_page_data_and_user_profile": main_page_data_and_user_profile,
                 "order_by_cate_worry_list": WorryBoardSerializer(
                     order_by_cate_worry_list, context={"request": request}, many=True
                 ).data,
@@ -174,7 +188,7 @@ class LetterView(APIView):
             result = filtering_sys.unsmile_filter(data_content[900 * i : 900 * (i + 1)])
             if result["label"] != "clean":
                 return Response(
-                    {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                    {"detail": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             break
@@ -196,6 +210,11 @@ class LetterisReadView(APIView):
     """
 
     def post(self, request, letter_id):
+        try:
+            letter_is_read_service(letter_id=letter_id, user_id=request.user.id)
+            return Response(status=status.HTTP_200_OK)
 
-        letter_is_read_service(letter_id)
-        return Response(status=status.HTTP_200_OK)
+        except LetterModel.DoesNotExist:
+            return Response(
+                {"detail": "자신이 받은 편지가 아닙니다."}, status=status.HTTP_400_BAD_REQUEST
+            )

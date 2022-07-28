@@ -5,7 +5,7 @@ from user.models import Report
 from user.models import User as UserModel
 from user.services.report_service import (
     create_user_report,
-    get_reported_user_over_condition_cnt,
+    get_reported_user_over_condition,
 )
 
 
@@ -14,7 +14,7 @@ class TestUserReportService(TestCase):
     condition 이상으로 신고된 유저를 찾고 그 유저의 active값을 변경하는 함수를 검증
     """
 
-    def test_get_reported_user_over_condition_cnt(self):
+    def test_get_reported_user_over_condition(self):
         """
         report_condition에 맞게 데이터가 나오는지 검증
         """
@@ -40,7 +40,7 @@ class TestUserReportService(TestCase):
         self.assertEqual(3, Report.objects.all().count())
 
         with self.assertNumQueries(3):
-            get_reported_user_over_condition_cnt()
+            get_reported_user_over_condition()
 
         reported_user = UserModel.objects.filter(id=reported_user.id).get()
 

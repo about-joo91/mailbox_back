@@ -11,8 +11,8 @@ import unsmile_filtering
 from main_page.services.letter_service import (
     letter_is_read_service,
     letter_post_service,
-    letter_review_like_service,
     letter_review_like_delete_service,
+    letter_review_like_service,
 )
 from main_page.services.main_gage_service import (
     best_review_list_service,
@@ -20,6 +20,7 @@ from main_page.services.main_gage_service import (
     my_letter_count,
     worry_worryboard_union,
 )
+from user.models import User as UserModel
 from worry_board.serializers import WorryBoardSerializer
 
 from . import recommender
@@ -30,7 +31,7 @@ from .serializers import (
     LiveReviewSerializer,
     MainPageDataSerializer,
 )
-from user.models import User as UserModel
+
 # from . import recommender
 
 
@@ -52,14 +53,14 @@ class ReviewLikeView(APIView):
             )
             return Response(
                 {
-                    "message": "좋아요가 완료 되었습니다!!",
+                    "detail": "좋아요가 완료 되었습니다!!",
                 },
                 status=status.HTTP_200_OK,
             )
         except django.db.utils.IntegrityError:
             return Response(
                 {
-                    "message": "좋아요를 이미 누르셨습니다!!",
+                    "detail": "좋아요를 이미 누르셨습니다!!",
                 },
                 status=status.HTTP_400_BAD_REQUEST,
             )
@@ -67,10 +68,10 @@ class ReviewLikeView(APIView):
     def delete(self, request, letter_review_id):
         letter_review_like_delete_service(
             letter_review_id=letter_review_id, user_id=request.user.id
-            )
+        )
         return Response(
             {
-                "message": "좋아요가 취소 되었습니다!!",
+                "detail": "좋아요가 취소 되었습니다!!",
             },
             status=status.HTTP_200_OK,
         )
@@ -86,7 +87,6 @@ class LikeisGet(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
-
         return Response(
             {
                 "best_review": BestReviewSerializer(
@@ -111,14 +111,14 @@ class MainPageView(APIView):
     def get(self, request):
         cur_user = request.user
 
-        user_letters = LetterModel.objects.filter(letter_author=cur_user).order_by(
-            "-create_date"
-        )[:1]
-        latest_worryboard_id = [obj.worryboard.id for obj in user_letters][0]
-        recomendation_sys = recommender.recommend_worryboard
-        final_worryboard_list = recomendation_sys.recommend_worries(
-            latest_worryboard_id
-        )
+        # user_letters = LetterModel.objects.filter(letter_author=cur_user).order_by(
+        #     "-create_date"
+        # )[:1]
+        # latest_worryboard_id = [obj.worryboard.id for obj in user_letters][0]
+        # recomendation_sys = recommender.recommend_worryboard
+        # final_worryboard_list = recomendation_sys.recommend_worries(
+        #     latest_worryboard_id
+        # )
         not_read_my_letter_count = my_letter_count(request.user.id)
 
         worry_categories = WorryCategoryModel.objects.prefetch_related(
@@ -127,23 +127,32 @@ class MainPageView(APIView):
         order_by_cate_worry_list = worry_worryboard_union(worry_categories)
         user_profile_data = {}
         try:
-            user_profile_data = MainPageDataSerializer(UserModel.objects.select_related("userprofile").get(id=cur_user.id)).data
+            user_profile_data = MainPageDataSerializer(
+                UserModel.objects.select_related("userprofile").get(id=cur_user.id)
+            ).data
         except UserModel.userprofile.RelatedObjectDoesNotExist:
-            return Response({"detail":"유저프로필이 없습니다 생성해주세요."},status=status.HTTP_404_NOT_FOUND)
-            
+            return Response(
+                {"detail": "유저프로필이 없습니다 생성해주세요."}, status=status.HTTP_404_NOT_FOUND
+            )
+
         grade_order_best_reviews = best_review_list_service()
         create_order_live_reviews = live_review_list_service()
         return Response(
             {
                 "letter_count": not_read_my_letter_count,
                 "user_profile_data": user_profile_data,
-                "order_by_cate_worry_list": WorryBoardSerializer(order_by_cate_worry_list,context={"request": request},many=True).data,
+                "order_by_cate_worry_list": WorryBoardSerializer(
+                    order_by_cate_worry_list, context={"request": request}, many=True
+                ).data,
                 "best_review": BestReviewSerializer(
                     grade_order_best_reviews, context={"request": request}, many=True
                 ).data,
                 "live_review": LiveReviewSerializer(
                     create_order_live_reviews, context={"request": request}, many=True
                 ).data,
+                "recommend_worry_board_list": WorryBoardSerializer(
+                    final_worryboard_list, context={"request": request}, many=True
+                ),
             },
             status=status.HTTP_200_OK,
         )
@@ -164,16 +173,12 @@ class LetterView(APIView):
             result = filtering_sys.unsmile_filter(data_content[900 * i : 900 * (i + 1)])
             if result["label"] != "clean":
                 return Response(
-                    {"message": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                    {"detail": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
             break
         try:
-            worry_board_id = request.data["worry_board_id"]
-            request.data["letter_author"] = request.user.id
-            letter_post_service(
-                worry_board_id=worry_board_id, request_data=request.data
-            )
+            letter_post_service(letter_author=request.user, request_data=request.data)
             return Response({"detail": "편지 작성이 완료 되었습니다."}, status=status.HTTP_200_OK)
         except django.db.utils.IntegrityError:
             return Response(

@@ -25,6 +25,9 @@ class User(AbstractBaseUser):
     username = models.CharField("사용자 계정", max_length=50, unique=True)
     password = models.CharField("비밀번호", max_length=128)
     nickname = models.CharField("닉네임", max_length=20)
+    received_letter_cnt = models.IntegerField(default=0)
+    sent_letter_cnt = models.IntegerField(default=0)
+
     create_date = models.DateTimeField("가입일", auto_now_add=True)
     update_date = models.DateTimeField("갱신일", auto_now=True)
 
@@ -70,7 +73,7 @@ class UserProfile(models.Model):
         "main_page.WorryCategory", through="UserProfileCategory"
     )
     profile_img = models.URLField(
-        default="https://user-images.githubusercontent.com/55477835/178631292-f381c6e2-2541-4a2c-ba67-b5bb4369e3d0.jpeg"
+        default="https://user-images.githubusercontent.com/55477835/181186077-f2c8d0ce-d92a-46d8-b0cb-8c931754c663.png"
     )
 
 

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from user.models import User as UserModel
+
 from .models import Letter as LetterModel
 from .models import LetterReview as LetterReviewModel
 from .models import LetterReviewLike as LetterreviewLikeModel
@@ -61,8 +62,9 @@ class BestReviewSerializer(serializers.ModelSerializer):
     def get_is_liked(self, obj):
         cur_user = self.context["request"].user
 
-        return LetterreviewLikeModel.objects.filter(user=cur_user, letter_review=obj).exists()
-        
+        return LetterreviewLikeModel.objects.filter(
+            user=cur_user, letter_review=obj
+        ).exists()
 
     def get_review_id(self, obj):
         return obj.id
@@ -90,8 +92,9 @@ class LiveReviewSerializer(serializers.ModelSerializer):
 
     def get_is_liked(self, obj):
         cur_user = self.context["request"].user
-        return LetterreviewLikeModel.objects.filter(user=cur_user, letter_review=obj).exists()
-
+        return LetterreviewLikeModel.objects.filter(
+            user=cur_user, letter_review=obj
+        ).exists()
 
     def get_review_id(self, obj):
         return obj.id

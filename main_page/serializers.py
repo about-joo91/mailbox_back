@@ -45,7 +45,7 @@ class MainPageDataSerializer(serializers.ModelSerializer):
 
     def get_user_profile_data(self, obj):
         return {
-            "grade": obj.userprofile.mongle_grade,
+            "grade": obj.monglegrade.grade,
             "profile_img": obj.userprofile.profile_img,
         }
 
@@ -55,16 +55,15 @@ class MainPageDataSerializer(serializers.ModelSerializer):
 
 
 class BestReviewSerializer(serializers.ModelSerializer):
-    is_liked = serializers.SerializerMethodField()
+    letter_review_like_id = serializers.SerializerMethodField()
     review_id = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
 
-    def get_is_liked(self, obj):
-        cur_user = self.context["request"].user
-
-        return LetterreviewLikeModel.objects.filter(
-            user=cur_user, letter_review=obj
-        ).exists()
+    def get_letter_review_like_id(self, obj):
+        try:
+            return obj.letterreviewlike_set.get().id
+        except LetterreviewLikeModel.DoesNotExist:
+            pass
 
     def get_review_id(self, obj):
         return obj.id
@@ -77,7 +76,7 @@ class BestReviewSerializer(serializers.ModelSerializer):
         fields = [
             "like_count",
             "review_id",
-            "is_liked",
+            "letter_review_like_id",
             "content",
             "review_author",
             "grade",
@@ -86,15 +85,15 @@ class BestReviewSerializer(serializers.ModelSerializer):
 
 
 class LiveReviewSerializer(serializers.ModelSerializer):
-    is_liked = serializers.SerializerMethodField()
+    letter_review_like_id = serializers.SerializerMethodField()
     review_id = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
 
-    def get_is_liked(self, obj):
-        cur_user = self.context["request"].user
-        return LetterreviewLikeModel.objects.filter(
-            user=cur_user, letter_review=obj
-        ).exists()
+    def get_letter_review_like_id(self, obj):
+        try:
+            return obj.letterreviewlike_set.get().id
+        except LetterreviewLikeModel.DoesNotExist:
+            pass
 
     def get_review_id(self, obj):
         return obj.id
@@ -107,7 +106,7 @@ class LiveReviewSerializer(serializers.ModelSerializer):
         fields = [
             "like_count",
             "review_id",
-            "is_liked",
+            "letter_review_like_id",
             "content",
             "review_author",
             "grade",

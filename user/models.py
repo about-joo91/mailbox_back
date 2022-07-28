@@ -58,22 +58,21 @@ class User(AbstractBaseUser):
 class MongleGrade(models.Model):
     user = models.OneToOneField("User", on_delete=models.CASCADE)
     grade = models.IntegerField(default=0)
+    level = models.IntegerField(default=0)
     mongle = models.URLField(
-        default="https://user-images.githubusercontent.com/55477835/178631292-f381c6e2-2541-4a2c-ba67-b5bb4369e3d0.jpeg"
+        default="https://user-images.githubusercontent.com/55477835/181283419-20705c71-a20a-46ab-a30e-bb4edece1670.png"
     )
 
 
 class UserProfile(models.Model):
     user = models.OneToOneField("User", on_delete=models.CASCADE)
     description = models.TextField(default="")
-    mongle_level = models.IntegerField(default=0)
-    mongle_grade = models.IntegerField(default=0)
     fullname = models.TextField(default="")
     categories = models.ManyToManyField(
         "main_page.WorryCategory", through="UserProfileCategory"
     )
     profile_img = models.URLField(
-        default="https://user-images.githubusercontent.com/55477835/181186077-f2c8d0ce-d92a-46d8-b0cb-8c931754c663.png"
+        default="https://user-images.githubusercontent.com/55477835/181283419-20705c71-a20a-46ab-a30e-bb4edece1670.png"
     )
 
 

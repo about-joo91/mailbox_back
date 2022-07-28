@@ -11,8 +11,11 @@
             "program": "${workspaceFolder}/manage.py",
             "args": [
                 "test",
+
                 "${workspaceFolder}/user/tests",
                 // "${workspaceFolder}/board/tests"
+                "${workspaceFolder}/my_page/tests"
+
 
                 
             ],

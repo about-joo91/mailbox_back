@@ -11,7 +11,6 @@ class Board(models.Model):
     update_date = models.DateTimeField(auto_now=True)
 
 
-
 class BoardLike(models.Model):
     author = models.ForeignKey("user.User", on_delete=models.CASCADE)
     board = models.ForeignKey("board.Board", on_delete=models.CASCADE)
@@ -22,6 +21,7 @@ class BoardLike(models.Model):
                 fields=["author", "board"], name="user_only_one_board_like"
             )
         ]
+
 
 class BoardComment(models.Model):
     author = models.ForeignKey("user.User", on_delete=models.CASCADE)

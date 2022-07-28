@@ -22,6 +22,7 @@ from user.services.user_signup_login_service import (
     post_user_signup_data,
 )
 
+from .models import MongleGrade
 from .models import User as UserModel
 from .models import UserProfile as UserProfileModel
 
@@ -60,8 +61,14 @@ class UserProfileView(APIView):
             profile_data = get_user_profile_data(cur_user.id)
             return Response(profile_data, status=status.HTTP_200_OK)
         except UserProfileModel.DoesNotExist:
+            UserProfileModel.objects.create(user=cur_user)
             return Response(
-                {"detail": "프로필이 없습니다. 프로필을 생성해주세요"}, status=status.HTTP_404_NOT_FOUND
+                {"detail": "잘못된 접근입니다. 다시 시도해주세요."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        except MongleGrade.DoesNotExist:
+            MongleGrade.objects.create(user=cur_user)
+            return Response(
+                {"detail": "잘못된 접근입니다. 다시 시도해주세요."}, status=status.HTTP_400_BAD_REQUEST
             )
 
     def put(self, request: Request) -> Response:
@@ -76,8 +83,14 @@ class UserProfileView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except UserProfileModel.DoesNotExist:
+            UserProfileModel.objects.create(user=cur_user)
             return Response(
-                {"detail": "프로필이 없습니다. 프로필을 생성해주세요"}, status=status.HTTP_404_NOT_FOUND
+                {"detail": "잘못된 접근입니다. 다시 시도해주세요."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        except MongleGrade.DoesNotExist:
+            MongleGrade.objects.create(user=cur_user)
+            return Response(
+                {"detail": "잘못된 접근입니다. 다시 시도해주세요."}, status=status.HTTP_400_BAD_REQUEST
             )
 
 

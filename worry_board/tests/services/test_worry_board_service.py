@@ -47,7 +47,7 @@ class TestWorryBoardService(TestCase):
         category = WorryCategory.objects.create(cate_name="일상")
         create_data = {"category": category.id, "content": "생성테스트"}
         if check_is_it_clean_text(create_data["content"]):
-            create_worry_board_data(create_data=create_data, author=user)
+            create_worry_board_data(author=user, create_data=create_data)
 
         self.assertEqual(
             WorryBoardModel.objects.all()[0].id,
@@ -67,7 +67,7 @@ class TestWorryBoardService(TestCase):
         update_data = {"category": category.id, "content": "수정함"}
         if check_is_it_clean_text(update_data["content"]):
             update_worry_board_data(
-                worry_board_id=user_worry_board.id, update_worry_board_data=update_data
+                worry_board_id=user_worry_board.id, update_data=update_data
             )
 
         self.assertEqual(
@@ -83,7 +83,7 @@ class TestWorryBoardService(TestCase):
         user_worry_board = WorryBoardModel.objects.create(
             author=user, category=category, content="삭제할 데이터"
         )
-        delete_worry_board_data(worry_board_id=user_worry_board.id, author=user)
+        delete_worry_board_data(author=user, worry_board_id=user_worry_board.id)
 
         self.assertEqual(0, WorryBoardModel.objects.count())
 
@@ -95,7 +95,7 @@ class TestWorryBoardService(TestCase):
         category = WorryCategory.objects.create(cate_name="일상")
         create_data = {"category": category.id, "content": "바보같은놈"}
         if check_is_it_clean_text(create_data["content"]):
-            create_worry_board_data(create_data=create_data, author=user)
+            create_worry_board_data(author=user, create_data=create_data)
 
         with self.assertRaises(WorryBoardModel.DoesNotExist):
             WorryBoardModel.objects.get(author=user).id
@@ -108,9 +108,7 @@ class TestWorryBoardService(TestCase):
         update_data = {"category": category.id, "content": "수정함"}
         if check_is_it_clean_text(update_data["content"]):
             with self.assertRaises(WorryBoardModel.DoesNotExist):
-                update_worry_board_data(
-                    worry_board_id=10, update_worry_board_data=update_data
-                )
+                update_worry_board_data(worry_board_id=10, update_data=update_data)
         with self.assertRaises(WorryBoardModel.DoesNotExist):
             update_worry_board_data(WorryBoardModel.objects.get(content="수정함"))
 
@@ -128,7 +126,7 @@ class TestWorryBoardService(TestCase):
 
         with self.assertRaises(ValidationError):
             if check_is_it_clean_text(create_data["content"]):
-                create_worry_board_data(create_data=create_data, author=user)
+                create_worry_board_data(author=user, create_data=create_data)
 
     def test_when_post_including_swear_word_in_update_worry_board_data(self) -> None:
         """
@@ -144,7 +142,7 @@ class TestWorryBoardService(TestCase):
         update_data = {"category": category.id, "content": "바보같은놈"}
         if check_is_it_clean_text(update_data["content"]):
             update_worry_board_data(
-                worry_board_id=user_worry_board.id, update_worry_board_data=update_data
+                worry_board_id=user_worry_board.id, update_data=update_data
             )
 
         with self.assertRaises(WorryBoardModel.DoesNotExist):

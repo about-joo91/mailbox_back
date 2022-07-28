@@ -5,7 +5,6 @@ from main_page.models import LetterReview as LetterReviewModel
 from main_page.models import WorryCategory as WorryCategoryModel
 from main_page.services.letter_service import letter_review_like_service
 from user.models import User as UserModel
-from user.models import UserProfile as UserProfileModel
 from worry_board.models import WorryBoard as WorryBoardModel
 
 
@@ -22,9 +21,6 @@ class TestLetterReviewPostLikeAPI(APITestCase):
         user = UserModel.objects.create(
             username="hajin", password="1234", nickname="hajin"
         )
-        user_profile_info = {"user": user, "mongle_grade": 100}
-        UserProfileModel.objects.create(**user_profile_info)
-
         WorryCategoryModel.objects.create(cate_name="일상")
         daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
         worry_obj = WorryBoardModel.objects.create(
@@ -63,9 +59,6 @@ class TestLetterReviewPostLikeAPI(APITestCase):
         user = UserModel.objects.create(
             username="hajin", password="1234", nickname="hajin"
         )
-        user_profile_info = {"user": user, "mongle_grade": 100}
-        UserProfileModel.objects.create(**user_profile_info)
-
         WorryCategoryModel.objects.create(cate_name="일상")
         daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
         worry_obj = WorryBoardModel.objects.create(
@@ -108,9 +101,6 @@ class TestLetterReviewPostLikeAPI(APITestCase):
         user = UserModel.objects.create(
             username="hajin", password="1234", nickname="hajin"
         )
-        user_profile_info = {"user": user, "mongle_grade": 100}
-        UserProfileModel.objects.create(**user_profile_info)
-
         WorryCategoryModel.objects.create(cate_name="일상")
         daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
         worry_obj = WorryBoardModel.objects.create(
@@ -147,9 +137,6 @@ class TestLetterReviewPostLikeAPI(APITestCase):
         user = UserModel.objects.create(
             username="hajin", password="1234", nickname="hajin"
         )
-        user_profile_info = {"user": user, "mongle_grade": 100}
-        UserProfileModel.objects.create(**user_profile_info)
-
         WorryCategoryModel.objects.create(cate_name="일상")
         daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
         worry_obj = WorryBoardModel.objects.create(
@@ -184,9 +171,6 @@ class TestLetterReviewPostLikeAPI(APITestCase):
         user = UserModel.objects.create(
             username="hajin", password="1234", nickname="hajin"
         )
-        user_profile_info = {"user": user, "mongle_grade": 100}
-        UserProfileModel.objects.create(**user_profile_info)
-
         WorryCategoryModel.objects.create(cate_name="일상")
         daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
         worry_obj = WorryBoardModel.objects.create(
@@ -218,6 +202,27 @@ class TestLetterReviewPostLikeAPI(APITestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(result["detail"], "좋아요가 취소 되었습니다!!")
 
+    def test_when_not_letter_review_delete_like(self) -> None:
+        """
+        LetterReviewLike 의 delete 함수를 검증하는 함수
+        case: 없는 리뷰 일 때
+        """
+        client = APIClient()
+        user = UserModel.objects.create(
+            username="hajin", password="1234", nickname="hajin"
+        )
+
+        client.force_authenticate(user=user)
+        url = "/main_page/review_like9999"
+        response = client.delete(
+            url,
+            content_type="application/json",
+        )
+        result = response.json()
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(result["detail"], "없는 리뷰 입니다.")
+
 
 class TestLetterReviewPostLikeUpdateGetAPI(APITestCase):
     """
@@ -232,9 +237,6 @@ class TestLetterReviewPostLikeUpdateGetAPI(APITestCase):
         user = UserModel.objects.create(
             username="hajin", password="1234", nickname="hajin"
         )
-        user_profile_info = {"user": user, "mongle_grade": 100}
-        UserProfileModel.objects.create(**user_profile_info)
-
         daily_category = WorryCategoryModel.objects.create(cate_name="일상")
         daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
         worry_obj = WorryBoardModel.objects.create(

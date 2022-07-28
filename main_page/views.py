@@ -25,6 +25,7 @@ from worry_board.serializers import WorryBoardSerializer
 
 from . import recommender
 from .models import Letter as LetterModel
+from .models import LetterReview as LetterReviewModel
 from .models import WorryCategory as WorryCategoryModel
 from .serializers import (
     BestReviewSerializer,
@@ -66,15 +67,21 @@ class ReviewLikeView(APIView):
             )
 
     def delete(self, request, letter_review_id):
-        letter_review_like_delete_service(
-            letter_review_id=letter_review_id, user_id=request.user.id
-        )
-        return Response(
-            {
-                "detail": "좋아요가 취소 되었습니다!!",
-            },
-            status=status.HTTP_200_OK,
-        )
+        try:
+
+            letter_review_like_delete_service(
+                letter_review_id=letter_review_id, user_id=request.user.id
+            )
+            return Response(
+                {
+                    "detail": "좋아요가 취소 되었습니다!!",
+                },
+                status=status.HTTP_200_OK,
+            )
+        except LetterReviewModel.DoesNotExist:
+            return Response(
+                {"detail": "없는 리뷰 입니다."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class LikeisGet(APIView):
@@ -111,23 +118,23 @@ class MainPageView(APIView):
     def get(self, request):
         cur_user = request.user
 
-        # user_letters = LetterModel.objects.filter(letter_author=cur_user).order_by(
-        #     "-create_date"
-        # )[:1]
-        # latest_worryboard_id = [obj.worryboard.id for obj in user_letters][0]
-        # recomendation_sys = recommender.recommend_worryboard
-        # final_worryboard_list = recomendation_sys.recommend_worries(
-        #     latest_worryboard_id
-        # )
+        user_letters = LetterModel.objects.filter(letter_author=cur_user).order_by(
+            "-create_date"
+        )[:1]
+        latest_worryboard_id = [obj.worryboard.id for obj in user_letters][0]
+        recomendation_sys = recommender.recommend_worryboard
+        final_worryboard_list = recomendation_sys.recommend_worries(
+            latest_worryboard_id
+        )
         not_read_my_letter_count = my_letter_count(request.user.id)
 
         worry_categories = WorryCategoryModel.objects.prefetch_related(
             "worryboard_set"
         ).all()
         order_by_cate_worry_list = worry_worryboard_union(worry_categories)
-        user_profile_data = {}
+        main_page_data_and_user_profile = {}
         try:
-            user_profile_data = MainPageDataSerializer(
+            main_page_data_and_user_profile = MainPageDataSerializer(
                 UserModel.objects.select_related("userprofile").get(id=cur_user.id)
             ).data
         except UserModel.userprofile.RelatedObjectDoesNotExist:
@@ -140,7 +147,7 @@ class MainPageView(APIView):
         return Response(
             {
                 "letter_count": not_read_my_letter_count,
-                "user_profile_data": user_profile_data,
+                "main_page_data_and_user_profile": main_page_data_and_user_profile,
                 "order_by_cate_worry_list": WorryBoardSerializer(
                     order_by_cate_worry_list, context={"request": request}, many=True
                 ).data,
@@ -150,15 +157,13 @@ class MainPageView(APIView):
                 "live_review": LiveReviewSerializer(
                     create_order_live_reviews, context={"request": request}, many=True
                 ).data,
-                # "recommend_worry_board_list": WorryBoardSerializer(
-                #     final_worryboard_list, context={"request": request}, many=True
-                # ),
+                "recommend_worry_board_list": WorryBoardSerializer(
+                    final_worryboard_list, context={"request": request}, many=True
+                ),
             },
             status=status.HTTP_200_OK,
         )
         ####
-
-        
 
 
 class LetterView(APIView):

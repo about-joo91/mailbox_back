@@ -22,7 +22,7 @@ class TestMaingPageAPI(APITestCase):
             username="hajin", password="1234", nickname="hajin"
         )
         user_profile_info = {"user": user, "mongle_grade": 100}
-        user_profile = UserProfileModel.objects.create(**user_profile_info)
+        UserProfileModel.objects.create(**user_profile_info)
 
         category_list = ["일상", "연애", "학업", "가족", "인간관계", "육아"]
         for cate_name in category_list:

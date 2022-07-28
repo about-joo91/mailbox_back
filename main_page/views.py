@@ -145,7 +145,11 @@ class MainPageView(APIView):
             return Response(
                 {"detail": "유저프로필이 없습니다 생성해주세요."}, status=status.HTTP_404_NOT_FOUND
             )
-
+        except UserModel.monglegrade.RelatedObjectDoesNotExist:
+            return Response(
+                {"detail": "몽글그레이드 정보가 없습니다 생성해주세요."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         grade_order_best_reviews = best_review_list_service()
         create_order_live_reviews = live_review_list_service()
         return Response(

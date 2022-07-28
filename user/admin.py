@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from .models import MongleGrade as MogleGradeModel
 from .models import Report as ReportModel
 from .models import ReportedUser as ReportedUserModel
 from .models import User as UserModel
@@ -12,3 +13,4 @@ admin.site.register(UserProfileModel)
 admin.site.register(ReportModel)
 admin.site.register(ReportedUserModel)
 admin.site.register(UserProfileCategoryModel)
+admin.site.register(MogleGradeModel)

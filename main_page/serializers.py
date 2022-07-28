@@ -45,7 +45,7 @@ class MainPageDataSerializer(serializers.ModelSerializer):
 
     def get_user_profile_data(self, obj):
         return {
-            "grade": obj.userprofile.mongle_grade,
+            "grade": obj.monglegrade.grade,
             "profile_img": obj.userprofile.profile_img,
         }
 

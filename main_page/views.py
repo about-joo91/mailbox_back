@@ -1,7 +1,7 @@
 import math
 
 import django
-from rest_framework import status
+from rest_framework import exceptions, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -25,7 +25,7 @@ from worry_board.serializers import WorryBoardSerializer
 
 from . import recommender
 from .models import Letter as LetterModel
-from .models import LetterReview as LetterReviewModel
+from .models import LetterReviewLike as LetterReviewLikeModel
 from .models import WorryCategory as WorryCategoryModel
 from .serializers import (
     BestReviewSerializer,
@@ -47,10 +47,10 @@ class ReviewLikeView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    def post(self, request, letter_review_id):
+    def post(self, request, letter_review_like_id):
         try:
             letter_review_like_service(
-                letter_review_id=letter_review_id, user_id=request.user.id
+                letter_review_id=letter_review_like_id, user_id=request.user.id
             )
             return Response(
                 {
@@ -66,11 +66,10 @@ class ReviewLikeView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    def delete(self, request, letter_review_id):
+    def delete(self, request, letter_review_like_id) -> Response:
         try:
-
             letter_review_like_delete_service(
-                letter_review_id=letter_review_id, user_id=request.user.id
+                letter_review_like_id=letter_review_like_id, user_id=request.user.id
             )
             return Response(
                 {
@@ -78,9 +77,14 @@ class ReviewLikeView(APIView):
                 },
                 status=status.HTTP_200_OK,
             )
-        except LetterReviewModel.DoesNotExist:
+        except LetterReviewLikeModel.DoesNotExist:
             return Response(
                 {"detail": "없는 리뷰 입니다."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        except exceptions.PermissionDenied:
+            return Response(
+                {"detail": "이 작업을 수행할 권한(permission)이 없습니다."},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
 
@@ -163,7 +167,6 @@ class MainPageView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-        ####
 
 
 class LetterView(APIView):
@@ -203,6 +206,11 @@ class LetterisReadView(APIView):
     """
 
     def post(self, request, letter_id):
+        try:
+            letter_is_read_service(letter_id=letter_id, user_id=request.user.id)
+            return Response(status=status.HTTP_200_OK)
 
-        letter_is_read_service(letter_id)
-        return Response(status=status.HTTP_200_OK)
+        except LetterModel.DoesNotExist:
+            return Response(
+                {"detail": "자신이 받은 편지가 아닙니다."}, status=status.HTTP_400_BAD_REQUEST
+            )

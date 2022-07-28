@@ -125,26 +125,33 @@ class TestLoginUser(TestCase):
             content="tist",
         )
 
-        letter_is_read_service(letter_id=letter_obj.id)
+        letter_is_read_service(letter_id=letter_obj.id, user_id=user.id)
 
         self.assertEqual(0, my_letter_count(user_id=user.id))
 
     def test_when_letter_does_not_exist__letter_is_read_service(self) -> None:
         """
         내가 받은 편지 읽음 여부를 확인하는 함수 검증
-        case: 없는 편지 일 겨우
+        case: 자신이 받은 편지가 아닐 경우
         """
         user = UserModel.objects.create(username="hajin", nickname="hajin")
+        author = UserModel.objects.create(username="author", nickname="author")
         worry_cate_obj = WorryCategoryModel.objects.create(cate_name="일상")
-
+        worry_obj = WorryBoardModel.objects.create(
+            author_id=user.id, content="ttttt", category_id=worry_cate_obj.id
+        )
         WorryBoardModel.objects.create(
             author_id=user.id, content="ttttt", category_id=worry_cate_obj.id
         )
-
-        faeke_letter_obj = LetterModel.objects.filter(id=9999)
+        letter_obj = LetterModel.objects.create(
+            letter_author_id=author.id,
+            worryboard_id=worry_obj.id,
+            title="test",
+            content="tist",
+        )
 
         with self.assertRaises(LetterModel.DoesNotExist):
-            letter_is_read_service(letter_id=faeke_letter_obj.get().id)
+            letter_is_read_service(letter_id=letter_obj.id, user_id=9999)
 
     def test_letter_review_like_service(self) -> None:
         """

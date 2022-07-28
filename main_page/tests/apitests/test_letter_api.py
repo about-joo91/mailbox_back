@@ -15,7 +15,7 @@ class TestLetterviewAPI(APITestCase):
 
     def test_letter_post(self) -> None:
         """
-        LetterReviewLike 의 post 함수를 검증하는 함수
+        Letterview 의 post 함수를 검증하는 함수
         """
         client = APIClient()
         revice_user = UserModel.objects.create(
@@ -169,8 +169,7 @@ class TestLetterIsReadView(APITestCase):
         author_user = UserModel.objects.create(
             username="author", password="1234", nickname="author"
         )
-        WorryCategoryModel.objects.create(cate_name="일상")
-        daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
+        daily_cate = WorryCategoryModel.objects.create(cate_name="일상")
         worry_obj = WorryBoardModel.objects.create(
             author_id=revice_user.id, content="test", category_id=daily_cate.id
         )
@@ -181,7 +180,7 @@ class TestLetterIsReadView(APITestCase):
             content="테스트입니다",
         )
 
-        client.force_authenticate(user=author_user)
+        client.force_authenticate(user=revice_user)
         url = f"/main_page/letter/{letter_obj.id}"
         response = client.post(
             url,
@@ -191,9 +190,9 @@ class TestLetterIsReadView(APITestCase):
         )
         self.assertEqual(200, response.status_code)
 
-    def test_when_user_is_unauthenticated_in_letter_post(self) -> None:
+    def test_when_user_is_unauthenticated_in_letter_read_post(self) -> None:
         """
-        LetterReviewLike 의 post 함수를 검증하는 함수
+        LetterisReadView 의 post 함수를 검증하는 함수
         case : 인증되지 않은 유저일 때
         """
         client = APIClient()
@@ -214,12 +213,42 @@ class TestLetterIsReadView(APITestCase):
             title="테스트입니다",
             content="테스트입니다",
         )
-
         url = f"/main_page/letter/{letter_obj.id}"
-        response = client.get(url)
+        response = client.post(url)
         result = response.json()
 
         self.assertEqual(401, response.status_code)
         self.assertEqual(
             "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
         )
+
+    def test_when_recevie_not_to_me_letter_read_post(self) -> None:
+        """
+        LetterisReadView 의 post 함수를 검증하는 함수
+        case : 자신이 받은 편지가 아닐 때
+        """
+        client = APIClient()
+        revice_user = UserModel.objects.create(
+            username="hajin", password="1234", nickname="hajin"
+        )
+        author_user = UserModel.objects.create(
+            username="author", password="1234", nickname="author"
+        )
+        WorryCategoryModel.objects.create(cate_name="일상")
+        daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
+        worry_obj = WorryBoardModel.objects.create(
+            author_id=revice_user.id, content="test", category_id=daily_cate.id
+        )
+        letter_obj = LetterModel.objects.create(
+            letter_author=author_user,
+            worryboard=worry_obj,
+            title="테스트입니다",
+            content="테스트입니다",
+        )
+        client.force_authenticate(user=author_user)
+        url = f"/main_page/letter/{letter_obj.id}"
+        response = client.post(url)
+        result = response.json()
+
+        self.assertEqual(400, response.status_code)
+        self.assertEqual("자신이 받은 편지가 아닙니다.", result["detail"])

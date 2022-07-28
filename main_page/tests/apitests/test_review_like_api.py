@@ -2,6 +2,7 @@ from rest_framework.test import APIClient, APITestCase
 
 from main_page.models import Letter as LetterModel
 from main_page.models import LetterReview as LetterReviewModel
+from main_page.models import LetterReviewLike as LetterReviewLikeModel
 from main_page.models import WorryCategory as WorryCategoryModel
 from main_page.services.letter_service import letter_review_like_service
 from user.models import User as UserModel
@@ -128,6 +129,48 @@ class TestLetterReviewPostLikeAPI(APITestCase):
             "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
         )
 
+    def test_letter_reveiw_delete_like(self) -> None:
+        """
+        LetterReviewLike 의 delete 함수를 검증하는 함수
+        """
+        client = APIClient()
+        user = UserModel.objects.create(
+            username="hajin", password="1234", nickname="hajin"
+        )
+        WorryCategoryModel.objects.create(cate_name="일상")
+        daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
+        worry_obj = WorryBoardModel.objects.create(
+            author_id=user.id, content="test", category_id=daily_cate.id
+        )
+        letter_obj = LetterModel.objects.create(
+            letter_author=user,
+            worryboard_id=worry_obj.id,
+            title="test",
+            content="test",
+        )
+        letter_review_obj = LetterReviewModel.objects.create(
+            review_author=user,
+            letter_id=letter_obj.id,
+            content="test",
+            grade=100,
+        )
+        target_letter_review_like_obj = LetterReviewLikeModel.objects.create(
+            letter_review=letter_review_obj, user=user
+        )
+        target_review_like = LetterReviewLikeModel.objects.get(
+            id=target_letter_review_like_obj.id
+        )
+        client.force_authenticate(user=user)
+        url = f"/main_page/review_like{target_review_like.id}"
+        response = client.delete(
+            url,
+            content_type="application/json",
+        )
+        result = response.json()
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(result["detail"], "좋아요가 취소 되었습니다!!")
+
     def test_when_user_is_unauthenticated_in_review_like_delete(self) -> None:
         """
         LetterReviewLike 의 delete 함수를 검증하는 함수
@@ -154,53 +197,16 @@ class TestLetterReviewPostLikeAPI(APITestCase):
             content="test",
             grade=100,
         )
-
-        url = f"/main_page/review_like{letter_review_obj.id}"
+        target_letter_review_like_obj = LetterReviewLikeModel.objects.create(
+            letter_review=letter_review_obj, user=user
+        )
+        url = f"/main_page/review_like{target_letter_review_like_obj.id}"
         response = client.delete(url)
         result = response.json()
         self.assertEqual(401, response.status_code)
         self.assertEqual(
             "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
         )
-
-    def test_letter_reveiw_delete_like(self) -> None:
-        """
-        LetterReviewLike 의 delete 함수를 검증하는 함수
-        """
-        client = APIClient()
-        user = UserModel.objects.create(
-            username="hajin", password="1234", nickname="hajin"
-        )
-        WorryCategoryModel.objects.create(cate_name="일상")
-        daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(
-            author_id=user.id, content="test", category_id=daily_cate.id
-        )
-        letter_obj = LetterModel.objects.create(
-            letter_author=user,
-            worryboard_id=worry_obj.id,
-            title="test",
-            content="test",
-        )
-        letter_review_obj = LetterReviewModel.objects.create(
-            review_author=user,
-            letter_id=letter_obj.id,
-            content="test",
-            grade=100,
-        )
-        letter_review_like_service(
-            letter_review_id=letter_review_obj.id, user_id=user.id
-        )
-        client.force_authenticate(user=user)
-        url = f"/main_page/review_like{letter_review_obj.id}"
-        response = client.delete(
-            url,
-            content_type="application/json",
-        )
-        result = response.json()
-
-        self.assertEqual(200, response.status_code)
-        self.assertEqual(result["detail"], "좋아요가 취소 되었습니다!!")
 
     def test_when_not_letter_review_delete_like(self) -> None:
         """
@@ -222,6 +228,45 @@ class TestLetterReviewPostLikeAPI(APITestCase):
 
         self.assertEqual(400, response.status_code)
         self.assertEqual(result["detail"], "없는 리뷰 입니다.")
+
+    def test_when_different_user_review_like_delete(self) -> None:
+        """
+        LetterReviewLike 의 delete 함수를 검증하는 함수
+        case: 다른유저가 좋아요 를 취소 할 경우
+        """
+        client = APIClient()
+        user = UserModel.objects.create(
+            username="hajin", password="1234", nickname="hajin"
+        )
+        different_user = UserModel.objects.create(
+            username="different_user", password="1234", nickname="different_user"
+        )
+        WorryCategoryModel.objects.create(cate_name="일상")
+        daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
+        worry_obj = WorryBoardModel.objects.create(
+            author_id=user.id, content="test", category_id=daily_cate.id
+        )
+        letter_obj = LetterModel.objects.create(
+            letter_author=user,
+            worryboard_id=worry_obj.id,
+            title="test",
+            content="test",
+        )
+        letter_review_obj = LetterReviewModel.objects.create(
+            review_author=user,
+            letter_id=letter_obj.id,
+            content="test",
+            grade=100,
+        )
+        target_letter_review_like_obj = LetterReviewLikeModel.objects.create(
+            letter_review=letter_review_obj, user=user
+        )
+        client.force_authenticate(user=different_user)
+        url = f"/main_page/review_like{target_letter_review_like_obj.id}"
+        response = client.delete(url)
+        result = response.json()
+        self.assertEqual(403, response.status_code)
+        self.assertEqual("이 작업을 수행할 권한(permission)이 없습니다.", result["detail"])
 
 
 class TestLetterReviewPostLikeUpdateGetAPI(APITestCase):

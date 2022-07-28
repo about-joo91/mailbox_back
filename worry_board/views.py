@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import RequestMessageSerializer, WorryBoardSerializer
 from worry_board.services.worry_board_request_message_service import (
@@ -142,15 +143,33 @@ class RequestMessageView(APIView):
             status=status.HTTP_200_OK,
         )
 
-    def post(self, request, worry_board_id):
+    def post(self, request, worry_board_id=0):
         """
         request 요청을 보내는 view
         """
-
+        if worry_board_id == 0:
+            return Response(
+                {"detail": "worry_board가 존재하지 않습니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         author = request.user
         check_content = request.data["request_message"]
         if check_is_it_clean_text(check_content):
-            create_request_message_data(author, worry_board_id, check_content)
+            if RequestMessageModel.objects.filter(
+                author=author, worry_board_id=worry_board_id
+            ).exists():
+                return Response(
+                    {"detail": "이미 보낸 요청입니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if WorryBoardModel.objects.filter(
+                id=worry_board_id, author=author
+            ).exists():
+                return Response(
+                    {"detail": "내가 작성한 게시물에는 요청할 수 없습니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            create_request_message_data(author, worry_board_id, request.data)
             return Response({"detail": "게시물 작성자에게 요청하였습니다!"}, status=status.HTTP_200_OK)
 
         else:
@@ -163,18 +182,20 @@ class RequestMessageView(APIView):
         # {"detail": "존재하지 않는 게시물입니다."},
         # status=status.HTTP_400_BAD_REQUEST)
 
-        # return Response({"detail" : "내가 작성한 worry_board에는 요청할 수 없습니다"}, status=status.HTTP_400_BAD_REQUEST)
-        # return Response(
-        #     {"detail": "이미 보낸 요청입니다."},
-        #     status=status.HTTP_400_BAD_REQUEST,
-        # )
-
     def put(self, request, request_message_id):
-        for_update_data = request.data
-        update_request_message_data(for_update_data.data, request_message_id)
-        return Response({"detail": "요청 메세지가 수정되었습니다."}, status=status.HTTP_200_OK)
+        try:
+            update_request_message_data(request.data, request_message_id)
+            return Response({"detail": "요청 메세지가 수정되었습니다."}, status=status.HTTP_200_OK)
+        except RequestMessageModel.DoesNotExist:
+            return Response(
+                {"detail": "해당 요청 메세지가 존재하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST
+            )
 
     def delete(self, request, request_message_id):
-        delete_request_message_data(request_message_id)
-        return Response({"detail": "요청 메세지 삭제되었습니다."}, status=status.HTTP_200_OK)
-        # return Response({"detail": "삭제에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            delete_request_message_data(request_message_id)
+            return Response({"detail": "요청 메세지가 삭제되었습니다."}, status=status.HTTP_200_OK)
+        except RequestMessageModel.DoesNotExist:
+            return Response(
+                {"detail": "해당 요청 메세지가 존재하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST
+            )

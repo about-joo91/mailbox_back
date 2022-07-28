@@ -168,7 +168,7 @@ class TestBoardAPI(APITestCase):
         """
         BoardView의 put 함수를 검증하는 함수
         case : 게시물을 쓴 사용자가 아닌 사람이 수정을 하려는 경우
-        *원래 코드 수정 필요*
+
         """
         
         client = APIClient()
@@ -189,9 +189,9 @@ class TestBoardAPI(APITestCase):
             url, data=json.dumps(request_data), content_type="application/json"
         )
         result = response.json()
-        print(result)
         
-        self.assertEqual(401, response.status_code)
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(result["detail"], "게시글 수정 권한이 없습니다")
         
     def test_when_parameter_doesnot_exist_in_put_board_list(self) -> None:
         """
@@ -257,7 +257,7 @@ class TestBoardAPI(APITestCase):
         response = client.delete(url)
         result = response.json()
         
-        self.assertEqual(401, response.status_code)
+        self.assertEqual(response.status_code, 401)
         self.assertEqual(
             result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다."
         )
@@ -284,9 +284,8 @@ class TestBoardAPI(APITestCase):
         response = client.delete(url)
         result = response.json()
         
-        self.assertEqual(response.status_code, 404)
-        self.assertEqual(result["detail"], "게시글이 존재하지 않습니다")
-        # 게시글을 삭제할 수 없습니다 exception이 따로 있어야 하나?
+        self.assertEqual(response.status_code, 403)
+        self.assertEqual(result["detail"], "게시글 삭제 권한이 없습니다")
 
 
     def test_when_parameter_doesnot_exist_in_delete_board_list(self) -> None:

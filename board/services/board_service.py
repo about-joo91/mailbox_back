@@ -1,4 +1,5 @@
 from typing import Dict, List, Tuple
+from rest_framework import exceptions
 
 from board.models import Board as BoardModel, BoardLike as BoardLikeModel, BoardComment as BoardCommentModel
 from board.serializers import BoardSerializer, BoardCommentSerializer
@@ -34,11 +35,13 @@ def create_board_data(board_data : Dict, author_id:int) -> None:
     create_board_serializer.save()
 
 
-def update_board_data(board_id : int , update_data : Dict) -> None:
+def update_board_data(board_id : int , update_data : Dict, user_id:int) -> None:
     """
     board 데이터를 업데이트 하는 service
     """
     update_board = BoardModel.objects.get(id=board_id)
+    if user_id != update_board.author.id:
+        raise exceptions.PermissionDenied
     update_board_serializer = BoardSerializer(
         update_board, data=update_data, partial=True
     )
@@ -51,7 +54,9 @@ def delete_board_data(board_id : int, author_id : int) -> None:
     """
     board 데이터를 삭제하는 service
     """
-    delete_model = BoardModel.objects.get(id=board_id, author=author_id)
+    delete_model = BoardModel.objects.get(id=board_id)
+    if author_id != delete_model.author.id:
+        raise exceptions.PermissionDenied
     delete_model.delete()
 
 def make_like_data(author : int, board_id : int) -> None:

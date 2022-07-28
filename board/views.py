@@ -1,8 +1,8 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import exceptions
 
 
 from board.models import Board as BoardModel
@@ -23,7 +23,7 @@ from board.services.board_service import(
     delete_board_comment_data
 )
 
-from mail_box.permissions import IsAuthorOrReadonly
+
 # Create your views here.
 
 
@@ -65,7 +65,7 @@ class BoardView(APIView):
     def put(self, request, board_id: str = None):
         try:
             if check_is_it_clean_text(request.data["content"]):
-                update_board_data(board_id, request.data)
+                update_board_data(board_id, request.data, request.user.id)
                 return Response({"detail": "게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
             else:
                 return Response(
@@ -74,7 +74,8 @@ class BoardView(APIView):
                 )
         except BoardModel.DoesNotExist:
             return Response({"detail": "게시글이 존재하지 않습니다"}, status=status.HTTP_404_NOT_FOUND)
-
+        except exceptions.PermissionDenied:
+            return Response({"detail": "게시글 수정 권한이 없습니다"}, status=status.HTTP_403_FORBIDDEN)
 
     def delete(self, request, board_id: str = None):
         try:
@@ -82,6 +83,8 @@ class BoardView(APIView):
             return Response({"detail": "게시글이 삭제되었습니다."}, status=status.HTTP_200_OK)
         except BoardModel.DoesNotExist:
             return Response({"detail": "게시글이 존재하지 않습니다"}, status=status.HTTP_404_NOT_FOUND)
+        except exceptions.PermissionDenied:
+            return Response({"detail": "게시글 삭제 권한이 없습니다"}, status=status.HTTP_403_FORBIDDEN)
 
 
 class BorderLikeView(APIView):

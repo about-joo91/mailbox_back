@@ -40,7 +40,7 @@ class BoardSerializer(serializers.ModelSerializer):
         time_data = time.strftime(format_data)
 
         return time_data
-
+    
     class Meta:
         model = BoardModel
         fields = [

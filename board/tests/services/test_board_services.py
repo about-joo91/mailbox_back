@@ -148,7 +148,7 @@ class TestBoardService(TestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["title"][0], "이 필드의 글자 수가 30 이하인지 확인하십시오.")
+        self.assertEqual(result["detail"], "이 필드의 글자 수가 30 이하인지 확인하십시오.")
     
     def test_exceeding_limited_num_of_char_on_put_board_content(self) -> None:
         """
@@ -185,4 +185,4 @@ class TestBoardService(TestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["content"][0], "이 필드의 글자 수가 500 이하인지 확인하십시오.")
+        self.assertEqual(result["detail"], "이 필드의 글자 수가 500 이하인지 확인하십시오.")

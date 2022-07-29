@@ -4,10 +4,7 @@ from rest_framework.exceptions import ValidationError
 from user.models import MongleGrade
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
-from user.services.user_profile_service import (
-    get_user_profile_data,
-    update_user_profile_data,
-)
+from user.services.user_profile_service import get_user_profile_data, update_user_profile_data
 
 
 class TestUserProfileServices(TestCase):

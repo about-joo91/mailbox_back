@@ -1,8 +1,4 @@
-from transformers import (
-    AutoTokenizer,
-    BertForSequenceClassification,
-    TextClassificationPipeline,
-)
+from transformers import AutoTokenizer, BertForSequenceClassification, TextClassificationPipeline
 
 
 class UnsmileFiltering:

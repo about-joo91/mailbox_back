@@ -19,14 +19,10 @@ class TestLetterReviewPostLikeAPI(APITestCase):
         LetterReviewLike 의 post 함수를 검증하는 함수
         """
         client = APIClient()
-        user = UserModel.objects.create(
-            username="hajin", password="1234", nickname="hajin"
-        )
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         WorryCategoryModel.objects.create(cate_name="일상")
         daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(
-            author_id=user.id, content="test", category_id=daily_cate.id
-        )
+        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=daily_cate.id)
         letter_obj = LetterModel.objects.create(
             letter_author=user,
             worryboard_id=worry_obj.id,
@@ -57,14 +53,10 @@ class TestLetterReviewPostLikeAPI(APITestCase):
         case: 중복된 letter_review 에 좋아요를 할 경우
         """
         client = APIClient()
-        user = UserModel.objects.create(
-            username="hajin", password="1234", nickname="hajin"
-        )
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         WorryCategoryModel.objects.create(cate_name="일상")
         daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(
-            author_id=user.id, content="test", category_id=daily_cate.id
-        )
+        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=daily_cate.id)
         letter_obj = LetterModel.objects.create(
             letter_author=user,
             worryboard_id=worry_obj.id,
@@ -78,9 +70,7 @@ class TestLetterReviewPostLikeAPI(APITestCase):
             grade=100,
         )
 
-        letter_review_like_service(
-            letter_review_id=letter_review_obj.id, user_id=user.id
-        )
+        letter_review_like_service(letter_review_id=letter_review_obj.id, user_id=user.id)
 
         client.force_authenticate(user=user)
         url = f"/main_page/review_like{letter_review_obj.id}"
@@ -99,14 +89,10 @@ class TestLetterReviewPostLikeAPI(APITestCase):
         case: 인증되지 않은 유저일 때
         """
         client = APIClient()
-        user = UserModel.objects.create(
-            username="hajin", password="1234", nickname="hajin"
-        )
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         WorryCategoryModel.objects.create(cate_name="일상")
         daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(
-            author_id=user.id, content="test", category_id=daily_cate.id
-        )
+        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=daily_cate.id)
         letter_obj = LetterModel.objects.create(
             letter_author=user,
             worryboard_id=worry_obj.id,
@@ -125,23 +111,17 @@ class TestLetterReviewPostLikeAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
-        )
+        self.assertEqual("자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"])
 
     def test_letter_reveiw_delete_like(self) -> None:
         """
         LetterReviewLike 의 delete 함수를 검증하는 함수
         """
         client = APIClient()
-        user = UserModel.objects.create(
-            username="hajin", password="1234", nickname="hajin"
-        )
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         WorryCategoryModel.objects.create(cate_name="일상")
         daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(
-            author_id=user.id, content="test", category_id=daily_cate.id
-        )
+        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=daily_cate.id)
         letter_obj = LetterModel.objects.create(
             letter_author=user,
             worryboard_id=worry_obj.id,
@@ -154,12 +134,8 @@ class TestLetterReviewPostLikeAPI(APITestCase):
             content="test",
             grade=100,
         )
-        target_letter_review_like_obj = LetterReviewLikeModel.objects.create(
-            letter_review=letter_review_obj, user=user
-        )
-        target_review_like = LetterReviewLikeModel.objects.get(
-            id=target_letter_review_like_obj.id
-        )
+        target_letter_review_like_obj = LetterReviewLikeModel.objects.create(letter_review=letter_review_obj, user=user)
+        target_review_like = LetterReviewLikeModel.objects.get(id=target_letter_review_like_obj.id)
         client.force_authenticate(user=user)
         url = f"/main_page/review_like{target_review_like.id}"
         response = client.delete(
@@ -177,14 +153,10 @@ class TestLetterReviewPostLikeAPI(APITestCase):
         case: 인증되지 않은 유저일 때
         """
         client = APIClient()
-        user = UserModel.objects.create(
-            username="hajin", password="1234", nickname="hajin"
-        )
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         WorryCategoryModel.objects.create(cate_name="일상")
         daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(
-            author_id=user.id, content="test", category_id=daily_cate.id
-        )
+        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=daily_cate.id)
         letter_obj = LetterModel.objects.create(
             letter_author=user,
             worryboard_id=worry_obj.id,
@@ -197,16 +169,12 @@ class TestLetterReviewPostLikeAPI(APITestCase):
             content="test",
             grade=100,
         )
-        target_letter_review_like_obj = LetterReviewLikeModel.objects.create(
-            letter_review=letter_review_obj, user=user
-        )
+        target_letter_review_like_obj = LetterReviewLikeModel.objects.create(letter_review=letter_review_obj, user=user)
         url = f"/main_page/review_like{target_letter_review_like_obj.id}"
         response = client.delete(url)
         result = response.json()
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
-        )
+        self.assertEqual("자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"])
 
     def test_when_not_letter_review_delete_like(self) -> None:
         """
@@ -214,9 +182,7 @@ class TestLetterReviewPostLikeAPI(APITestCase):
         case: 없는 리뷰 일 때
         """
         client = APIClient()
-        user = UserModel.objects.create(
-            username="hajin", password="1234", nickname="hajin"
-        )
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
 
         client.force_authenticate(user=user)
         url = "/main_page/review_like9999"
@@ -235,17 +201,11 @@ class TestLetterReviewPostLikeAPI(APITestCase):
         case: 다른유저가 좋아요 를 취소 할 경우
         """
         client = APIClient()
-        user = UserModel.objects.create(
-            username="hajin", password="1234", nickname="hajin"
-        )
-        different_user = UserModel.objects.create(
-            username="different_user", password="1234", nickname="different_user"
-        )
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
+        different_user = UserModel.objects.create(username="different_user", password="1234", nickname="different_user")
         WorryCategoryModel.objects.create(cate_name="일상")
         daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(
-            author_id=user.id, content="test", category_id=daily_cate.id
-        )
+        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=daily_cate.id)
         letter_obj = LetterModel.objects.create(
             letter_author=user,
             worryboard_id=worry_obj.id,
@@ -258,9 +218,7 @@ class TestLetterReviewPostLikeAPI(APITestCase):
             content="test",
             grade=100,
         )
-        target_letter_review_like_obj = LetterReviewLikeModel.objects.create(
-            letter_review=letter_review_obj, user=user
-        )
+        target_letter_review_like_obj = LetterReviewLikeModel.objects.create(letter_review=letter_review_obj, user=user)
         client.force_authenticate(user=different_user)
         url = f"/main_page/review_like{target_letter_review_like_obj.id}"
         response = client.delete(url)
@@ -279,14 +237,10 @@ class TestLetterReviewPostLikeUpdateGetAPI(APITestCase):
         lette_review_like post 의 data update get 함수를 검증하는 함수
         """
         client = APIClient()
-        user = UserModel.objects.create(
-            username="hajin", password="1234", nickname="hajin"
-        )
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         daily_category = WorryCategoryModel.objects.create(cate_name="일상")
         daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(
-            author_id=user.id, content="test", category_id=daily_cate.id
-        )
+        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=daily_cate.id)
         letter_obj = LetterModel.objects.create(
             letter_author=user,
             worryboard_id=worry_obj.id,
@@ -302,9 +256,7 @@ class TestLetterReviewPostLikeUpdateGetAPI(APITestCase):
 
         test_order_grade_review_obj = LetterReviewModel.objects.order_by("-grade")[:1]
 
-        letter_review_like_service(
-            letter_review_id=test_order_grade_review_obj.get().id, user_id=user.id
-        )
+        letter_review_like_service(letter_review_id=test_order_grade_review_obj.get().id, user_id=user.id)
 
         test_user_create = UserModel.objects.create(username="test", nickname="test")
         test_worry_create = WorryBoardModel.objects.create(
@@ -329,12 +281,8 @@ class TestLetterReviewPostLikeUpdateGetAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual(
-            result["live_review"][0]["review_id"], test_letter_review_create.id
-        )
-        self.assertEqual(
-            result["best_review"][0]["grade"], test_order_grade_review_obj.get().grade
-        )
+        self.assertEqual(result["live_review"][0]["review_id"], test_letter_review_create.id)
+        self.assertEqual(result["best_review"][0]["grade"], test_order_grade_review_obj.get().grade)
 
     def test_when_user_is_unauthenticated_in_review_like_update_get(self) -> None:
         """
@@ -348,6 +296,4 @@ class TestLetterReviewPostLikeUpdateGetAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
-        )
+        self.assertEqual("자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"])

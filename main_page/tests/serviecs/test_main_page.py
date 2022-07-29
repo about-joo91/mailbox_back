@@ -30,12 +30,8 @@ class TestMainPageServices(TestCase):
         first_cate = WorryCategoryModel.objects.get(cate_name="일상").id
         last_cate = WorryCategoryModel.objects.get(cate_name="육아").id
 
-        worry_obj1 = WorryBoardModel.objects.create(
-            author=user, content="ttttt", category_id=first_cate
-        )
-        worry_obj2 = WorryBoardModel.objects.create(
-            author=user, content="ttttt", category_id=last_cate
-        )
+        worry_obj1 = WorryBoardModel.objects.create(author=user, content="ttttt", category_id=first_cate)
+        worry_obj2 = WorryBoardModel.objects.create(author=user, content="ttttt", category_id=last_cate)
 
         letter_obj1 = LetterModel.objects.create(
             letter_author_id=test_user.id,
@@ -51,9 +47,7 @@ class TestMainPageServices(TestCase):
         )
 
         self.assertEqual("일상", WorryCategoryModel.objects.get(id=first_cate).cate_name)
-        self.assertEqual(
-            test_user.id, LetterModel.objects.get(id=letter_obj1.id).letter_author.id
-        )
+        self.assertEqual(test_user.id, LetterModel.objects.get(id=letter_obj1.id).letter_author.id)
         self.assertEqual(2, my_letter_count(user.id))
 
     def test_when_none_user_letter_count_service(self) -> None:
@@ -72,12 +66,8 @@ class TestMainPageServices(TestCase):
         first_cate = WorryCategoryModel.objects.get(cate_name="일상").id
         last_cate = WorryCategoryModel.objects.get(cate_name="육아").id
 
-        worry_obj1 = WorryBoardModel.objects.create(
-            author=user, content="ttttt", category_id=first_cate
-        )
-        worry_obj2 = WorryBoardModel.objects.create(
-            author=user, content="ttttt", category_id=last_cate
-        )
+        worry_obj1 = WorryBoardModel.objects.create(author=user, content="ttttt", category_id=first_cate)
+        worry_obj2 = WorryBoardModel.objects.create(author=user, content="ttttt", category_id=last_cate)
 
         LetterModel.objects.create(
             letter_author_id=test_user.id,
@@ -111,18 +101,12 @@ class TestMainPageServices(TestCase):
 
         for woory_board_count in range(5):
             for cate_idx in range(first_cate, last_cate + 1):
-                WorryBoardModel.objects.create(
-                    author_id=user.id, content="ttttt", category_id=cate_idx
-                )
+                WorryBoardModel.objects.create(author_id=user.id, content="ttttt", category_id=cate_idx)
 
-        worry_categories = WorryCategoryModel.objects.prefetch_related(
-            "worryboard_set"
-        ).all()
+        worry_categories = WorryCategoryModel.objects.prefetch_related("worryboard_set").all()
         worry_worryboard_union(worry_categories)
 
-        test_board = WorryBoardModel.objects.filter(category_id=first_cate).order_by(
-            "-create_date"
-        )[:3]
+        test_board = WorryBoardModel.objects.filter(category_id=first_cate).order_by("-create_date")[:3]
 
         count = 0
         for worry_union_idx in worry_worryboard_union(worry_categories):
@@ -149,13 +133,9 @@ class TestMainPageServices(TestCase):
 
         for woory_board_count in range(5):
             for cate_idx in range(first_cate, last_cate + 1):
-                WorryBoardModel.objects.create(
-                    author_id=user.id, content="ttttt", category_id=cate_idx
-                )
+                WorryBoardModel.objects.create(author_id=user.id, content="ttttt", category_id=cate_idx)
 
-        worry_categories = WorryCategoryModel.objects.prefetch_related(
-            "worryboard_set"
-        ).all()
+        worry_categories = WorryCategoryModel.objects.prefetch_related("worryboard_set").all()
 
         with self.assertRaises(WorryCategoryModel.MultipleObjectsReturned):
             worry_worryboard_union(worry_categories.get())
@@ -176,9 +156,7 @@ class TestMainPageServices(TestCase):
 
         for woory_board_count in range(5):
             for cate_idx in range(first_cate, last_cate + 1):
-                WorryBoardModel.objects.create(
-                    author_id=user.id, content="test", category_id=cate_idx
-                )
+                WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=cate_idx)
 
         first_worry_obj = WorryBoardModel.objects.order_by("create_date")[:1].get().id
         last_worry_obj = WorryBoardModel.objects.order_by("-create_date")[:1].get().id
@@ -224,9 +202,7 @@ class TestMainPageServices(TestCase):
 
         for woory_board_count in range(5):
             for cate_idx in range(first_cate, last_cate + 1):
-                WorryBoardModel.objects.create(
-                    author_id=user.id, content="test", category_id=cate_idx
-                )
+                WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=cate_idx)
 
         first_worry_obj = WorryBoardModel.objects.order_by("create_date")[:1].get().id
         last_worry_obj = WorryBoardModel.objects.order_by("-create_date")[:1].get().id
@@ -251,9 +227,7 @@ class TestMainPageServices(TestCase):
             )
 
         get_cate = WorryCategoryModel.objects.get(cate_name="일상")
-        grade_test_worry = WorryBoardModel.objects.create(
-            author_id=user.id, content="test", category_id=get_cate.id
-        )
+        grade_test_worry = WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=get_cate.id)
         grade_test_letter = LetterModel.objects.create(
             letter_author=user,
             worryboard_id=grade_test_worry.id,
@@ -273,6 +247,4 @@ class TestMainPageServices(TestCase):
         self.assertEqual(10, grade_order_best_reviews.count())
         self.assertEqual(True, best_review[0] == grade_order_best_reviews[0])
         self.assertEqual(200, grade_order_best_reviews[0].grade)
-        self.assertEqual(
-            100, grade_order_best_reviews[len(grade_order_best_reviews) - 1].grade
-        )
+        self.assertEqual(100, grade_order_best_reviews[len(grade_order_best_reviews) - 1].grade)

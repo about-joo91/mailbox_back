@@ -14,8 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="letterreviewlike",
             name="letter_review",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="main_page.letterreview"
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="main_page.letterreview"),
         ),
     ]

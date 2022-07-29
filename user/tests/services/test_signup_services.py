@@ -1,18 +1,26 @@
-# from django.db import connection
-# from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
-from rest_framework import serializers
 from rest_framework.test import APITestCase
 
 from user.models import User as UserModel
-
-# from user.services.user_signup_login_service import post_user_signup_data
 
 
 class TestUserRegistrationAPI(APITestCase):
     """
     회원가입 테스트 코드
     """
+
+    def test_username_duplicate_check(self) -> None:
+        """
+        아이디가 중복일 때
+        """
+        url = reverse("user_view")
+        UserModel.objects.create(username="won1", nickname="won")
+        user_data = {"username": "won1", "password": "qwer1234%", "nickname": "won1"}
+        response = self.client.post(url, user_data)
+        result = response.json()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("user의 사용자 계정은/는 이미 존재합니다.", result["detail"])
 
     def test_username_under_4_char_check(self) -> None:
         """
@@ -21,20 +29,10 @@ class TestUserRegistrationAPI(APITestCase):
         url = reverse("user_view")
         user_data = {"username": "won", "password": "qwer1234%", "nickname": "won1122"}
         response = self.client.post(url, user_data)
-        print(dir(response))
-        print(response)
-        print(response.content)
+        result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.content["non_field_errors"][0], "아이디는 4자 이상 입력!")
-
-        # with CaptureQueriesContext(connection) as ctx:
-        #     post_user_signup_data(user_data)
-        #     print("dd")
-        with self.assertRaises(serializers.ValidationError):
-            UserModel.objects.create(
-                username=user_data["username"], nickname=user_data["nickname"]
-            )
+        self.assertIn("아이디는 4자 이상 입력해주세요.", result["detail"])
 
     def test_nickname_blank_check(self) -> None:
         """
@@ -43,14 +41,10 @@ class TestUserRegistrationAPI(APITestCase):
         url = reverse("user_view")
         user_data = {"username": "won1", "password": "qwer1234%", "nickname": ""}
         response = self.client.post(url, user_data)
+        result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response["none_field_errors"])
-
-        with self.assertRaises(serializers.ValidationError):
-            UserModel.objects.create(
-                username=user_data["username"], nickname=user_data["nickname"]
-            )
+        self.assertIn("이 필드는 blank일 수 없습니다.", result["detail"])
 
     def test_nickname_duplicate_check(self) -> None:
         """
@@ -60,13 +54,11 @@ class TestUserRegistrationAPI(APITestCase):
         UserModel.objects.create(username="joo", nickname="won")
         user_data = {"username": "won1", "password": "qwer1234%", "nickname": "won"}
         response = self.client.post(url, user_data)
+        result = response.json()
 
         self.assertEqual(response.status_code, 400)
-
-        # with self.assertRaises(serializers.ValidationError):
-        #     UserModel.objects.create(
-        #         username=user_data["username"], nickname=user_data["nickname"]
-        #     )
+        self.assertEqual(result["detail"], "중복된 닉네임이 존재합니다.")
+        self.assertIn("중복된 닉네임이 존재합니다.", result["detail"])
 
     def test_password_under_8_char_check(self) -> None:
         """
@@ -75,15 +67,10 @@ class TestUserRegistrationAPI(APITestCase):
         url = reverse("user_view")
         user_data = {"username": "won1", "password": "qwer123", "nickname": "won1122"}
         response = self.client.post(url, user_data)
+        result = response.json()
 
         self.assertEqual(response.status_code, 400)
-
-        # with self.assertRaises(serializers.ValidationError):
-        #     UserModel.objects.create(
-        #         username=user_data["username"],
-        #         nickname=user_data["nickname"],
-        #         password=user_data["password"],
-        #     )
+        self.assertIn("비밀번호는 8자 이상 특수문자 포함해 입력해주세요", result["detail"])
 
     def test_password_including_special_char_check(self) -> None:
         """
@@ -92,5 +79,7 @@ class TestUserRegistrationAPI(APITestCase):
         url = reverse("user_view")
         user_data = {"username": "won1", "password": "qwer1234", "nickname": "won1122"}
         response = self.client.post(url, user_data)
+        result = response.json()
 
         self.assertEqual(response.status_code, 400)
+        self.assertIn("비밀번호는 8자 이상 특수문자 포함해 입력해주세요", result["detail"])

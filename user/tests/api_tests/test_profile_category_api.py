@@ -60,9 +60,7 @@ class TestProfileCategoryAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
-        )
+        self.assertEqual("자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"])
 
     def test_post_userprofile_category(self) -> None:
         """
@@ -99,9 +97,7 @@ class TestProfileCategoryAPI(APITestCase):
 
         client.force_authenticate(user=user)
         url = "/user/profile/category/"
-        response = client.post(
-            url, json.dumps({"categories": ["가족"]}), content_type="application/json"
-        )
+        response = client.post(url, json.dumps({"categories": ["가족"]}), content_type="application/json")
         result = response.json()
 
         self.assertEqual("카테고리 생성에 실패했습니다. 정확한 값을 입력해주세요.", result["detail"])
@@ -145,9 +141,7 @@ class TestProfileCategoryAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
-        )
+        self.assertEqual("자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"])
 
     def test_delete_userprofile_category(self) -> None:
         """
@@ -239,6 +233,4 @@ class TestProfileCategoryAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
-        )
+        self.assertEqual("자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"])

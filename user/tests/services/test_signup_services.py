@@ -8,6 +8,18 @@ class TestUserRegistrationAPI(APITestCase):
     """
     회원가입 테스트 코드
     """
+    def test_username_duplicate_check(self) -> None:
+        """
+        아이디가 중복일 때
+        """
+        url = reverse("user_view")
+        UserModel.objects.create(username="won1", nickname="won")
+        user_data = {"username": "won1", "password": "qwer1234%", "nickname": "won1"}
+        response = self.client.post(url, user_data)
+        result = response.json()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("user의 사용자 계정은/는 이미 존재합니다.", result["detail"])
 
     def test_username_under_4_char_check(self) -> None:
         """
@@ -19,7 +31,7 @@ class TestUserRegistrationAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["detail"], "아이디는 4자 이상 입력해주세요.")
+        self.assertIn("아이디는 4자 이상 입력해주세요.", result["detail"])
 
 
     def test_nickname_blank_check(self) -> None:
@@ -32,7 +44,7 @@ class TestUserRegistrationAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["detail"], "이 필드는 blank일 수 없습니다.")
+        self.assertIn("이 필드는 blank일 수 없습니다.", result["detail"])
 
 
     def test_nickname_duplicate_check(self) -> None:
@@ -47,6 +59,7 @@ class TestUserRegistrationAPI(APITestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(result["detail"], "중복된 닉네임이 존재합니다.")
+        self.assertIn("중복된 닉네임이 존재합니다.", result["detail"])
 
 
     def test_password_under_8_char_check(self) -> None:
@@ -58,9 +71,8 @@ class TestUserRegistrationAPI(APITestCase):
         response = self.client.post(url, user_data)
         result = response.json()
 
-
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["detail"], "비밀번호는 8자 이상 특수문자 포함해 입력해주세요")
+        self.assertIn("비밀번호는 8자 이상 특수문자 포함해 입력해주세요", result["detail"])
 
 
     def test_password_including_special_char_check(self) -> None:
@@ -72,6 +84,6 @@ class TestUserRegistrationAPI(APITestCase):
         response = self.client.post(url, user_data)
         result = response.json()
 
-
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["detail"], "비밀번호는 8자 이상 특수문자 포함해 입력해주세요")
+        self.assertIn("비밀번호는 8자 이상 특수문자 포함해 입력해주세요", result["detail"])
+        

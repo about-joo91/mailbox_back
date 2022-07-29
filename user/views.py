@@ -5,6 +5,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import exceptions
 
 from main_page.models import WorryCategory
 from user.services.report_service import create_user_report
@@ -32,18 +33,16 @@ class UserView(APIView):
     """
     회원정보 조회 및 회원가입
     """
-
     def get(self, request: Request) -> Response:
         user_data = get_user_signup_data(request.user)
         return Response(user_data, status=status.HTTP_200_OK)
 
     def post(self, request: Request) -> Response:
-        result = post_user_signup_data(request.data)
-        if "성공" in result:
+        try:
+            post_user_signup_data(request.data)
             return Response({"detail": "회원가입을 성공하였습니다"}, status=status.HTTP_200_OK)
-        else:
-            for key, values in result.items():
-                error = [value[:] for value in values][0]
+        except exceptions.ValidationError as e:
+            error = "".join([str(value) for values in e.detail.values() for value in values])
             return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
 
 

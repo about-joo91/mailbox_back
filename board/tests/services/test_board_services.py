@@ -59,7 +59,7 @@ class TestBoardService(TestCase):
         print(result)
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["detail"], "이 필드의 글자 수가 30 이하인지 확인하십시오.")
+        self.assertIn("이 필드의 글자 수가 30 이하인지 확인하십시오.", result["detail"])
 
 
     def test_exceeding_limited_num_of_char_on_post_board_content(self) -> None:
@@ -93,7 +93,43 @@ class TestBoardService(TestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["detail"], "이 필드의 글자 수가 500 이하인지 확인하십시오.")
+        self.assertIn("이 필드의 글자 수가 500 이하인지 확인하십시오.", result["detail"])
+        
+        
+    def test_exceeding_limited_num_of_char_on_post_board_title_and_content(self) -> None:
+        """
+        BoardView의 post 함수를 검증하는 함수
+        case: 작성한 board의 제목과 내용이 제한 글자 수(각 30, 500자)를 초과했을 경우
+        """
+        client = APIClient()
+        user = UserModel.objects.create(
+            username="won1", password="1234", nickname="won"
+        )
+        request_data = {
+            "title": "30자 이상입니다. 30자 이상입니다. 30자 이상입니다",
+            "content": "500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 \
+            이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니",
+            "author": user.id,
+        }
+
+        client.force_authenticate(user=user)
+        url = "/board/"
+        response = client.post(
+            url, data=json.dumps(request_data), content_type="application/json"
+        )
+        result = response.json()
+        print(result)
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("이 필드의 글자 수가 500 이하인지 확인하십시오.", result["detail"])
+        self.assertIn("이 필드의 글자 수가 30 이하인지 확인하십시오.", result["detail"])
 
 
 
@@ -122,7 +158,7 @@ class TestBoardService(TestCase):
         self.assertEqual(result["detail"], "부적절한 내용이 담겨있어 게시글을 수정 할 수 없습니다")
         
         
-    def test_exceeding_limited_num_of_char_on_post_board_title(self) -> None:
+    def test_exceeding_limited_num_of_char_on_put_board_title(self) -> None:
         """
         BoardView의 put 함수를 검증하는 함수
         case: 수정한 제목이 제한 글자 수(30자)를 초과했을 경우
@@ -148,7 +184,8 @@ class TestBoardService(TestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["detail"], "이 필드의 글자 수가 30 이하인지 확인하십시오.")
+        self.assertIn("이 필드의 글자 수가 30 이하인지 확인하십시오.", result["detail"])
+    
     
     def test_exceeding_limited_num_of_char_on_put_board_content(self) -> None:
         """
@@ -185,4 +222,42 @@ class TestBoardService(TestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["detail"], "이 필드의 글자 수가 500 이하인지 확인하십시오.")
+        self.assertIn("이 필드의 글자 수가 500 이하인지 확인하십시오.", result["detail"])
+        
+        
+    def test_exceeding_limited_num_of_char_on_put_board_title_and_content(self) -> None:
+        """
+        BoardView의 put 함수를 검증하는 함수
+        case: 수정한 제목과 내용이 제한 글자 수(각 30, 500자)를 초과했을 경우
+        """
+        client = APIClient()
+        user = UserModel.objects.create(
+            username="won1", password="1234", nickname="won"
+        )
+        user_board = BoardModel.objects.create(
+            title="title", content="content", author=user
+        )
+        request_data = {
+            "title": "30자 이상입니다. 30자 이상입니다. 30자 이상입니다",
+            "content": "500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 \
+            이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
+            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니",
+            "author": user.id,
+        }
+
+        client.force_authenticate(user=user)
+        url = "/board/" + str(user_board.id)
+        response = client.put(
+            url, data=json.dumps(request_data), content_type="application/json"
+        )
+        result = response.json()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("이 필드의 글자 수가 30 이하인지 확인하십시오.", result["detail"])
+        self.assertIn("이 필드의 글자 수가 500 이하인지 확인하십시오.", result["detail"])

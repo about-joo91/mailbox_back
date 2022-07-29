@@ -13,7 +13,7 @@
                 "test",
 
                 "${workspaceFolder}/user/tests",
-                // "${workspaceFolder}/board/tests"
+                "${workspaceFolder}/board/tests",
                 "${workspaceFolder}/my_page/tests"
 
 

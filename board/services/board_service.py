@@ -36,10 +36,8 @@ def create_board_data(board_data: Dict, author_id: int) -> None:
     """
     board_data["author"] = author_id
     create_board_serializer = BoardSerializer(data=board_data)
-    if create_board_serializer.is_valid():
-        create_board_serializer.save()
-        return "저장"
-    return create_board_serializer.errors
+    create_board_serializer.is_valid(raise_exception=True)
+    create_board_serializer.save()
 
 
 

@@ -1,8 +1,7 @@
-from rest_framework import permissions, status
+from rest_framework import exceptions, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework import exceptions
 
 from board.models import Board as BoardModel
 from board.models import BoardComment as BoardCommentModel
@@ -24,8 +23,6 @@ from board.services.board_service import (
 
 
 # Create your views here.
-
-
 class BoardView(APIView):
     """
     board 게시판의 CRUD를 담당하는 view
@@ -50,21 +47,24 @@ class BoardView(APIView):
             )
         except TypeError:
             return Response({"detail": "게시판을 조회할 수 없습니다. 다시 시도해주세요."}, status=status.HTTP_404_NOT_FOUND)
+        except exceptions.ValidationError as e:
+            error = "".join([str(value) for values in e.detail.values() for value in values])
+            return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
         
     def post(self, request):
-        if check_is_it_clean_text(request.data["content"]):
-            result = create_board_data(request.data, request.user.id)
-            if not "저장" in result:
-                for key, values in result.items():
-                    error = [value[:] for value in values][0]
-                return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
-            return Response({"detail": "게시글이 생성되었습니다."}, status=status.HTTP_200_OK)
-        else:
-            return Response(
-                {"detail": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-            
+        try:
+            if check_is_it_clean_text(request.data["content"]):
+                create_board_data(request.data, request.user.id)
+                return Response({"detail": "게시글이 생성되었습니다."}, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    {"detail": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except exceptions.ValidationError as e:
+            error_message = " ".join([str(value) for values in e.detail.values() for value in values])
+            return Response({"detail": error_message}, status=status.HTTP_400_BAD_REQUEST)
+                
 
     def put(self, request, board_id: str = None):
         try:
@@ -80,6 +80,9 @@ class BoardView(APIView):
             return Response({"detail": "게시글이 존재하지 않습니다"}, status=status.HTTP_404_NOT_FOUND)
         except exceptions.PermissionDenied:
             return Response({"detail": "게시글 수정 권한이 없습니다"}, status=status.HTTP_403_FORBIDDEN)
+        except exceptions.ValidationError as e:
+            error_message = "".join([str(value) for values in e.detail.values() for value in values])
+            return Response({"detail": error_message }, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, board_id: str = None):
         try:
@@ -89,7 +92,6 @@ class BoardView(APIView):
             return Response({"detail": "게시글이 존재하지 않습니다"}, status=status.HTTP_404_NOT_FOUND)
         except exceptions.PermissionDenied:
             return Response({"detail": "게시글 삭제 권한이 없습니다"}, status=status.HTTP_403_FORBIDDEN)
-
 
 
 class BorderLikeView(APIView):

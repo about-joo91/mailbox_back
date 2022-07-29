@@ -43,6 +43,7 @@ class LetterSerializer(serializers.ModelSerializer):
     class Meta:
         model = LetterModel
         fields = [
+            "id",
             "category",
             "title",
             "content",

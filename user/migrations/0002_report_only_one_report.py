@@ -12,8 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddConstraint(
             model_name="report",
-            constraint=models.UniqueConstraint(
-                fields=("report_user", "reported_user"), name="only_one_report"
-            ),
+            constraint=models.UniqueConstraint(fields=("report_user", "reported_user"), name="only_one_report"),
         ),
     ]

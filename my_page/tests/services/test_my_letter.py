@@ -65,13 +65,9 @@ class TestMyLetter(TestCase):
         case: userprofile이 none일 때
         """
         # Given
-        letter_author = UserModel.objects.create(
-            username="letter_author", nickname="letter_author"
-        )
+        letter_author = UserModel.objects.create(username="letter_author", nickname="letter_author")
         MongleGradeModel.objects.create(user=letter_author)
-        worry_board_author = UserModel.objects.create(
-            username="worryboard_author", nickname="worryboard_author"
-        )
+        worry_board_author = UserModel.objects.create(username="worryboard_author", nickname="worryboard_author")
         worry_board = WorryBoard.objects.create(
             author=worry_board_author,
             category=WorryCategoryModel.objects.create(cate_name="1"),
@@ -97,13 +93,9 @@ class TestMyLetter(TestCase):
         case: monglegrade가 none일 때
         """
         # Given
-        letter_author = UserModel.objects.create(
-            username="letter_author", nickname="letter_author"
-        )
+        letter_author = UserModel.objects.create(username="letter_author", nickname="letter_author")
         UserProfileModel.objects.create(user=letter_author)
-        worry_board_author = UserModel.objects.create(
-            username="worryboard_author", nickname="worryboard_author"
-        )
+        worry_board_author = UserModel.objects.create(username="worryboard_author", nickname="worryboard_author")
         worry_board = WorryBoard.objects.create(
             author=worry_board_author,
             category=WorryCategoryModel.objects.create(cate_name="1"),
@@ -179,13 +171,9 @@ class TestMyRecievedLetter(TestCase):
         case: userprofile이 none일 때
         """
         # Given
-        letter_author = UserModel.objects.create(
-            username="letter_author", nickname="letter_author"
-        )
+        letter_author = UserModel.objects.create(username="letter_author", nickname="letter_author")
         MongleGradeModel.objects.create(user=letter_author)
-        worry_board_author = UserModel.objects.create(
-            username="worryboard_author", nickname="worryboard_author"
-        )
+        worry_board_author = UserModel.objects.create(username="worryboard_author", nickname="worryboard_author")
         worry_board = WorryBoard.objects.create(
             author=worry_board_author,
             category=WorryCategoryModel.objects.create(cate_name="1"),
@@ -212,13 +200,9 @@ class TestMyRecievedLetter(TestCase):
         case: monglegrade가 none일 때
         """
         # Given
-        letter_author = UserModel.objects.create(
-            username="letter_author", nickname="letter_author"
-        )
+        letter_author = UserModel.objects.create(username="letter_author", nickname="letter_author")
         UserProfileModel.objects.create(user=letter_author)
-        worry_board_author = UserModel.objects.create(
-            username="worryboard_author", nickname="worryboard_author"
-        )
+        worry_board_author = UserModel.objects.create(username="worryboard_author", nickname="worryboard_author")
         worry_board = WorryBoard.objects.create(
             author=worry_board_author,
             category=WorryCategoryModel.objects.create(cate_name="1"),

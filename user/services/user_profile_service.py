@@ -17,8 +17,6 @@ def get_user_profile_data(user_id: int) -> Dict:
 
 def update_user_profile_data(user_id: int, update_data: Dict) -> None:
     cur_userprofile = UserProfileModel.objects.filter(user_id=user_id).get()
-    user_profile_serializer = UserProfileSerializer(
-        cur_userprofile, data=update_data, partial=True
-    )
+    user_profile_serializer = UserProfileSerializer(cur_userprofile, data=update_data, partial=True)
     user_profile_serializer.is_valid(raise_exception=True)
     user_profile_serializer.save()

@@ -12,8 +12,6 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddConstraint(
             model_name="letterreviewlike",
-            constraint=models.UniqueConstraint(
-                fields=("letter_review", "user"), name="only_one_like"
-            ),
+            constraint=models.UniqueConstraint(fields=("letter_review", "user"), name="only_one_like"),
         ),
     ]

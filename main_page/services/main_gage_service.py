@@ -9,9 +9,7 @@ def my_letter_count(user_id: int) -> list[dict]:
     """
     메인 페이지에 읽은 편지 개수를 가져오기 위한 service
     """
-    my_worrys = LetterModel.objects.filter(
-        Q(is_read=False) & Q(worryboard__author=user_id)
-    ).count()
+    my_worrys = LetterModel.objects.filter(Q(is_read=False) & Q(worryboard__author=user_id)).count()
 
     return my_worrys
 

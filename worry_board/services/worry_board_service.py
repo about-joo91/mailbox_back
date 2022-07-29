@@ -1,6 +1,7 @@
 from typing import Dict, List, Tuple
 
 import unsmile_filtering
+from user.models import User as UserModel
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import WorryBoardSerializer
 
@@ -15,15 +16,15 @@ def get_paginated_worry_board_data(page_num: int, category: int) -> Tuple[List, 
         ]
         total_count = WorryBoardModel.objects.count()
     else:
-        paginated_worry_board = WorryBoardModel.objects.filter(
-            category=category
-        ).order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        paginated_worry_board = WorryBoardModel.objects.filter(category=category).order_by("-create_date")[
+            10 * (page_num - 1) : 10 + 10 * (page_num - 1)
+        ]
         total_count = WorryBoardModel.objects.filter(category=category).count()
 
     return paginated_worry_board, total_count
 
 
-def create_worry_board_data(author: str, create_data: Dict) -> None:
+def create_worry_board_data(author: UserModel, create_data: Dict[str, str]) -> None:
     """
     worry_board의 데이터를 만드는 service
     """
@@ -33,19 +34,17 @@ def create_worry_board_data(author: str, create_data: Dict) -> None:
     create_worry_board_serializer.save()
 
 
-def update_worry_board_data(worry_board_id: int, update_data: Dict) -> None:
+def update_worry_board_data(worry_board_id: int, update_data: Dict[str, str]) -> None:
     """
     worry_board 데이터를 업데이트 하는 service
     """
     update_worry_board = WorryBoardModel.objects.get(id=worry_board_id)
-    update_worry_board_serializer = WorryBoardSerializer(
-        update_worry_board, data=update_data, partial=True
-    )
+    update_worry_board_serializer = WorryBoardSerializer(update_worry_board, data=update_data, partial=True)
     update_worry_board_serializer.is_valid(raise_exception=True)
     update_worry_board_serializer.save()
 
 
-def delete_worry_board_data(author: str, worry_board_id: int) -> None:
+def delete_worry_board_data(author: UserModel, worry_board_id: int) -> None:
     """
     worry_board 데이터를 삭제하는 service
     """
@@ -53,7 +52,7 @@ def delete_worry_board_data(author: str, worry_board_id: int) -> None:
     delete_model.delete()
 
 
-def check_is_it_clean_text(check_content: Dict) -> bool:
+def check_is_it_clean_text(check_content: str) -> bool:
     """
     작성하는 데이터에 욕설이 있는지 검증하는 service
     """

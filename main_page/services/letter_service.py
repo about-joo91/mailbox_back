@@ -15,9 +15,7 @@ def letter_post_service(letter_author: UserModel, request_data: dict) -> None:
     편지 보내는 기능을 담당하는 service
     """
     worry_board_id = request_data.pop("worry_board_id")
-    worry_board = WorryBoardModel.objects.select_related("author").get(
-        id=worry_board_id
-    )
+    worry_board = WorryBoardModel.objects.select_related("author").get(id=worry_board_id)
     letterserialzier = LetterSerilaizer(data=request_data)
     letterserialzier.is_valid(raise_exception=True)
     letterserialzier.save(worryboard=worry_board, letter_author=letter_author)
@@ -46,13 +44,9 @@ def letter_review_like_service(letter_review_id: int, user_id: int) -> None:
     편지 리뷰의 라이크를 담당하는 service
     """
     target_board = LetterReviewModel.objects.get(id=letter_review_id)
-    like_create = LetterReviewLikeModel.objects.create(
-        user_id=user_id, letter_review=target_board
-    )
+    like_create = LetterReviewLikeModel.objects.create(user_id=user_id, letter_review=target_board)
     if like_create:
-        LetterReviewModel.objects.filter(id=letter_review_id).update(
-            grade=F("grade") + 100
-        )
+        LetterReviewModel.objects.filter(id=letter_review_id).update(grade=F("grade") + 100)
 
 
 def letter_review_like_delete_service(letter_review_like_id: int, user_id: int) -> None:
@@ -65,6 +59,4 @@ def letter_review_like_delete_service(letter_review_like_id: int, user_id: int) 
     if target_review_like.user.id != user_id:
         raise exceptions.PermissionDenied
     target_review_like.delete()
-    LetterReviewModel.objects.filter(id=target_review_like.letter_review.id).update(
-        grade=F("grade") - 100
-    )
+    LetterReviewModel.objects.filter(id=target_review_like.letter_review.id).update(grade=F("grade") - 100)

@@ -35,15 +35,11 @@ class WorryBoardView(APIView):
             page_num = int(self.request.query_params.get("page_num"))
         except TypeError:
             page_num = 1
-        paginated_worry_board, total_count = get_paginated_worry_board_data(
-            page_num, category
-        )
+        paginated_worry_board, total_count = get_paginated_worry_board_data(page_num, category)
 
         return Response(
             {
-                "boards": WorryBoardSerializer(
-                    paginated_worry_board, many=True, context={"request": request}
-                ).data,
+                "boards": WorryBoardSerializer(paginated_worry_board, many=True, context={"request": request}).data,
                 "total_count": total_count,
             },
             status=status.HTTP_200_OK,
@@ -78,9 +74,7 @@ class WorryBoardView(APIView):
         if check_is_it_clean_text(request.data["content"]):
             try:
                 update_worry_board_data(worry_board_id, request.data)
-                return Response(
-                    {"detail": "고민 게시글이 수정되었습니다."}, status=status.HTTP_200_OK
-                )
+                return Response({"detail": "고민 게시글이 수정되었습니다."}, status=status.HTTP_200_OK)
 
             except TypeError:
                 return Response(
@@ -128,20 +122,18 @@ class RequestMessageView(APIView):
             page_num = int(self.request.query_params.get("page_num"))
         except TypeError:
             page_num = 1
-        author = request.user
-        paginated_request_message, total_count = get_paginated_request_message_data(
-            page_num, case, author
-        )
+            author = request.user
+            paginated_request_message, total_count = get_paginated_request_message_data(page_num, case, author)
 
-        return Response(
-            {
-                "request_message": RequestMessageSerializer(
-                    paginated_request_message, many=True, context={"request": request}
-                ).data,
-                "total_count": total_count,
-            },
-            status=status.HTTP_200_OK,
-        )
+            return Response(
+                {
+                    "request_message": RequestMessageSerializer(
+                        paginated_request_message, many=True, context={"request": request}
+                    ).data,
+                    "total_count": total_count,
+                },
+                status=status.HTTP_200_OK,
+            )
 
     def post(self, request, worry_board_id=0):
         """
@@ -155,16 +147,12 @@ class RequestMessageView(APIView):
         author = request.user
         check_content = request.data["request_message"]
         if check_is_it_clean_text(check_content):
-            if RequestMessageModel.objects.filter(
-                author=author, worry_board_id=worry_board_id
-            ).exists():
+            if RequestMessageModel.objects.filter(author=author, worry_board_id=worry_board_id).exists():
                 return Response(
                     {"detail": "이미 보낸 요청입니다."},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            if WorryBoardModel.objects.filter(
-                id=worry_board_id, author=author
-            ).exists():
+            if WorryBoardModel.objects.filter(id=worry_board_id, author=author).exists():
                 return Response(
                     {"detail": "내가 작성한 게시물에는 요청할 수 없습니다."},
                     status=status.HTTP_400_BAD_REQUEST,
@@ -187,15 +175,11 @@ class RequestMessageView(APIView):
             update_request_message_data(request.data, request_message_id)
             return Response({"detail": "요청 메세지가 수정되었습니다."}, status=status.HTTP_200_OK)
         except RequestMessageModel.DoesNotExist:
-            return Response(
-                {"detail": "해당 요청 메세지가 존재하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "해당 요청 메세지가 존재하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, request_message_id):
         try:
             delete_request_message_data(request_message_id)
             return Response({"detail": "요청 메세지가 삭제되었습니다."}, status=status.HTTP_200_OK)
         except RequestMessageModel.DoesNotExist:
-            return Response(
-                {"detail": "해당 요청 메세지가 존재하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "해당 요청 메세지가 존재하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)

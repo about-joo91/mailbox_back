@@ -26,9 +26,7 @@ class BoardSerializer(serializers.ModelSerializer):
 
     def get_board_comment(self, obj):
         request = self.context["request"]
-        return BoardCommentSerializer(
-            obj.boardcomment_set, many=True, context={"request": request}
-        ).data
+        return BoardCommentSerializer(obj.boardcomment_set, many=True, context={"request": request}).data
 
     def get_board_comment_count(self, obj):
         return obj.boardcomment_set.count()

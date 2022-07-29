@@ -4,7 +4,33 @@ on:
     types: [closed]
     branches: [main]
 jobs:
+  run-test:
+    runs-on: ubuntu-latest
+    env:
+      MONGLE_SECRET_KEY: ${{ secrets.MONGLE_SECRET_KEY }}
+      MONGLE_JWT_SECRET_KEY: ${{ secrets.MONGLE_JWT_SECRET_KEY }}
+      MONGLE_USER: ${{ secrets.MONGLE_USER }}
+      MONGLE_DB_NAME: ${{ secrets.MONGLE_DB_NAME }}
+      MONGLE_PASSWORD: ${{ secrets.MONGLE_PASSWORD }}
+      MONGLE_HOST: ${{ secrets.MONGLE_HOST }}
+      MONGLE_PORT: ${{ secrets.MONGLE_PORT }}
+    steps:
+      - uses: actions/checkout@master
+      - name: set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+      - name: install dependencies
+        run: |
+          python -m pip install --upgrade pip 
+          pip install -r requirements.txt
+      - name: run tests
+        run: |
+          python manage.py migrate
+          python manage.py test --keepdb
+
   build-image:
+    needs: run-test
     if: github.event.pull_request.merged
     runs-on: ubuntu-latest
     steps:

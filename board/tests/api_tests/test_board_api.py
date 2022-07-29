@@ -285,7 +285,6 @@ class TestBoardAPI(APITestCase):
         """
         BoardView의 put 함수를 검증하는 함수
         case : 게시물을 쓴 사용자가 아닌 사람이 수정을 하려는 경우
-
         """
         
         client = APIClient()

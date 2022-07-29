@@ -27,20 +27,14 @@ class MyLetterView(APIView):
         try:
             letter_num = int(self.request.query_params.get("letter_num"))
         except TypeError:
-            return Response(
-                {"detail": "올바른 편지 번호를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "올바른 편지 번호를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             cur_user.refresh_from_db()
             letter_cnt = cur_user.sent_letter_cnt
             if letter_cnt == 0:
-                return Response(
-                    {"detail": "편지가 없습니다. 작성하러 가볼까요?"}, status=status.HTTP_303_SEE_OTHER
-                )
+                return Response({"detail": "편지가 없습니다. 작성하러 가볼까요?"}, status=status.HTTP_303_SEE_OTHER)
             query = Q(letter_author=cur_user)
-            letter_this_page = get_letter_data_by_user(
-                query=query, letter_num=letter_num
-            )
+            letter_this_page = get_letter_data_by_user(query=query, letter_num=letter_num)
             return Response(
                 {
                     "letter": letter_this_page,
@@ -74,9 +68,7 @@ class MyRecievedLetterView(APIView):
         try:
             letter_num = int(self.request.query_params.get("letter_num"))
         except TypeError:
-            return Response(
-                {"detail": "올바른 편지 번호를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "올바른 편지 번호를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             cur_user.refresh_from_db()
             letter_cnt = cur_user.received_letter_cnt
@@ -86,9 +78,7 @@ class MyRecievedLetterView(APIView):
                     status=status.HTTP_303_SEE_OTHER,
                 )
             query = Q(worryboard__author=cur_user)
-            letter_this_page = get_letter_data_by_user(
-                query=query, letter_num=letter_num
-            )
+            letter_this_page = get_letter_data_by_user(query=query, letter_num=letter_num)
             return Response(
                 {
                     "letter": letter_this_page,

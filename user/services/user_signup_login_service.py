@@ -18,4 +18,3 @@ def post_user_signup_data(user_data: Dict) -> None:
     user_data_serializer = UserSignupSerializer(data=user_data)
     user_data_serializer.is_valid(raise_exception=True)
     user_data_serializer.save()
-    

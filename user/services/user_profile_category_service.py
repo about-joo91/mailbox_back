@@ -10,19 +10,11 @@ def get_category_of_profile_except_mine(user_id: int) -> List[Dict]:
     """
     user_profile = UserProfileModel.objects.filter(user_id=user_id).get()
     worry_category_ids_of_mine = [
-        category.id
-        for category in list(
-            WorryCategoryModel.objects.filter(userprofile=user_profile)
-        )
+        category.id for category in list(WorryCategoryModel.objects.filter(userprofile=user_profile))
     ]
 
-    category_all_except_mine = list(
-        WorryCategoryModel.objects.all().exclude(id__in=worry_category_ids_of_mine)
-    )
-    categories = [
-        {"id": cate.id, "cate_name": cate.cate_name}
-        for cate in category_all_except_mine
-    ]
+    category_all_except_mine = list(WorryCategoryModel.objects.all().exclude(id__in=worry_category_ids_of_mine))
+    categories = [{"id": cate.id, "cate_name": cate.cate_name} for cate in category_all_except_mine]
     return categories
 
 
@@ -39,6 +31,4 @@ def delete_category_of_profile(user_id: int, p_category: int) -> None:
     내 프로필의 카테고리를 제거하는 함수
     """
     worry_category = WorryCategoryModel.objects.filter(id=p_category).get()
-    UserProfileModel.objects.filter(user_id=user_id).get().categories.remove(
-        worry_category
-    )
+    UserProfileModel.objects.filter(user_id=user_id).get().categories.remove(worry_category)

@@ -16,9 +16,9 @@ def get_paginated_worry_board_data(page_num: int, category: int) -> Tuple[List, 
         ]
         total_count = WorryBoardModel.objects.count()
     else:
-        paginated_worry_board = WorryBoardModel.objects.filter(
-            category=category
-        ).order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        paginated_worry_board = WorryBoardModel.objects.filter(category=category).order_by("-create_date")[
+            10 * (page_num - 1) : 10 + 10 * (page_num - 1)
+        ]
         total_count = WorryBoardModel.objects.filter(category=category).count()
 
     return paginated_worry_board, total_count
@@ -50,9 +50,7 @@ def update_worry_board_data(worry_board_id: int, update_worry_board_data: Dict) 
     worry_board 데이터를 업데이트 하는 service
     """
     update_worry_board = WorryBoardModel.objects.filter(id=worry_board_id)
-    update_worry_board_serializer = WorryBoardSerializer(
-        update_worry_board, data=update_worry_board_data, partial=True
-    )
+    update_worry_board_serializer = WorryBoardSerializer(update_worry_board, data=update_worry_board_data, partial=True)
     update_worry_board_serializer.is_valid(raise_exception=True)
     update_worry_board_serializer.save()
 
@@ -65,20 +63,18 @@ def delete_worry_board_data(worry_board_id: int, author: str) -> None:
     delete_model.delete()
 
 
-def get_paginated_request_message_data(
-    page_num: int, case: str, author: str
-) -> Tuple[List, int]:
+def get_paginated_request_message_data(page_num: int, case: str, author: str) -> Tuple[List, int]:
     """
     request_data를 가져오는 service
     """
     if case == "sended":
-        paginated_request_message = RequestMessageModel.objects.filter(
-            author=author
-        ).order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        paginated_request_message = RequestMessageModel.objects.filter(author=author).order_by("-create_date")[
+            10 * (page_num - 1) : 10 + 10 * (page_num - 1)
+        ]
     elif case == "recieve":
-        paginated_request_message = RequestMessageModel.objects.filter(
-            worry_board__author=author
-        ).order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        paginated_request_message = RequestMessageModel.objects.filter(worry_board__author=author).order_by(
+            "-create_date"
+        )[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
     total_count = paginated_request_message.count()
     return paginated_request_message, total_count
 
@@ -87,9 +83,7 @@ def create_request_message_data(author: str, worry_board_id: int, request_messag
     """
     request_message를 만드는 service
     """
-    get_request_message = RequestMessageModel.objects.filter(
-        author=author, worry_board_id=worry_board_id
-    ).exists()
+    get_request_message = RequestMessageModel.objects.filter(author=author, worry_board_id=worry_board_id).exists()
     if get_request_message == False:
         RequestMessageModel.objects.create(
             author=author,

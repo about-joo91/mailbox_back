@@ -16,11 +16,7 @@ class BoardLike(models.Model):
     board = models.ForeignKey("board.Board", on_delete=models.CASCADE)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["author", "board"], name="user_only_one_board_like"
-            )
-        ]
+        constraints = [models.UniqueConstraint(fields=["author", "board"], name="user_only_one_board_like")]
 
 
 class BoardComment(models.Model):

@@ -31,16 +31,13 @@ class BoardView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-
     def get(self, request):
         try:
             page_num = int(self.request.query_params.get("page_num"))
             paginated_board, total_count = get_paginated_board_data(page_num)
             return Response(
                 {
-                    "boards": BoardSerializer(
-                        paginated_board, many=True, context={"request": request}
-                    ).data,
+                    "boards": BoardSerializer(paginated_board, many=True, context={"request": request}).data,
                     "total_count": total_count,
                 },
                 status=status.HTTP_200_OK,
@@ -50,7 +47,7 @@ class BoardView(APIView):
         except exceptions.ValidationError as e:
             error = "".join([str(value) for values in e.detail.values() for value in values])
             return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
-        
+
     def post(self, request):
         try:
             if check_is_it_clean_text(request.data["content"]):
@@ -64,7 +61,6 @@ class BoardView(APIView):
         except exceptions.ValidationError as e:
             error_message = " ".join([str(value) for values in e.detail.values() for value in values])
             return Response({"detail": error_message}, status=status.HTTP_400_BAD_REQUEST)
-                
 
     def put(self, request, board_id: str = None):
         try:
@@ -82,7 +78,7 @@ class BoardView(APIView):
             return Response({"detail": "게시글 수정 권한이 없습니다"}, status=status.HTTP_403_FORBIDDEN)
         except exceptions.ValidationError as e:
             error_message = "".join([str(value) for values in e.detail.values() for value in values])
-            return Response({"detail": error_message }, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": error_message}, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, board_id: str = None):
         try:
@@ -125,9 +121,7 @@ class BorderCommentView(APIView):
         board_comment_data = get_board_comment_data(board_id)
         return Response(
             {
-                "board_comments": BoardSerializer(
-                    board_comment_data, many=True, context={"request": request}
-                ).data,
+                "board_comments": BoardSerializer(board_comment_data, many=True, context={"request": request}).data,
             },
             status=status.HTTP_200_OK,
         )
@@ -160,6 +154,4 @@ class BorderCommentView(APIView):
             delete_board_comment_data(comment_id, request.user.id)
             return Response({"detail": "댓글이 삭제되었습니다."}, status=status.HTTP_200_OK)
         except BoardCommentModel.DoesNotExist:
-            return Response(
-                {"detail": "댓글이 존재하지 않습니다.."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "댓글이 존재하지 않습니다.."}, status=status.HTTP_400_BAD_REQUEST)

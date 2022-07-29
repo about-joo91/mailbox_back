@@ -11,8 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AddConstraint(
-            model_name='boardlike',
-            constraint=models.UniqueConstraint(fields=('author', 'board'), name='user_only_one_board_like'),
-
+            model_name="boardlike",
+            constraint=models.UniqueConstraint(fields=("author", "board"), name="user_only_one_board_like"),
         ),
     ]

@@ -9,12 +9,8 @@ class UserSignupSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if UserModel.objects.filter(nickname=data["nickname"]).exists():
             raise serializers.ValidationError("중복된 닉네임이 존재합니다.")
-        
 
-        condition = all(
-            x not in ["!", "@", "#", "$", "%", "^", "&", "*", "_"]
-            for x in data["password"]
-        )
+        condition = all(x not in ["!", "@", "#", "$", "%", "^", "&", "*", "_"] for x in data["password"])
         if len(data["username"]) < 4:
             raise serializers.ValidationError("아이디는 4자 이상 입력해주세요.")
         elif len(data["password"]) < 8 or condition:
@@ -49,10 +45,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     mongle_grade = serializers.SerializerMethodField(read_only=True)
 
     def get_categories(self, obj):
-        return [
-            {"id": cate.id, "cate_name": cate.category.cate_name}
-            for cate in obj.userprofilecategory_set.all()
-        ]
+        return [{"id": cate.id, "cate_name": cate.category.cate_name} for cate in obj.userprofilecategory_set.all()]
 
     def get_mongle_level(self, obj):
         return obj.user.monglegrade.level

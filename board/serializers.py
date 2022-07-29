@@ -5,7 +5,7 @@ from board.models import BoardComment as BoardCommentModel
 
 
 class BoardSerializer(serializers.ModelSerializer):
-    
+
     like_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     is_board_writer = serializers.SerializerMethodField()
@@ -26,9 +26,7 @@ class BoardSerializer(serializers.ModelSerializer):
 
     def get_board_comment(self, obj):
         request = self.context["request"]
-        return BoardCommentSerializer(
-            obj.boardcomment_set, many=True, context={"request": request}
-        ).data
+        return BoardCommentSerializer(obj.boardcomment_set, many=True, context={"request": request}).data
 
     def get_board_comment_count(self, obj):
         return obj.boardcomment_set.count()
@@ -40,7 +38,7 @@ class BoardSerializer(serializers.ModelSerializer):
         time_data = time.strftime(format_data)
 
         return time_data
-    
+
     class Meta:
         model = BoardModel
         fields = [

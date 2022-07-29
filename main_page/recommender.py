@@ -1,5 +1,6 @@
-import pandas as pd
 import random
+
+import pandas as pd
 
 from worry_board.models import WorryBoard as WorryBoardModel
 
@@ -17,9 +18,7 @@ class Recommendation:
     def recommend_worries(self, latest_worryboard_id):
         try:
             recommend_index = list(
-                self.cos.loc[self.id_to_index[latest_worryboard_id]]
-                .sort_values(ascending=False)[:4]
-                .index
+                self.cos.loc[self.id_to_index[latest_worryboard_id]].sort_values(ascending=False)[:4].index
             )
             recommend_ids = [self.index_to_id[int(index)] for index in recommend_index]
             recommend_ids.remove(latest_worryboard_id)
@@ -30,14 +29,13 @@ class Recommendation:
                 result_obj.append(result)
 
             return result_obj
-        
+
         except KeyError:
             result_obj = list(WorryBoardModel.objects.all())
             # change 3 to how many random items you want
             random_items = random.sample(result_obj, 3)
             print(random_items)
-            return result_obj
-
+            return random_items
 
 
 recommend_worryboard = Recommendation()

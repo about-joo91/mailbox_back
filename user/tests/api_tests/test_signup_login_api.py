@@ -4,11 +4,11 @@ from rest_framework.test import APITestCase
 from user.models import User as UserModel
 
 
-
 class TestUserRegistrationAPI(APITestCase):
     """
     회원가입 API 테스트 코드
     """
+
     def test_signup(self) -> None:
         url = reverse("user_view")
         user_data = {"username": "won1", "password": "qwer1234%", "nickname": "won1122"}
@@ -33,4 +33,3 @@ class LoginTestCase(APITestCase):
     def test_login(self):
         response = self.client.post(reverse("token_obtain_pair"), self.data)
         self.assertEqual(response.status_code, 200)
-

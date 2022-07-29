@@ -3,8 +3,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-import unsmile_filtering
-from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import RequestMessageSerializer, WorryBoardSerializer
 from worry_board.services.worry_board_service import (
@@ -28,15 +26,11 @@ class WorryBoardView(APIView):
     def get(self, request):
         category = int(self.request.query_params.get("category"))
         page_num = int(self.request.query_params.get("page_num"))
-        paginated_worry_board, total_count = get_paginated_worry_board_data(
-            page_num, category
-        )
+        paginated_worry_board, total_count = get_paginated_worry_board_data(page_num, category)
 
         return Response(
             {
-                "boards": WorryBoardSerializer(
-                    paginated_worry_board, many=True, context={"request": request}
-                ).data,
+                "boards": WorryBoardSerializer(paginated_worry_board, many=True, context={"request": request}).data,
                 "total_count": total_count,
             },
             status=status.HTTP_200_OK,
@@ -83,9 +77,7 @@ class WorryBoardView(APIView):
             delete_worry_board_data(worry_board_id, author)
             return Response({"detail": "고민 게시글이 삭제되었습니다."}, status=status.HTTP_200_OK)
         except WorryBoardModel.DoesNotExist:
-            return Response(
-                {"detail": "게시글이 존재하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "게시글이 존재하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RequestMessageView(APIView):
@@ -101,20 +93,18 @@ class RequestMessageView(APIView):
             page_num = int(self.request.query_params.get("page_num"))
         except:
             page_num = 1
-        author = request.user
-        paginated_request_message, total_count = get_paginated_request_message_data(
-            page_num, case, author
-        )
+            author = request.user
+            paginated_request_message, total_count = get_paginated_request_message_data(page_num, case, author)
 
-        return Response(
-            {
-                "request_message": RequestMessageSerializer(
-                    paginated_request_message, many=True, context={"request": request}
-                ).data,
-                "total_count": total_count,
-            },
-            status=status.HTTP_200_OK,
-        )
+            return Response(
+                {
+                    "request_message": RequestMessageSerializer(
+                        paginated_request_message, many=True, context={"request": request}
+                    ).data,
+                    "total_count": total_count,
+                },
+                status=status.HTTP_200_OK,
+            )
 
     def post(self, request, worry_board_id):
         """

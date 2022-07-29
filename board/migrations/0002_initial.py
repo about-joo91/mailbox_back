@@ -18,50 +18,36 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="boardlike",
             name="author",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name="boardlike",
             name="board",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="board.board"
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="board.board"),
         ),
         migrations.AddField(
             model_name="boardcommentlike",
             name="board_comment",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="board.boardcomment"
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="board.boardcomment"),
         ),
         migrations.AddField(
             model_name="boardcommentlike",
             name="board_comment_author",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name="boardcomment",
             name="author",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name="boardcomment",
             name="board",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to="board.board"
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="board.board"),
         ),
         migrations.AddField(
             model_name="board",
             name="author",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
     ]

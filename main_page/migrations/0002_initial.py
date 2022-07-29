@@ -19,23 +19,17 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="letterreviewlike",
             name="user_id",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name="letterreview",
             name="letter",
-            field=models.OneToOneField(
-                on_delete=django.db.models.deletion.CASCADE, to="main_page.letter"
-            ),
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to="main_page.letter"),
         ),
         migrations.AddField(
             model_name="letterreview",
             name="review_author",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
-            ),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name="letter",

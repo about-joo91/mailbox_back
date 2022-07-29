@@ -6,6 +6,14 @@ on:
 jobs:
   run-test:
     runs-on: ubuntu-latest
+    env:
+      MONGLE_SECRET_KEY: ${{ secrets.MONGLE_SECRET_KEY }}
+      MONGLE_JWT_SECRET_KEY: ${{ secrets.MONGLE_JWT_SECRET_KEY }}
+      MONGLE_USER: ${{ secrets.MONGLE_USER }}
+      MONGLE_DB_NAME: ${{ secrets.MONGLE_DB_NAME }}
+      MONGLE_PASSWORD: ${{ secrets.MONGLE_PASSWORD }}
+      MONGLE_HOST: ${{ secrets.MONGLE_HOST }}
+      MONGLE_PORT: ${{ secrets.MONGLE_PORT }}
     steps:
       - uses: actions/checkout@master
       - name: set up python

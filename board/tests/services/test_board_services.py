@@ -1,263 +1,137 @@
 from django.test import TestCase
 
-import json
-
-from rest_framework.test import APIClient
-
-from board.models import Board as BoardModel
 from user.models import User as UserModel
+from board.models import Board as BoardModel
+from board.services.board_service import (
+    check_is_it_clean_text, 
+    create_board_data, 
+    delete_board_data, 
+    get_paginated_board_data, 
+    update_board_data
+)
+
 
 
 class TestBoardService(TestCase):
     """
-    BoardView의 service를 검증하는 클래스
+    BoardView의 service 함수를 검증하는 클래스
     """
     
-    def test_including_swear_word_in_post_board_content(self) -> None:
+    def test_check_is_it_clean_text(self):
         """
-        BoardView의 post 함수를 검증하는 함수
-        case : 욕설을 포함한 내용을 post하는 경우
+        비속어 필터링 함수 체크
+        case: 비속어가 포함되어 있지 않은 경우
         """
-        client = APIClient()
+        user = UserModel.objects.create(
+            username="won1", password="1234", nickname="won"
+        )
+        request_data = {"title": "title", "content": "봄날의 햇살", "author": user.id}
+        result = check_is_it_clean_text(request_data["content"])
+        
+        self.assertTrue(result)
+    
+    
+    def test_check_is_it_clean_text_when_contents_include_swear_word(self) -> None:
+        """
+        비속어 필터링 함수 체크
+        case: 비속어가 포함되어 있는 경우
+        """
         user = UserModel.objects.create(
             username="won1", password="1234", nickname="won"
         )
         request_data = {"title": "title", "content": "바보 멍청이", "author": user.id}
-
-        client.force_authenticate(user=user)
-        url = "/board/"
-        response = client.post(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
-        result = response.json()
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["detail"], "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다")
-
-    def test_exceeding_limited_num_of_char_on_post_board_title(self) -> None:
-        """
-        BoardView의 post 함수를 검증하는 함수
-        case : 제목에 제한된 글자수(30자)를 초과하여 post하는 경우
-        """
-        client = APIClient()
-        user = UserModel.objects.create(
-            username="won1", password="1234", nickname="won"
-        )
-        request_data = {
-            "title": "30자 이상입니다. 30자 이상입니다. 30자 이상입니다",
-            "content": "content",
-            "author": user.id,
-        }
-
-        client.force_authenticate(user=user)
-        url = "/board/"
-        response = client.post(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
-        print(response)
-        result = response.json()
-        print(result)
-
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("이 필드의 글자 수가 30 이하인지 확인하십시오.", result["detail"])
-
-
-    def test_exceeding_limited_num_of_char_on_post_board_content(self) -> None:
-        """
-        BoardView의 post 함수를 검증하는 함수
-        case : 내용에 제한된 글자수를 초과하여 post하는 경우
-        """
-        client = APIClient()
-        user = UserModel.objects.create(
-            username="won1", password="1234", nickname="won"
-        )
-        request_data = {
-            "title": "title",
-            "content": "500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 \
-            이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니",
-            "author": user.id,
-        }
-
-        client.force_authenticate(user=user)
-        url = "/board/"
-        response = client.post(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
-        result = response.json()
-
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("이 필드의 글자 수가 500 이하인지 확인하십시오.", result["detail"])
+        result = check_is_it_clean_text(request_data["content"])
+        
+        self.assertFalse(result)
         
         
-    def test_exceeding_limited_num_of_char_on_post_board_title_and_content(self) -> None:
+    def test_get_paginated_board_data(self) -> None:
         """
-        BoardView의 post 함수를 검증하는 함수
-        case: 작성한 board의 제목과 내용이 제한 글자 수(각 30, 500자)를 초과했을 경우
+        page_num을 통해서 board 데이터를 가져오는 service 함수 검증
         """
-        client = APIClient()
         user = UserModel.objects.create(
             username="won1", password="1234", nickname="won"
         )
-        request_data = {
-            "title": "30자 이상입니다. 30자 이상입니다. 30자 이상입니다",
-            "content": "500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 \
-            이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니",
-            "author": user.id,
-        }
+        BoardModel.objects.create(title="title", content="content", author=user)
 
-        client.force_authenticate(user=user)
-        url = "/board/"
-        response = client.post(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
-        result = response.json()
-        print(result)
-
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("이 필드의 글자 수가 500 이하인지 확인하십시오.", result["detail"])
-        self.assertIn("이 필드의 글자 수가 30 이하인지 확인하십시오.", result["detail"])
-
-
-
-    def test_including_swear_word_in_put_board_content(self) -> None:
-        """
-        BoardView의 put 함수를 검증하는 함수
-        case: 수정한 내용이 욕설을 포함한 내용일 경우
-        """
-        client = APIClient()
-        user = UserModel.objects.create(
-            username="won1", password="1234", nickname="won"
-        )
-        user_board = BoardModel.objects.create(
-            title="title", content="content", author=user
-        )
-        request_data = {"title": "수정된 제목", "content": "바보 멍청이", "author": user.id}
-
-        client.force_authenticate(user=user)
-        url = "/board/" + str(user_board.id)
-        response = client.put(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
-        result = response.json()
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(result["detail"], "부적절한 내용이 담겨있어 게시글을 수정 할 수 없습니다")
+        paginated_board, total_count = get_paginated_board_data(1)
+        
+        with self.assertNumQueries(1):
+            get_paginated_board_data(1)
+        
+        self.assertEqual(1, total_count)
         
         
-    def test_exceeding_limited_num_of_char_on_put_board_title(self) -> None:
+    def test_create_board_data(self) -> None:
         """
-        BoardView의 put 함수를 검증하는 함수
-        case: 수정한 제목이 제한 글자 수(30자)를 초과했을 경우
+        board 데이터를 작성하는 service 함수 검증
         """
-        client = APIClient()
         user = UserModel.objects.create(
             username="won1", password="1234", nickname="won"
         )
-        user_board = BoardModel.objects.create(
-            title="title", content="content", author=user
-        )
-        request_data = {
-            "title": "30자 이상입니다. 30자 이상입니다. 30자 이상입니다",
-            "content": "content",
-            "author": user.id,
-        }
-
-        client.force_authenticate(user=user)
-        url = "/board/" + str(user_board.id)
-        response = client.put(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
-        result = response.json()
-
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("이 필드의 글자 수가 30 이하인지 확인하십시오.", result["detail"])
+        request_data = {"title": "title", "content": "content", "author": user.id}
+        
+        with self.assertNumQueries(2):
+            create_board_data(request_data, user.id)
+        
+        board = BoardModel.objects.get(author=user.id)
+        
+        self.assertEqual(1, BoardModel.objects.all().count())
+        self.assertEqual(board.title, "title")
+        self.assertEqual(board.content, "content")
     
     
-    def test_exceeding_limited_num_of_char_on_put_board_content(self) -> None:
+    def test_update_board_data(self) -> None:
         """
-        BoardView의 put 함수를 검증하는 함수
-        case: 수정한 내용이 제한 글자 수(500자)를 초과했을 경우
+        board 데이터를 업데이트 하는 service 함수 검증
         """
-        
-        client = APIClient()
         user = UserModel.objects.create(
             username="won1", password="1234", nickname="won"
         )
         user_board = BoardModel.objects.create(
             title="title", content="content", author=user
         )
-        request_data = {
-            "title": "title",
-            "content": "500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 \
-            이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니",
-            "author": user.id,
-        }
+        request_data = {"title": "수정된 제목", "content": "수정된 내용", "author": user.id}
 
-        client.force_authenticate(user=user)
-        url = "/board/" + str(user_board.id)
-        response = client.put(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
-        result = response.json()
-
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("이 필드의 글자 수가 500 이하인지 확인하십시오.", result["detail"])
+        with self.assertNumQueries(4):
+            update_board_data(user_board.id, request_data, user.id)
+            
+        updated_board = BoardModel.objects.get(id=user_board.id)
         
+        self.assertEqual(updated_board.title, "수정된 제목")
+        self.assertEqual(updated_board.content, "수정된 내용")
         
-    def test_exceeding_limited_num_of_char_on_put_board_title_and_content(self) -> None:
+    
+    def test_delete_board_data(self) -> None:
         """
-        BoardView의 put 함수를 검증하는 함수
-        case: 수정한 제목과 내용이 제한 글자 수(각 30, 500자)를 초과했을 경우
+        board 데이터를 삭제하는 service 함수 검증
         """
-        client = APIClient()
         user = UserModel.objects.create(
             username="won1", password="1234", nickname="won"
         )
         user_board = BoardModel.objects.create(
             title="title", content="content", author=user
         )
-        request_data = {
-            "title": "30자 이상입니다. 30자 이상입니다. 30자 이상입니다",
-            "content": "500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 \
-            이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니다. \
-            500자 이상입니다. 500자 이상입니다. 500자 이상입니다. 500자 이상입니",
-            "author": user.id,
-        }
+        
+        self.assertEqual(1, BoardModel.objects.all().count())
+        
+        with self.assertNumQueries(5):
+            delete_board_data(user_board.id, user.id)
+        
+        self.assertEqual(0, BoardModel.objects.all().count())
+        
+        
+        
+        
+        
+        
+    
+    
+    
+    
+    
+    
+    
 
-        client.force_authenticate(user=user)
-        url = "/board/" + str(user_board.id)
-        response = client.put(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
-        result = response.json()
 
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("이 필드의 글자 수가 30 이하인지 확인하십시오.", result["detail"])
-        self.assertIn("이 필드의 글자 수가 500 이하인지 확인하십시오.", result["detail"])
+    

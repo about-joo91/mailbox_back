@@ -121,14 +121,14 @@ class MainPageView(APIView):
         cur_user = request.user
 
 
-        latest_user_letter = LetterModel.objects.filter(letter_author=cur_user).order_by(
-            "-create_date"
-        )[:1][0]
-        worryboard_id_of_letter = latest_user_letter.worryboard.id
-        recomendation_sys = recommender.recommend_worryboard
-        final_worryboard_list = recomendation_sys.recommend_worries(
-            worryboard_id_of_letter
-        )
+        # latest_user_letter = LetterModel.objects.filter(letter_author=cur_user).order_by(
+        #     "-create_date"
+        # )[:1][0]
+        # worryboard_id_of_letter = latest_user_letter.worryboard.id
+        # recomendation_sys = recommender.recommend_worryboard
+        # final_worryboard_list = recomendation_sys.recommend_worries(
+        #     worryboard_id_of_letter
+        # )
         not_read_my_letter_count = my_letter_count(request.user.id)
 
         worry_categories = WorryCategoryModel.objects.prefetch_related(

@@ -64,7 +64,7 @@ def make_like_data(author: int, board_id: int) -> None:
     like 데이터를 만드는 service
     """
     target_board = BoardModel.objects.get(id=board_id)
-    like_board = BoardLikeModel.objects.create(author=author, board=target_board)
+    BoardLikeModel.objects.create(author=author, board=target_board)
 
 
 def delete_like_data(author: int, board_id: int) -> None:

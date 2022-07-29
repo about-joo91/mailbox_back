@@ -4,7 +4,21 @@ on:
     types: [closed]
     branches: [main]
 jobs:
+  run-test:
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@master
+    - name: set up python
+    - uses: actions/setup-python@n4
+      with:
+        python-version: "3.10"
+        architecture: "x64"
+    - name: run tests
+      run: |
+        python manage.py test
+
   build-image:
+    needs: run-test
     if: github.event.pull_request.merged
     runs-on: ubuntu-latest
     steps:

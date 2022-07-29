@@ -7,10 +7,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from main_page.services.letter_service import letter_is_read_service
-from my_page.services.my_page_service import (
-    get_letter_data_by_user,
-    get_not_read_letter_count,
-)
+from my_page.services.my_page_service import get_letter_data_by_user, get_not_read_letter_count
 from user.models import MongleGrade as MongleGradeModel
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
@@ -31,20 +28,14 @@ class MyLetterView(APIView):
         try:
             letter_num = int(self.request.query_params.get("letter_num"))
         except TypeError:
-            return Response(
-                {"detail": "올바른 편지 번호를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "올바른 편지 번호를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             cur_user.refresh_from_db()
             letter_cnt = cur_user.sent_letter_cnt
             if letter_cnt == 0:
-                return Response(
-                    {"detail": "편지가 없습니다. 작성하러 가볼까요?"}, status=status.HTTP_303_SEE_OTHER
-                )
+                return Response({"detail": "편지가 없습니다. 작성하러 가볼까요?"}, status=status.HTTP_303_SEE_OTHER)
             query = Q(letter_author=cur_user)
-            letter_this_page = get_letter_data_by_user(
-                query=query, letter_num=letter_num
-            )
+            letter_this_page = get_letter_data_by_user(query=query, letter_num=letter_num)
             return Response(
                 {
                     "letter": letter_this_page,
@@ -78,9 +69,7 @@ class MyRecievedLetterView(APIView):
         try:
             letter_num = int(self.request.query_params.get("letter_num"))
         except TypeError:
-            return Response(
-                {"detail": "올바른 편지 번호를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "올바른 편지 번호를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
         try:
             cur_user.refresh_from_db()
             letter_cnt = cur_user.received_letter_cnt
@@ -91,9 +80,7 @@ class MyRecievedLetterView(APIView):
                 )
 
             letter_this_page_query = Q(worryboard__author=cur_user)
-            letter_this_page = get_letter_data_by_user(
-                query=letter_this_page_query, letter_num=letter_num
-            )
+            letter_this_page = get_letter_data_by_user(query=letter_this_page_query, letter_num=letter_num)
 
             not_read_letter_query = Q(worryboard__author=cur_user) & Q(is_read=False)
             not_read_letter_cnt = get_not_read_letter_count(not_read_letter_query)
@@ -132,12 +119,8 @@ class NotReadLetterView(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            letter_this_page = get_letter_data_by_user(
-                query=query, letter_num=letter_num
-            )
-            letter_is_read_service(
-                user_id=cur_user.id, letter_id=int(letter_this_page["id"])
-            )
+            letter_this_page = get_letter_data_by_user(query=query, letter_num=letter_num)
+            letter_is_read_service(user_id=cur_user.id, letter_id=int(letter_this_page["id"]))
 
             return Response(
                 {
@@ -155,6 +138,4 @@ class NotReadLetterView(APIView):
             MongleGradeModel.objects.create(user=cur_user)
             return Response({"detail": "잘못된 요청입니다. 다시 시도해주세요."})
         except TypeError:
-            return Response(
-                {"detail": "올바른 편지 번호를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "올바른 편지 번호를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)

@@ -27,14 +27,7 @@ from . import recommender
 from .models import Letter as LetterModel
 from .models import LetterReviewLike as LetterReviewLikeModel
 from .models import WorryCategory as WorryCategoryModel
-from .serializers import (
-    BestReviewSerializer,
-    LiveReviewSerializer,
-    MainPageDataSerializer,
-)
-
-# from . import recommender
-
+from .serializers import BestReviewSerializer, LiveReviewSerializer, MainPageDataSerializer
 
 # Create your views here.
 
@@ -49,9 +42,7 @@ class ReviewLikeView(APIView):
 
     def post(self, request, letter_review_like_id):
         try:
-            letter_review_like_service(
-                letter_review_id=letter_review_like_id, user_id=request.user.id
-            )
+            letter_review_like_service(letter_review_id=letter_review_like_id, user_id=request.user.id)
             return Response(
                 {
                     "detail": "좋아요가 완료 되었습니다!!",
@@ -68,9 +59,7 @@ class ReviewLikeView(APIView):
 
     def delete(self, request, letter_review_like_id) -> Response:
         try:
-            letter_review_like_delete_service(
-                letter_review_like_id=letter_review_like_id, user_id=request.user.id
-            )
+            letter_review_like_delete_service(letter_review_like_id=letter_review_like_id, user_id=request.user.id)
             return Response(
                 {
                     "detail": "좋아요가 취소 되었습니다!!",
@@ -78,9 +67,7 @@ class ReviewLikeView(APIView):
                 status=status.HTTP_200_OK,
             )
         except LetterReviewLikeModel.DoesNotExist:
-            return Response(
-                {"detail": "없는 리뷰 입니다."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "없는 리뷰 입니다."}, status=status.HTTP_400_BAD_REQUEST)
         except exceptions.PermissionDenied:
             return Response(
                 {"detail": "이 작업을 수행할 권한(permission)이 없습니다."},
@@ -122,19 +109,18 @@ class MainPageView(APIView):
     def get(self, request):
         cur_user = request.user
 
-        user_letters = LetterModel.objects.filter(letter_author=cur_user).order_by(
-            "-create_date"
-        )[:1]
-        latest_worryboard_id = [obj.worryboard.id for obj in user_letters][0]
-        recomendation_sys = recommender.recommend_worryboard
-        final_worryboard_list = recomendation_sys.recommend_worries(
-            latest_worryboard_id
-        )
+        # 추천시스템 관련 코드로 수정 후 다시 사용할 예정입니다
+        # latest_user_letter = LetterModel.objects.filter(letter_author=cur_user).order_by(
+        #     "-create_date"
+        # )[:1][0]
+        # worryboard_id_of_letter = latest_user_letter.worryboard.id
+        # recomendation_sys = recommender.recommend_worryboard
+        # final_worryboard_list = recomendation_sys.recommend_worries(
+        #     worryboard_id_of_letter
+        # )
         not_read_my_letter_count = my_letter_count(request.user.id)
 
-        worry_categories = WorryCategoryModel.objects.prefetch_related(
-            "worryboard_set"
-        ).all()
+        worry_categories = WorryCategoryModel.objects.prefetch_related("worryboard_set").all()
         order_by_cate_worry_list = worry_worryboard_union(worry_categories)
         main_page_data_and_user_profile = {}
         try:
@@ -142,9 +128,7 @@ class MainPageView(APIView):
                 UserModel.objects.select_related("userprofile").get(id=cur_user.id)
             ).data
         except UserModel.userprofile.RelatedObjectDoesNotExist:
-            return Response(
-                {"detail": "유저프로필이 없습니다 생성해주세요."}, status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({"detail": "유저프로필이 없습니다 생성해주세요."}, status=status.HTTP_404_NOT_FOUND)
         except UserModel.monglegrade.RelatedObjectDoesNotExist:
             return Response(
                 {"detail": "몽글그레이드 정보가 없습니다 생성해주세요."},
@@ -165,9 +149,9 @@ class MainPageView(APIView):
                 "live_review": LiveReviewSerializer(
                     create_order_live_reviews, context={"request": request}, many=True
                 ).data,
-                "recommend_worry_board_list": WorryBoardSerializer(
-                    final_worryboard_list, context={"request": request}, many=True
-                ),
+                # "recommend_worry_board_list": WorryBoardSerializer(
+                #     final_worryboard_list, context={"request": request}, many=True
+                # ),추천시스템 관련 코드로 수정 후 다시 사용할 예정입니다
             },
             status=status.HTTP_200_OK,
         )
@@ -196,9 +180,7 @@ class LetterView(APIView):
             letter_post_service(letter_author=request.user, request_data=request.data)
             return Response({"detail": "편지 작성이 완료 되었습니다."}, status=status.HTTP_200_OK)
         except django.db.utils.IntegrityError:
-            return Response(
-                {"detail": "이미 편지를 작성 하셨습니다."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "이미 편지를 작성 하셨습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LetterisReadView(APIView):
@@ -215,6 +197,4 @@ class LetterisReadView(APIView):
             return Response(status=status.HTTP_200_OK)
 
         except LetterModel.DoesNotExist:
-            return Response(
-                {"detail": "자신이 받은 편지가 아닙니다."}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "자신이 받은 편지가 아닙니다."}, status=status.HTTP_400_BAD_REQUEST)

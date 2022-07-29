@@ -68,9 +68,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField("User", on_delete=models.CASCADE)
     description = models.TextField(default="")
     fullname = models.TextField(default="")
-    categories = models.ManyToManyField(
-        "main_page.WorryCategory", through="UserProfileCategory"
-    )
+    categories = models.ManyToManyField("main_page.WorryCategory", through="UserProfileCategory")
     profile_img = models.URLField(
         default="https://user-images.githubusercontent.com/55477835/181283419-20705c71-a20a-46ab-a30e-bb4edece1670.png"
     )
@@ -78,9 +76,7 @@ class UserProfile(models.Model):
 
 class UserProfileCategory(models.Model):
     user_profile = models.ForeignKey("UserProfile", on_delete=models.CASCADE)
-    category = models.ForeignKey(
-        "main_page.WorryCategory", on_delete=models.SET_NULL, null=True
-    )
+    category = models.ForeignKey("main_page.WorryCategory", on_delete=models.SET_NULL, null=True)
 
 
 class Report(models.Model):
@@ -89,11 +85,7 @@ class Report(models.Model):
     report_reason = models.CharField(max_length=150)
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["report_user", "reported_user"], name="only_one_report"
-            )
-        ]
+        constraints = [models.UniqueConstraint(fields=["report_user", "reported_user"], name="only_one_report")]
 
 
 class ReportedUser(models.Model):

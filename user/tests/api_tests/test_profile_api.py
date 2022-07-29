@@ -60,9 +60,7 @@ class TestProfileAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
-        )
+        self.assertEqual("자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"])
 
     def test_put_user_profile(self) -> None:
         """
@@ -156,6 +154,4 @@ class TestProfileAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
-        )
+        self.assertEqual("자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"])

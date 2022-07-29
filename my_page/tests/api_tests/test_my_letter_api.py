@@ -33,9 +33,7 @@ class TestMyLetter(APITestCase):
         )
         worry_board_author = UserModel.objects.get(username="test_worry_board_author")
         category = WorryCategoryModel.objects.create(cate_name="1")
-        worry_board = WorryBoard.objects.create(
-            author=worry_board_author, category=category
-        )
+        worry_board = WorryBoard.objects.create(author=worry_board_author, category=category)
         letter_author = UserModel.objects.get(username="test_letter_author")
         letter_post_service(
             letter_author=letter_author,
@@ -140,9 +138,7 @@ class TestMyRecievedLetterView(APITestCase):
         )
         worry_board_author = UserModel.objects.get(username="test_worry_board_author")
         category = WorryCategoryModel.objects.create(cate_name="1")
-        worry_board = WorryBoard.objects.create(
-            author=worry_board_author, category=category
-        )
+        worry_board = WorryBoard.objects.create(author=worry_board_author, category=category)
         letter_author = UserModel.objects.get(username="test_letter_author")
         letter_post_service(
             letter_author=letter_author,

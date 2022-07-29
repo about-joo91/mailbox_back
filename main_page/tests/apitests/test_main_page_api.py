@@ -19,9 +19,7 @@ class TestMaingPageAPI(APITestCase):
         MainPageView의 의 get 함수를 검증하는 함수
         """
         client = APIClient()
-        user = UserModel.objects.create(
-            username="hajin", password="1234", nickname="hajin"
-        )
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         UserProfileModel.objects.create(user=user)
         MogleGardeModel.objects.create(user=user, grade=100, level=1)
         category_list = ["일상", "연애", "학업", "가족", "인간관계", "육아"]
@@ -33,9 +31,7 @@ class TestMaingPageAPI(APITestCase):
 
         for woory_board_count in range(5):
             for cate_idx in range(first_cate, last_cate + 1):
-                WorryBoardModel.objects.create(
-                    author_id=user.id, content="test", category_id=cate_idx
-                )
+                WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=cate_idx)
 
         first_worry_obj = WorryBoardModel.objects.order_by("create_date")[:1].get().id
         last_worry_obj = WorryBoardModel.objects.order_by("-create_date")[:1].get().id
@@ -66,9 +62,7 @@ class TestMaingPageAPI(APITestCase):
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(result["letter_count"], 30)
-        self.assertEqual(
-            result["main_page_data_and_user_profile"]["user_profile_data"]["grade"], 100
-        )
+        self.assertEqual(result["main_page_data_and_user_profile"]["user_profile_data"]["grade"], 100)
         self.assertEqual(
             result["main_page_data_and_user_profile"]["rank_list"][0]["username"],
             "hajin",
@@ -83,9 +77,7 @@ class TestMaingPageAPI(APITestCase):
         case: moglegrade가 없을 때
         """
         client = APIClient()
-        user = UserModel.objects.create(
-            username="hajin", password="1234", nickname="hajin"
-        )
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         UserProfileModel.objects.create(user=user)
         category_list = ["일상", "연애", "학업", "가족", "인간관계", "육아"]
         for cate_name in category_list:
@@ -96,9 +88,7 @@ class TestMaingPageAPI(APITestCase):
 
         for woory_board_count in range(5):
             for cate_idx in range(first_cate, last_cate + 1):
-                WorryBoardModel.objects.create(
-                    author_id=user.id, content="test", category_id=cate_idx
-                )
+                WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=cate_idx)
 
         first_worry_obj = WorryBoardModel.objects.order_by("create_date")[:1].get().id
         last_worry_obj = WorryBoardModel.objects.order_by("-create_date")[:1].get().id
@@ -136,9 +126,7 @@ class TestMaingPageAPI(APITestCase):
         case: userprofile 데이터가 없을 때
         """
         client = APIClient()
-        user = UserModel.objects.create(
-            username="hajin", password="1234", nickname="hajin"
-        )
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         MogleGardeModel.objects.create(user=user, grade=100, level=1)
         category_list = ["일상", "연애", "학업", "가족", "인간관계", "육아"]
         for cate_name in category_list:
@@ -149,9 +137,7 @@ class TestMaingPageAPI(APITestCase):
 
         for woory_board_count in range(5):
             for cate_idx in range(first_cate, last_cate + 1):
-                WorryBoardModel.objects.create(
-                    author_id=user.id, content="test", category_id=cate_idx
-                )
+                WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=cate_idx)
 
         first_worry_obj = WorryBoardModel.objects.order_by("create_date")[:1].get().id
         last_worry_obj = WorryBoardModel.objects.order_by("-create_date")[:1].get().id
@@ -195,6 +181,4 @@ class TestMaingPageAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
-        )
+        self.assertEqual("자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"])

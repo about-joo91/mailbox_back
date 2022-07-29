@@ -28,9 +28,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "last_login",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="last login"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="last login"),
                 ),
                 (
                     "username",
@@ -109,16 +107,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="userprofile",
             name="categories",
-            field=models.ManyToManyField(
-                through="user.UserProfileCategory", to="main_page.worrycategory"
-            ),
+            field=models.ManyToManyField(through="user.UserProfileCategory", to="main_page.worrycategory"),
         ),
         migrations.AddField(
             model_name="userprofile",
             name="user",
-            field=models.OneToOneField(
-                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
-            ),
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.CreateModel(
             name="ReportedUser",

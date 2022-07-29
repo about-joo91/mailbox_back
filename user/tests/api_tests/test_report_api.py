@@ -18,26 +18,20 @@ class ReportUserView(APITestCase):
         """
         client = APIClient()
         user = UserModel.objects.create(username="test", nickname="test")
-        target_user = UserModel.objects.create(
-            username="reported_user", nickname="reported_user"
-        )
+        target_user = UserModel.objects.create(username="reported_user", nickname="reported_user")
         report_reason = "욕했어요!"
 
         client.force_authenticate(user=user)
         url = "/user/report"
         response = client.post(
             url,
-            json.dumps(
-                {"target_user_id": target_user.id, "report_reason": report_reason}
-            ),
+            json.dumps({"target_user_id": target_user.id, "report_reason": report_reason}),
             content_type="application/json",
         )
         result = response.json()
 
         report_model_cnt = Report.objects.all().count()
-        report_model = Report.objects.filter(
-            report_user_id=user.id, reported_user__user_id=target_user.id
-        ).get()
+        report_model = Report.objects.filter(report_user_id=user.id, reported_user__user_id=target_user.id).get()
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(f"{target_user.username}유저를 신고하셨습니다.", result["detail"])
@@ -51,21 +45,15 @@ class ReportUserView(APITestCase):
         """
         client = APIClient()
         user = UserModel.objects.create(username="test", nickname="test")
-        target_user = UserModel.objects.create(
-            username="reported_user", nickname="reported_user"
-        )
+        target_user = UserModel.objects.create(username="reported_user", nickname="reported_user")
         report_reason = "욕했어요!"
-        create_user_report(
-            user_id=user.id, target_user_id=target_user.id, report_reason=report_reason
-        )
+        create_user_report(user_id=user.id, target_user_id=target_user.id, report_reason=report_reason)
 
         client.force_authenticate(user=user)
         url = "/user/report"
         response = client.post(
             url,
-            json.dumps(
-                {"target_user_id": target_user.id, "report_reason": report_reason}
-            ),
+            json.dumps({"target_user_id": target_user.id, "report_reason": report_reason}),
             content_type="application/json",
         )
         result = response.json()
@@ -100,22 +88,16 @@ class ReportUserView(APITestCase):
         case:인증되지 않은 유저일 때
         """
         client = APIClient()
-        target_user = UserModel.objects.create(
-            username="reported_user", nickname="reported_user"
-        )
+        target_user = UserModel.objects.create(username="reported_user", nickname="reported_user")
         report_reason = "욕했어요!"
 
         url = "/user/report"
         response = client.post(
             url,
-            json.dumps(
-                {"target_user_id": target_user.id, "report_reason": report_reason}
-            ),
+            json.dumps({"target_user_id": target_user.id, "report_reason": report_reason}),
             content_type="application/json",
         )
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"]
-        )
+        self.assertEqual("자격 인증데이터(authentication credentials)가 제공되지 않았습니다.", result["detail"])

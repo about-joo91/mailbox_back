@@ -120,7 +120,7 @@ class MainPageView(APIView):
     def get(self, request):
         cur_user = request.user
 
-
+        # 추천시스템 관련 코드로 수정 후 다시 사용할 예정입니다
         # latest_user_letter = LetterModel.objects.filter(letter_author=cur_user).order_by(
         #     "-create_date"
         # )[:1][0]
@@ -164,9 +164,9 @@ class MainPageView(APIView):
                 "live_review": LiveReviewSerializer(
                     create_order_live_reviews, context={"request": request}, many=True
                 ).data,
-                "recommend_worry_board_list": WorryBoardSerializer(
-                    final_worryboard_list, context={"request": request}, many=True
-                ),
+                # "recommend_worry_board_list": WorryBoardSerializer(
+                #     final_worryboard_list, context={"request": request}, many=True
+                # ),추천시스템 관련 코드로 수정 후 다시 사용할 예정입니다
             },
             status=status.HTTP_200_OK,
         )

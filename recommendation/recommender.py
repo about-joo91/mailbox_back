@@ -41,7 +41,6 @@ class Recommendation:
                 if ex in recommend_ids:
                     recommend_ids.remove(ex)
             
-            
             # 남은 워리보드 오브젝트 쿼리셋 리턴
             final_worryboard_list = []
             for worryboard_id in recommend_ids[:3]:
@@ -51,7 +50,6 @@ class Recommendation:
             return final_worryboard_list
 
         except KeyError:
-            print("ddddddddddddd")
             return HttpResponse(status=204)
 
 

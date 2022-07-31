@@ -28,25 +28,9 @@ class Recommendation:
             )
             recommend_ids = [self.index_to_id[int(index)] for index in recommend_index]
             
-            # 레터가 있는 워리보드와 자신이 쓴 워리보드 제외
-            has_letter = LetterModel.objects.values_list('worryboard_id', flat=True)
-            excluding_list = [has_letter_id for has_letter_id in has_letter] 
-            mine = WorryBoardModel.objects.filter(author=cur_user)
-            for j in mine:
-                mine_id = j.id
-                if mine_id not in excluding_list:
-                    excluding_list.append(mine_id)
+            final_worryboard_list = WorryBoardModel.objects.filter(Q(id__in = recommend_ids)).exclude(
+                Q(id__in = LetterModel.objects.values_list('worryboard_id', flat=True))|Q(author=cur_user))[:3]
             
-            for ex in excluding_list:
-                if ex in recommend_ids:
-                    recommend_ids.remove(ex)
-            
-            # 남은 워리보드 오브젝트 쿼리셋 리턴
-            final_worryboard_list = []
-            for worryboard_id in recommend_ids[:3]:
-                result = WorryBoardModel.objects.get(id=worryboard_id)
-                final_worryboard_list.append(result)
-
             return final_worryboard_list
 
         except KeyError:

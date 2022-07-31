@@ -26,6 +26,7 @@ jobs:
           pip install -r requirements.txt
       - name: run tests
         run: |
+          python manage.py migrate
           python manage.py test --keepdb
 
   build-image:

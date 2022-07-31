@@ -4,6 +4,7 @@ from rest_framework.exceptions import ValidationError
 from main_page.models import WorryCategory
 from user.models import User as UserModel
 from worry_board.models import RequestMessage as RequestMessageModel
+from worry_board.models import RequestStatus as RequestStatusModel
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.services.worry_board_request_message_service import (
     create_request_message_data,
@@ -23,9 +24,9 @@ class TestWorryBoardRequestMessageService(TestCase):
     def setUpTestData(cls):
         user = UserModel.objects.create(username="ko", nickname="ko")
         category = WorryCategory.objects.create(cate_name="일상")
-        WorryBoardModel.objects.create(
-            author=user, category=category, content="test_worry_board"
-        )
+        WorryBoardModel.objects.create(author=user, category=category, content="test_worry_board")
+        RequestStatusModel.objects.create(status="요청")
+        RequestStatusModel.objects.create(status="요청취소")
 
     def test_when_success_get_paginated_request_message_data(self) -> None:
         """
@@ -36,9 +37,7 @@ class TestWorryBoardRequestMessageService(TestCase):
         worry_board = WorryBoardModel.objects.get(content="test_worry_board")
         case = "sended"
         RequestMessageModel.objects.create(author=user, worry_board=worry_board)
-        paginated_request_message, total_count = get_paginated_request_message_data(
-            page_num, case, user
-        )
+        paginated_request_message, total_count = get_paginated_request_message_data(page_num, case, user)
 
         self.assertEqual(1, total_count)
         self.assertEqual(
@@ -99,10 +98,8 @@ class TestWorryBoardRequestMessageService(TestCase):
         user = UserModel.objects.get(username="ko")
         request_message_data = {"request_message": "worry_board_none"}
         if check_is_it_clean_text(request_message_data["request_message"]):
-            with self.assertRaises(ValidationError):
-                create_request_message_data(
-                    author=user, worry_board_id=10, request_message=request_message_data
-                )
+            with self.assertRaises(WorryBoardModel.DoesNotExist):
+                create_request_message_data(author=user, worry_board_id=10, request_message=request_message_data)
 
         with self.assertRaises(RequestMessageModel.DoesNotExist):
             RequestMessageModel.objects.get(author=user).id
@@ -147,9 +144,7 @@ class TestWorryBoardRequestMessageService(TestCase):
                 request_message_id=create_request_message.id,
             )
 
-        self.assertEqual(
-            create_request_message.id, RequestMessageModel.objects.get(author=user).id
-        )
+        self.assertEqual(create_request_message.id, RequestMessageModel.objects.get(author=user).id)
         self.assertEqual(
             RequestMessageModel.objects.all()[0].request_message,
             RequestMessageModel.objects.get(author=user).request_message,

@@ -43,7 +43,6 @@ class BoardSerializer(serializers.ModelSerializer):
         model = BoardModel
         fields = [
             "id",
-            "author",
             "title",
             "create_date",
             "content",
@@ -53,7 +52,6 @@ class BoardSerializer(serializers.ModelSerializer):
             "board_comment",
             "board_comment_count",
         ]
-        extra_kwargs = {"author": {"write_only": True}}
 
 
 class BoardCommentSerializer(serializers.ModelSerializer):
@@ -74,11 +72,9 @@ class BoardCommentSerializer(serializers.ModelSerializer):
         model = BoardCommentModel
         fields = [
             "id",
-            "author",
             "board",
             "create_date",
             "content",
             "is_comment_writer",
             "is_detail_page_writer",
         ]
-        extra_kwargs = {"author": {"write_only": True}}

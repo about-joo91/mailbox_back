@@ -5,6 +5,7 @@ from rest_framework.test import APIClient, APITestCase
 from main_page.models import WorryCategory as WorryCategoryModel
 from user.models import User as UserModel
 from worry_board.models import RequestMessage as RequestMessageModel
+from worry_board.models import RequestStatus as RequestStatusModel
 from worry_board.models import WorryBoard as WorryBoardModel
 
 
@@ -16,14 +17,10 @@ class TestRequestMessageAPI(APITestCase):
     @classmethod
     def setUpTestData(cls):
         user = UserModel.objects.create(username="test", nickname="test")
-        not_author_user = UserModel.objects.create(
-            username="not_author", nickname="not_author"
-        )
+        not_author_user = UserModel.objects.create(username="not_author", nickname="not_author")
         category = WorryCategoryModel.objects.create(cate_name="가족")
 
-        user_worry_board = WorryBoardModel.objects.create(
-            author=user, category=category, content="APItest"
-        )
+        user_worry_board = WorryBoardModel.objects.create(author=user, category=category, content="APItest")
         not_author_user_worry_board = WorryBoardModel.objects.create(
             author=not_author_user, category=category, content="APItest"
         )
@@ -43,6 +40,8 @@ class TestRequestMessageAPI(APITestCase):
             worry_board=user_worry_board,
             request_message="user기준 받은 메세지",
         )
+        RequestStatusModel.objects.create(status="요청")
+        RequestStatusModel.objects.create(status="요청취소")
 
     def test_get_sended_request_message_API(self) -> None:
         """
@@ -59,9 +58,7 @@ class TestRequestMessageAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            "user기준 보낸 메세지", response.json()["request_message"][0]["request_message"]
-        )
+        self.assertEqual("user기준 보낸 메세지", response.json()["request_message"][0]["request_message"])
         self.assertEqual(result["total_count"], 1)
 
     def test_when_is_user_is_unauthenticated_in_get_sended_request_message_API(
@@ -79,9 +76,7 @@ class TestRequestMessageAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다."
-        )
+        self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
 
     def test_get_recieved_request_message_API(self) -> None:
         """
@@ -98,9 +93,7 @@ class TestRequestMessageAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-            "user기준 받은 메세지", response.json()["request_message"][0]["request_message"]
-        )
+        self.assertEqual("user기준 받은 메세지", response.json()["request_message"][0]["request_message"])
         self.assertEqual(result["total_count"], 1)
 
     def test_when_is_user_is_unauthenticated_in_get_recieved_request_message_API(
@@ -118,9 +111,7 @@ class TestRequestMessageAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다."
-        )
+        self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
 
     def test_post_request_message_API(self) -> None:
         """
@@ -128,16 +119,12 @@ class TestRequestMessageAPI(APITestCase):
         """
         client = APIClient()
         user = UserModel.objects.get(username="test")
-        target_worry_board = WorryBoardModel.objects.filter(
-            content="user가 new_request_message를 보낼 worry_board"
-        )[0]
+        target_worry_board = WorryBoardModel.objects.filter(content="user가 new_request_message를 보낼 worry_board")[0]
         request_data = {"request_message": "new_request_message"}
 
         client.force_authenticate(user=user)
         url = "/worry_board/request/" + str(target_worry_board.id)
-        response = client.post(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
         self.assertEqual(
@@ -158,9 +145,7 @@ class TestRequestMessageAPI(APITestCase):
 
         client.force_authenticate(user=user)
         url = "/worry_board/request/"
-        response = client.post(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post(url, data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(response.status_code, 404)
         with self.assertRaises(ValueError):
@@ -174,16 +159,14 @@ class TestRequestMessageAPI(APITestCase):
         client = APIClient()
         user = UserModel.objects.get(username="test")
         not_author_user = UserModel.objects.get(username="not_author")
-        user_already_requested_worry_board = WorryBoardModel.objects.filter(
-            author=not_author_user
-        ).filter(requestmessage__author=user)
+        user_already_requested_worry_board = WorryBoardModel.objects.filter(author=not_author_user).filter(
+            requestmessage__author=user
+        )
         request_data = {"request_message": "new_request_message"}
 
         client.force_authenticate(user=user)
         url = "/worry_board/request/" + str(user_already_requested_worry_board[0].id)
-        response = client.post(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
@@ -201,9 +184,7 @@ class TestRequestMessageAPI(APITestCase):
 
         client.force_authenticate(user=user)
         url = "/worry_board/request/" + str(target_worry_board.id)
-        response = client.post(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
@@ -216,21 +197,15 @@ class TestRequestMessageAPI(APITestCase):
         """
         client = APIClient()
 
-        target_worry_board = WorryBoardModel.objects.filter(
-            content="user가 new_request_message를 보낼 worry_board"
-        )[0]
+        target_worry_board = WorryBoardModel.objects.filter(content="user가 new_request_message를 보낼 worry_board")[0]
         request_data = {"request_message": "new_request_message"}
 
         url = "/worry_board/request/" + str(target_worry_board.id)
-        response = client.post(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(
-            result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다."
-        )
+        self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
 
     def test_put_request_message_API(self) -> None:
         """
@@ -238,16 +213,12 @@ class TestRequestMessageAPI(APITestCase):
         """
         client = APIClient()
         user = UserModel.objects.get(username="test")
-        target_request_message = RequestMessageModel.objects.filter(
-            request_message="user기준 보낸 메세지"
-        )[0]
+        target_request_message = RequestMessageModel.objects.filter(request_message="user기준 보낸 메세지")[0]
         request_data = {"request_message": "update_request_message"}
 
         client.force_authenticate(user=user)
         url = "/worry_board/request/pd/" + str(target_request_message.id)
-        response = client.put(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.put(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
         self.assertEqual(response.status_code, 200)
@@ -266,12 +237,10 @@ class TestRequestMessageAPI(APITestCase):
 
         client.force_authenticate(user=user)
         url = "/worry_board/request/pd/" + str(9999)
-        response = client.put(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.put(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(result["detail"], "해당 요청 메세지가 존재하지 않습니다.")
 
     def test_when_is_user_is_unauthenticated_in_put_request_message_API(self) -> None:
@@ -280,22 +249,16 @@ class TestRequestMessageAPI(APITestCase):
         case : 로그인하지 않은 사용자가 put하는 경우
         """
         client = APIClient()
-        target_request_message = RequestMessageModel.objects.filter(
-            request_message="user기준 보낸 메세지"
-        )[0]
+        target_request_message = RequestMessageModel.objects.filter(request_message="user기준 보낸 메세지")[0]
         request_data = {"request_message": "update_request_message"}
 
         url = "/worry_board/request/pd/" + str(target_request_message.id)
-        response = client.put(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.put(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
         self.assertEqual(response.status_code, 401)
 
-        self.assertEqual(
-            result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다."
-        )
+        self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
 
     def test_delete_request_message_API(self) -> None:
         """
@@ -303,9 +266,7 @@ class TestRequestMessageAPI(APITestCase):
         """
         client = APIClient()
         user = UserModel.objects.get(username="test")
-        target_request_message = RequestMessageModel.objects.filter(
-            request_message="user기준 보낸 메세지"
-        )[0]
+        target_request_message = RequestMessageModel.objects.filter(request_message="user기준 보낸 메세지")[0]
 
         client.force_authenticate(user=user)
         url = "/worry_board/request/pd/" + str(target_request_message.id)
@@ -330,7 +291,7 @@ class TestRequestMessageAPI(APITestCase):
         response = client.delete(url)
         result = response.json()
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(result["detail"], "해당 요청 메세지가 존재하지 않습니다.")
 
     def test_when_is_user_is_unauthenticated_in_delete_request_message_API(
@@ -341,15 +302,11 @@ class TestRequestMessageAPI(APITestCase):
         case : 로그인하지 않은 사용자가 조회하는 경우
         """
         client = APIClient()
-        target_request_message = RequestMessageModel.objects.filter(
-            request_message="user기준 보낸 메세지"
-        )[0]
+        target_request_message = RequestMessageModel.objects.filter(request_message="user기준 보낸 메세지")[0]
 
         url = "/worry_board/request/pd/" + str(target_request_message.id)
         response = client.delete(url)
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다."
-        )
+        self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")

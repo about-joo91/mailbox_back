@@ -28,10 +28,10 @@ def create_worry_board_data(author: UserModel, create_data: Dict[str, str]) -> N
     """
     worry_board의 데이터를 만드는 service
     """
-    create_data["author"] = author.id
+    author = UserModel.objects.filter(id=author.id).get()
     create_worry_board_serializer = WorryBoardSerializer(data=create_data)
     create_worry_board_serializer.is_valid(raise_exception=True)
-    create_worry_board_serializer.save()
+    create_worry_board_serializer.save(author=author)
 
 
 def update_worry_board_data(worry_board_id: int, update_data: Dict[str, str]) -> None:

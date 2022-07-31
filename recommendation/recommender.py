@@ -1,7 +1,8 @@
-import random
-
 import pandas as pd
+from django.db.models.query_utils import Q
+from django.http import HttpResponse
 
+from main_page.models import Letter as LetterModel
 from worry_board.models import WorryBoard as WorryBoardModel
 
 
@@ -15,27 +16,22 @@ class Recommendation:
         # 데이터프레임 인덱스로 worryboard 아이디 구하기
         self.index_to_id = dict(zip(self.worry_data.index, self.worry_data["id"]))
 
-    def recommend_worries(self, latest_worryboard_id):
+    def recommend_worries(self, latest_worryboard_id, cur_user):
         try:
+            # 해당 워리보드의 코사인 유사도 내림차순 정렬
             recommend_index = list(
-                self.cos.loc[self.id_to_index[latest_worryboard_id]].sort_values(ascending=False)[:4].index
+                self.cos.loc[self.id_to_index[latest_worryboard_id]].sort_values(ascending=False).index
             )
             recommend_ids = [self.index_to_id[int(index)] for index in recommend_index]
-            recommend_ids.remove(latest_worryboard_id)
 
-            result_obj = []
-            for worryboard_id in recommend_ids:
-                result = WorryBoardModel.objects.get(id=worryboard_id)
-                result_obj.append(result)
+            final_worryboard_list = WorryBoardModel.objects.filter(Q(id__in=recommend_ids)).exclude(
+                Q(id__in=LetterModel.objects.values_list("worryboard_id", flat=True)) | Q(author=cur_user)
+            )[:3]
 
-            return result_obj
+            return final_worryboard_list
 
         except KeyError:
-            result_obj = list(WorryBoardModel.objects.all())
-            # change 3 to how many random items you want
-            random_items = random.sample(result_obj, 3)
-            print(random_items)
-            return random_items
+            return HttpResponse(status=204)
 
 
 recommend_worryboard = Recommendation()

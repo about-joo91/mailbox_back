@@ -3,6 +3,7 @@ from rest_framework.exceptions import ValidationError
 
 from main_page.models import WorryCategory
 from user.models import User as UserModel
+from worry_board.models import RequestStatus as RequestStatusModel
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.services.worry_board_service import (
     check_is_it_clean_text,
@@ -18,6 +19,11 @@ class TestWorryBoardService(TestCase):
     Worry_Board 서비스 함수들을 검증하는 클래스
     """
 
+    @classmethod
+    def setUpTestData(cls):
+        RequestStatusModel.objects.create(status="요청")
+        RequestStatusModel.objects.create(status="요청취소")
+
     def test_when_success_get_worry_board_data(self):
         """
         pagenation을 통하여 worry_board를 가져오는 함수에 대한 검증
@@ -26,18 +32,14 @@ class TestWorryBoardService(TestCase):
         category = WorryCategory.objects.create(cate_name="일상")
         page_num = 1
         WorryBoardModel.objects.create(author=user, category=category, content="get테스트")
-        paginated_worry_board, total_count = get_paginated_worry_board_data(
-            page_num, category.id
-        )
+        paginated_worry_board, total_count = get_paginated_worry_board_data(page_num, category.id)
 
         self.assertEqual(1, total_count)
         self.assertEqual(
             WorryBoardModel.objects.all()[0].id,
             WorryBoardModel.objects.get(author=user).id,
         )
-        self.assertEqual(
-            paginated_worry_board[0], WorryBoardModel.objects.filter(author=user)[0]
-        )
+        self.assertEqual(paginated_worry_board[0], WorryBoardModel.objects.filter(author=user)[0])
 
     def test_when_success_create_worry_board_data(self) -> None:
         """
@@ -61,18 +63,12 @@ class TestWorryBoardService(TestCase):
 
         user = UserModel.objects.create(username="Ko", nickname="Ko")
         category = WorryCategory.objects.create(cate_name="일상")
-        user_worry_board = WorryBoardModel.objects.create(
-            author=user, category=category, content="수정전"
-        )
+        user_worry_board = WorryBoardModel.objects.create(author=user, category=category, content="수정전")
         update_data = {"category": category.id, "content": "수정함"}
         if check_is_it_clean_text(update_data["content"]):
-            update_worry_board_data(
-                worry_board_id=user_worry_board.id, update_data=update_data
-            )
+            update_worry_board_data(worry_board_id=user_worry_board.id, update_data=update_data)
 
-        self.assertEqual(
-            user_worry_board.id, WorryBoardModel.objects.get(author=user).id
-        )
+        self.assertEqual(user_worry_board.id, WorryBoardModel.objects.get(author=user).id)
 
     def test_when_success_delete_worry_board_data(self) -> None:
         """
@@ -80,9 +76,7 @@ class TestWorryBoardService(TestCase):
         """
         user = UserModel.objects.create(username="Ko", nickname="Ko")
         category = WorryCategory.objects.create(cate_name="일상")
-        user_worry_board = WorryBoardModel.objects.create(
-            author=user, category=category, content="삭제할 데이터"
-        )
+        user_worry_board = WorryBoardModel.objects.create(author=user, category=category, content="삭제할 데이터")
         delete_worry_board_data(author=user, worry_board_id=user_worry_board.id)
 
         self.assertEqual(0, WorryBoardModel.objects.count())
@@ -136,14 +130,10 @@ class TestWorryBoardService(TestCase):
 
         user = UserModel.objects.create(username="Ko", nickname="Ko")
         category = WorryCategory.objects.create(cate_name="일상")
-        user_worry_board = WorryBoardModel.objects.create(
-            author=user, category=category, content="수정전"
-        )
+        user_worry_board = WorryBoardModel.objects.create(author=user, category=category, content="수정전")
         update_data = {"category": category.id, "content": "바보같은놈"}
         if check_is_it_clean_text(update_data["content"]):
-            update_worry_board_data(
-                worry_board_id=user_worry_board.id, update_data=update_data
-            )
+            update_worry_board_data(worry_board_id=user_worry_board.id, update_data=update_data)
 
         with self.assertRaises(WorryBoardModel.DoesNotExist):
             WorryBoardModel.objects.get(content="바보같은놈")

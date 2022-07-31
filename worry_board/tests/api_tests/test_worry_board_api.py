@@ -4,6 +4,7 @@ from rest_framework.test import APIClient, APITestCase
 
 from main_page.models import WorryCategory as WorryCategoryModel
 from user.models import User as UserModel
+from worry_board.models import RequestStatus as RequestStatusModel
 from worry_board.models import WorryBoard as WorryBoardModel
 
 
@@ -16,9 +17,8 @@ class TestWorryBoardAPI(APITestCase):
     def setUpTestData(cls):
         user = UserModel.objects.create(username="test", nickname="test")
         category = WorryCategoryModel.objects.create(cate_name="가족")
-        WorryBoardModel.objects.create(
-            author=user, category=category, content="APItest"
-        )
+        WorryBoardModel.objects.create(author=user, category=category, content="APItest")
+        RequestStatusModel.objects.create(status="요청")
 
     def test_get_worry_board_API(self) -> None:
         """
@@ -49,9 +49,7 @@ class TestWorryBoardAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다."
-        )
+        self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
 
     def test_when_parameter_does_not_exist_in_get_worry_board_API(self) -> None:
         """
@@ -79,16 +77,13 @@ class TestWorryBoardAPI(APITestCase):
         user = UserModel.objects.get(username="test")
         category = WorryCategoryModel.objects.get(cate_name="가족")
         request_data = {
-            "author": user.id,
             "category": category.id,
             "content": "new_post",
         }
 
         client.force_authenticate(user=user)
         url = "/worry_board/"
-        response = client.post(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
         self.assertEqual(
@@ -108,15 +103,11 @@ class TestWorryBoardAPI(APITestCase):
         request_data = {"category": category.id, "content": "new_post"}
 
         url = "/worry_board/"
-        response = client.post(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
         self.assertEqual(401, response.status_code)
-        self.assertEqual(
-            result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다."
-        )
+        self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
 
     def test_when_caregory_does_not_exist_in_post_worry_board_API(self) -> None:
         """
@@ -129,9 +120,7 @@ class TestWorryBoardAPI(APITestCase):
 
         client.force_authenticate(user=user)
         url = "/worry_board/"
-        response = client.post(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
         self.assertEqual(400, response.status_code)
@@ -148,9 +137,7 @@ class TestWorryBoardAPI(APITestCase):
 
         client.force_authenticate(user=user)
         url = "/worry_board/"
-        response = client.post(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.post(url, data=json.dumps(request_data), content_type="application/json")
 
         self.assertEqual(400, response.status_code)
 
@@ -166,17 +153,11 @@ class TestWorryBoardAPI(APITestCase):
 
         client.force_authenticate(user=user)
         url = "/worry_board/" + str(worry_board.id)
-        response = client.put(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.put(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
-        self.assertEqual(
-            WorryBoardModel.objects.filter(author=user)[0].content, "update_post"
-        )
-        self.assertEqual(
-            worry_board.id, WorryBoardModel.objects.filter(author=user)[0].id
-        )
+        self.assertEqual(WorryBoardModel.objects.filter(author=user)[0].content, "update_post")
+        self.assertEqual(worry_board.id, WorryBoardModel.objects.filter(author=user)[0].id)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(result["detail"], "고민 게시글이 수정되었습니다.")
 
@@ -193,19 +174,13 @@ class TestWorryBoardAPI(APITestCase):
         request_data = {"category": category.id, "content": "update_post"}
 
         url = "/worry_board/" + str(worry_board.id)
-        response = client.put(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.put(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
-        self.assertEqual(
-            WorryBoardModel.objects.filter(author=user)[0].content, "APItest"
-        )
+        self.assertEqual(WorryBoardModel.objects.filter(author=user)[0].content, "APItest")
         self.assertEqual(response.status_code, 401)
 
-        self.assertEqual(
-            result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다."
-        )
+        self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
 
     def test_when_not_author_put_worry_board_API(self) -> None:
         """
@@ -214,28 +189,20 @@ class TestWorryBoardAPI(APITestCase):
         """
 
         client = APIClient()
-        not_author = UserModel.objects.create(
-            username="not_author", nickname="not_author"
-        )
+        not_author = UserModel.objects.create(username="not_author", nickname="not_author")
         user = UserModel.objects.get(username="test")
         category = WorryCategoryModel.objects.get(cate_name="가족")
 
-        not_author_worry_board = WorryBoardModel.objects.create(
-            author=not_author, category=category, content="APItest"
-        )
+        not_author_worry_board = WorryBoardModel.objects.create(author=not_author, category=category, content="APItest")
 
         request_data = {"category": category.id, "content": "update_post"}
         client.force_authenticate(user=user)
         url = "/worry_board/" + str(not_author_worry_board.id)
 
-        response = client.put(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.put(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
-        self.assertEqual(
-            WorryBoardModel.objects.filter(author=not_author)[0].content, "APItest"
-        )
+        self.assertEqual(WorryBoardModel.objects.filter(author=not_author)[0].content, "APItest")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(result["detail"], "자기가 작성하지 않은 게시물은 수정이 불가합니다.")
 
@@ -254,9 +221,7 @@ class TestWorryBoardAPI(APITestCase):
         client.force_authenticate(user=user)
         url = "/worry_board/"
 
-        response = client.put(
-            url, data=json.dumps(request_data), content_type="application/json"
-        )
+        response = client.put(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
@@ -292,9 +257,7 @@ class TestWorryBoardAPI(APITestCase):
 
         self.assertEqual(WorryBoardModel.objects.all().count(), 1)
         self.assertEqual(response.status_code, 401)
-        self.assertEqual(
-            result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다."
-        )
+        self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
 
     def test_when_not_author_delete_board_content(self) -> None:
         """
@@ -303,9 +266,7 @@ class TestWorryBoardAPI(APITestCase):
         """
         client = APIClient()
         worry_board = WorryBoardModel.objects.get(content="APItest")
-        not_author = UserModel.objects.create(
-            username="not_author", nickname="not_author"
-        )
+        not_author = UserModel.objects.create(username="not_author", nickname="not_author")
 
         client.force_authenticate(user=not_author)
         url = "/worry_board/" + str(worry_board.id)
@@ -313,7 +274,7 @@ class TestWorryBoardAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(WorryBoardModel.objects.all().count(), 1)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(result["detail"], "유저의 고민 게시글과 일치하는 게시글이 없습니다.")
 
     def test_when_parameter_does_not_exist_in_delete_worry_board_API(self) -> None:
@@ -344,5 +305,5 @@ class TestWorryBoardAPI(APITestCase):
         response = client.delete(url)
         result = response.json()
 
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 404)
         self.assertEqual(result["detail"], "유저의 고민 게시글과 일치하는 게시글이 없습니다.")

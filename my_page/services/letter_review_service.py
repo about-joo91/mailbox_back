@@ -4,11 +4,14 @@ from my_page.serializers import LetterReviewSerializer
 from user.models import User
 
 
-def make_letter_review(user: User, letter_id: int, review_data: dict[str, str]) -> None:
-    target_letter = LetterModel.objects.get(id=letter_id)
-    letter_review_serializer = LetterReviewSerializer(data=review_data)
-    letter_review_serializer.is_valid(raise_exception=True)
-    letter_review_serializer.save(review_author=user, letter=target_letter)
+def create_letter_review(user: User, letter_id: int, review_data: dict[str, str]) -> None:
+    target_letter = LetterModel.objects.select_related("worryboard__author").get(id=letter_id)
+    if target_letter.worryboard.author == user:
+        letter_review_serializer = LetterReviewSerializer(data=review_data)
+        letter_review_serializer.is_valid(raise_exception=True)
+        letter_review_serializer.save(review_author=user, letter=target_letter)
+    else:
+        raise PermissionError
 
 
 def edit_letter_review(user: User, letter_review_id: int, edit_data: dict[str, str]) -> None:

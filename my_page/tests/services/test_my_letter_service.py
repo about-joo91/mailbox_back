@@ -51,7 +51,7 @@ class TestMyLetter(TestCase):
         )
 
         # When
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(2):
             query = Q(letter_author=letter_author)
             test_letter_this_page = get_letter_data_by_user(query=query, letter_num=0)
             # Then
@@ -156,7 +156,7 @@ class TestMyRecievedLetter(TestCase):
         )
 
         # When
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(2):
             query = Q(worryboard__author=worry_board_author)
             test_letter_this_page = get_letter_data_by_user(query=query, letter_num=0)
 
@@ -189,7 +189,6 @@ class TestMyRecievedLetter(TestCase):
         )
 
         # When
-
         with self.assertRaises(UserModel.userprofile.RelatedObjectDoesNotExist):
             query = Q(worryboard__author=worry_board_author)
             get_letter_data_by_user(query=query, letter_num=0)
@@ -216,7 +215,6 @@ class TestMyRecievedLetter(TestCase):
                 "content": "1",
             },
         )
-
         # When
         with self.assertRaises(UserModel.monglegrade.RelatedObjectDoesNotExist):
             query = Q(worryboard__author=worry_board_author)

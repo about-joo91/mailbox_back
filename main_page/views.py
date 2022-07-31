@@ -19,11 +19,13 @@ from main_page.services.main_gage_service import (
     live_review_list_service,
     my_letter_count,
     worry_worryboard_union,
+    recommend_worryboard_list
 )
 from user.models import User as UserModel
+from worry_board.models import WorryBoard
 from worry_board.serializers import WorryBoardSerializer
 
-from . import recommender
+
 from .models import Letter as LetterModel
 from .models import LetterReviewLike as LetterReviewLikeModel
 from .models import WorryCategory as WorryCategoryModel
@@ -109,15 +111,8 @@ class MainPageView(APIView):
     def get(self, request):
         cur_user = request.user
 
-        # 추천시스템 관련 코드로 수정 후 다시 사용할 예정입니다
-        # latest_user_letter = LetterModel.objects.filter(letter_author=cur_user).order_by(
-        #     "-create_date"
-        # )[:1][0]
-        # worryboard_id_of_letter = latest_user_letter.worryboard.id
-        # recomendation_sys = recommender.recommend_worryboard
-        # final_worryboard_list = recomendation_sys.recommend_worries(
-        #     worryboard_id_of_letter
-        # )
+        final_worryboard_list = recommend_worryboard_list(cur_user)
+              
         not_read_my_letter_count = my_letter_count(request.user.id)
 
         worry_categories = WorryCategoryModel.objects.prefetch_related("worryboard_set").all()
@@ -149,9 +144,9 @@ class MainPageView(APIView):
                 "live_review": LiveReviewSerializer(
                     create_order_live_reviews, context={"request": request}, many=True
                 ).data,
-                # "recommend_worry_board_list": WorryBoardSerializer(
-                #     final_worryboard_list, context={"request": request}, many=True
-                # ),추천시스템 관련 코드로 수정 후 다시 사용할 예정입니다
+                "recommend_worry_board_list": WorryBoardSerializer(
+                    final_worryboard_list, context={"request": request}, many=True
+                ),
             },
             status=status.HTTP_200_OK,
         )

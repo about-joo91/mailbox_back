@@ -1,5 +1,5 @@
 
-# from flask import Flask, render_template, request, jsonify, send_file, send_from_directory
+# from flask import Flask, render_template, request, jsonify, send_file
 # import os
 # import pymysql
 # import csv
@@ -8,19 +8,11 @@
 # from konlpy.tag import Okt
 # from sklearn.feature_extraction.text import TfidfVectorizer
 # import zipfile
+# from sklearn.metrics.pairwise import cosine_similarity
 
 # app = Flask(__name__)
 
 
-# conn = pymysql.connect(
-#         host='database-1.c4vg7kihi1fg.ap-northeast-2.rds.amazonaws.com',
-#         user='admin',
-#         password='loveyourself',
-#         db='mail_box',
-#         charset="utf8",
-#         autocommit=True,
-#         cursorclass=pymysql.cursors.DictCursor,
-#     )
 
 # # Konlpy 라이브러리
 # okt = Okt()
@@ -29,46 +21,13 @@
 # tf = TfidfVectorizer(analyzer='word', ngram_range=(1,1), min_df = 1)
 
 
-
 # @app.route('/test', methods=['GET'])
 # def test_get():
-
-#     try:
-#         with conn.cursor() as cursor:
-#             data = []
-#             sql ="SELECT * FROM `worry_board_worryboard`"
-#             cursor.execute(sql)
-#             rows = cursor.fetchall()
-#             for row in rows:
-#                 data.append(row)
-#     except:
-#         cursor.close()
-#         conn.close()
-#     print(data)
-
-#     # worryboard.csv 만들기
-#     headers = ["id", "content", "author_id", "category_id","create_date"]
-#     rows = data
-    
-#     with open("worryboard.csv", "w") as f:
-#         f_csv = csv.DictWriter(f, fieldnames=headers)
-#         f_csv.writeheader()
-#         f_csv.writerows(rows)
-
-#     # 코사인 유사도 데이터 만들기
 #     making_cosine_data()
-
-#     # 두 csv 파일 압축해 리턴
-#     file_list = ['worryboard.csv', 'cosine_sim.csv']
-
-#     with zipfile.ZipFile("recommendation_system.zip", 'w') as my_zip:
-#         for i in file_list:
-#             my_zip.write(i)
-#         my_zip.close()
-
-#     return send_file("recommendation_system.zip")
-
-
+#     return send_file("cosine_sim.csv")
+    
+    
+    
 # def making_cosine_data():
 #     with conn.cursor() as cursor:
 #         sql ="SELECT * FROM `worry_board_worryboard`"
@@ -95,16 +54,13 @@
 
 #         # 벡터화
 #         tfidf_matrix = tf.fit_transform(total_worryboard['result'].values.astype('U'))
-#         tfidf_matrix
 
 #         # 코사인유사도 구하기
-#         from sklearn.metrics.pairwise import cosine_similarity
 #         cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 #         cosine_sim = pd.DataFrame(cosine_sim)
-#         print(cosine_sim)
 
 #         cosine_sim.to_csv("cosine_sim.csv", index = False)
-
+        
 
 
 # # 줄거리에서 명사만 필터링하는 함수
@@ -117,7 +73,6 @@
 #         if pos in pos_list:
 #             pos_filtered_word_list.append(word)
 #     return pos_filtered_word_list
-
 
 
 

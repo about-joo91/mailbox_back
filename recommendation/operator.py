@@ -12,6 +12,7 @@ def start():
     scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
     register_events(scheduler)
 
+    # @scheduler.scheduled_job("interval", seconds=5, name="auto_csv")
     @scheduler.scheduled_job("interval", hours=4, name="auto_csv")
     def ready():
         db_to_csv()

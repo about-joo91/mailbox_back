@@ -19,8 +19,8 @@ from main_page.services.main_gage_service import (
     live_review_list_service,
     my_letter_count,
     worry_worryboard_union,
-    recommend_worryboard_list
 )
+from recommendation.services.recomendation_service import recommend_worryboard_list
 from user.models import User as UserModel
 from worry_board.models import WorryBoard
 from worry_board.serializers import WorryBoardSerializer

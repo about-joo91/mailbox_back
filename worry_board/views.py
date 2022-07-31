@@ -166,10 +166,6 @@ class RequestMessageView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # return Response(
-        # {"detail": "존재하지 않는 게시물입니다."},
-        # status=status.HTTP_400_BAD_REQUEST)
-
     def put(self, request, request_message_id):
         try:
             update_request_message_data(request.data, request_message_id)

@@ -22,9 +22,7 @@ from main_page.services.main_gage_service import (
 )
 from recommendation.services.recomendation_service import recommend_worryboard_list
 from user.models import User as UserModel
-from worry_board.models import WorryBoard
 from worry_board.serializers import WorryBoardSerializer
-
 
 from .models import Letter as LetterModel
 from .models import LetterReviewLike as LetterReviewLikeModel
@@ -111,14 +109,13 @@ class MainPageView(APIView):
     def get(self, request):
         cur_user = request.user
 
-        final_worryboard_list = recommend_worryboard_list(cur_user)
-              
         not_read_my_letter_count = my_letter_count(request.user.id)
 
         worry_categories = WorryCategoryModel.objects.prefetch_related("worryboard_set").all()
         order_by_cate_worry_list = worry_worryboard_union(worry_categories)
         main_page_data_and_user_profile = {}
         try:
+            final_worryboard_list = recommend_worryboard_list(cur_user)
             main_page_data_and_user_profile = MainPageDataSerializer(
                 UserModel.objects.select_related("userprofile").get(id=cur_user.id)
             ).data
@@ -129,6 +126,11 @@ class MainPageView(APIView):
                 {"detail": "몽글그레이드 정보가 없습니다 생성해주세요."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        except KeyError:
+            final_worryboard_list = []
+        except AttributeError:
+            final_worryboard_list = []
+
         grade_order_best_reviews = best_review_list_service()
         create_order_live_reviews = live_review_list_service()
         return Response(
@@ -146,7 +148,7 @@ class MainPageView(APIView):
                 ).data,
                 "recommend_worry_board_list": WorryBoardSerializer(
                     final_worryboard_list, context={"request": request}, many=True
-                ),
+                ).data,
             },
             status=status.HTTP_200_OK,
         )

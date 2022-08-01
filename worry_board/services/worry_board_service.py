@@ -28,7 +28,6 @@ def create_worry_board_data(author: UserModel, create_data: Dict[str, str]) -> N
     """
     worry_board의 데이터를 만드는 service
     """
-    author = UserModel.objects.filter(id=author.id).get()
     create_worry_board_serializer = WorryBoardSerializer(data=create_data)
     create_worry_board_serializer.is_valid(raise_exception=True)
     create_worry_board_serializer.save(author=author)
@@ -48,7 +47,7 @@ def delete_worry_board_data(author: UserModel, worry_board_id: int) -> None:
     """
     worry_board 데이터를 삭제하는 service
     """
-    delete_model = WorryBoardModel.objects.get(author=author.id, id=worry_board_id)
+    delete_model = WorryBoardModel.objects.get(author_id=author.id, id=worry_board_id)
     delete_model.delete()
 
 

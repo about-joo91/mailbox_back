@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from worry_board.models import RequestMessage as RequestMessageModel
-from worry_board.models import RequestStatus as RequestStatusModel
 from worry_board.models import WorryBoard as WorryBoardModel
 
 
@@ -24,21 +23,7 @@ class WorryBoardSerializer(serializers.ModelSerializer):
     def get_request_status(self, obj):
         author = self.context["request"].user
         try:
-            if (
-                obj.requestmessage_set.filter(author=author).get().request_status.id
-                == RequestStatusModel.objects.filter(status="요청취소").get().id
-            ):
-                return "요청취소"
-            elif (
-                obj.requestmessage_set.filter(author=author).get().request_status.id
-                == RequestStatusModel.objects.filter(status="수락됨").get().id
-            ):
-                return "수락됨"
-            elif (
-                obj.requestmessage_set.filter(author=author).get().request_status.id
-                == RequestStatusModel.objects.filter(status="반려됨").get().id
-            ):
-                return "반려됨"
+            return obj.requestmessage_set.get(author=author).request_status.status
         except RequestMessageModel.DoesNotExist:
             return "요청"
 

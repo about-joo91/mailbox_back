@@ -78,3 +78,4 @@ class BoardCommentSerializer(serializers.ModelSerializer):
             "is_comment_writer",
             "is_detail_page_writer",
         ]
+        extra_kwargs = {"board": {"read_only": True}}

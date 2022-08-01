@@ -105,7 +105,7 @@ class WorryBoardView(APIView):
         except WorryBoardModel.DoesNotExist:
             return Response(
                 {"detail": "유저의 고민 게시글과 일치하는 게시글이 없습니다."},
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_404_NOT_FOUND,
             )
 
 
@@ -171,11 +171,11 @@ class RequestMessageView(APIView):
             update_request_message_data(request.data, request_message_id)
             return Response({"detail": "요청 메세지가 수정되었습니다."}, status=status.HTTP_200_OK)
         except RequestMessageModel.DoesNotExist:
-            return Response({"detail": "해당 요청 메세지가 존재하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "해당 요청 메세지가 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request, request_message_id):
         try:
             delete_request_message_data(request_message_id)
             return Response({"detail": "요청 메세지가 삭제되었습니다."}, status=status.HTTP_200_OK)
         except RequestMessageModel.DoesNotExist:
-            return Response({"detail": "해당 요청 메세지가 존재하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "해당 요청 메세지가 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)

@@ -71,8 +71,8 @@ class TestBoardService(TestCase):
         user = UserModel.objects.create(username="won1", password="1234", nickname="won")
         request_data = {"title": "title", "content": "content", "author": user.id}
 
-        with self.assertNumQueries(2):
-            create_board_data(request_data, user.id)
+        with self.assertNumQueries(1):
+            create_board_data(request_data, user)
 
         board = BoardModel.objects.get(author=user.id)
 
@@ -124,7 +124,7 @@ class TestBoardService(TestCase):
             "author": user.id,
         }
         with self.assertRaises(exceptions.ValidationError):
-            create_board_data(request_data, user.id)
+            create_board_data(request_data, user)
 
     def test_update_board_data(self) -> None:
         """
@@ -134,8 +134,8 @@ class TestBoardService(TestCase):
         user_board = BoardModel.objects.create(title="title", content="content", author=user)
         request_data = {"title": "수정된 제목", "content": "수정된 내용", "author": user.id}
 
-        with self.assertNumQueries(4):
-            update_board_data(user_board.id, request_data, user.id)
+        with self.assertNumQueries(3):
+            update_board_data(user_board.id, request_data, user)
 
         updated_board = BoardModel.objects.get(id=user_board.id)
 
@@ -191,7 +191,7 @@ class TestBoardService(TestCase):
             "author": user.id,
         }
         with self.assertRaises(exceptions.ValidationError):
-            update_board_data(user_board.id, request_data, user.id)
+            update_board_data(user_board.id, request_data, user)
 
     def test_update_board_data_when_content_with_over_limited_num(self) -> None:
         """
@@ -214,7 +214,7 @@ class TestBoardService(TestCase):
             "author": user.id,
         }
         with self.assertRaises(exceptions.ValidationError):
-            update_board_data(user_board.id, request_data, user.id)
+            update_board_data(user_board.id, request_data, user)
 
     def test_delete_board_data(self) -> None:
         """
@@ -226,7 +226,7 @@ class TestBoardService(TestCase):
         self.assertEqual(1, BoardModel.objects.all().count())
 
         with self.assertNumQueries(5):
-            delete_board_data(user_board.id, user.id)
+            delete_board_data(user_board.id, user)
 
         self.assertEqual(0, BoardModel.objects.all().count())
 

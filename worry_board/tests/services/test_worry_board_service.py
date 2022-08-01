@@ -45,11 +45,13 @@ class TestWorryBoardService(TestCase):
         """
         worry_board_data를 생성하는 함수가 정상적으로 작동되었을 때에 대한 검증
         """
+
         user = UserModel.objects.create(username="Ko", nickname="Ko")
         category = WorryCategory.objects.create(cate_name="일상")
         create_data = {"category": category.id, "content": "생성테스트"}
         if check_is_it_clean_text(create_data["content"]):
-            create_worry_board_data(author=user, create_data=create_data)
+            with self.assertNumQueries(2):
+                create_worry_board_data(author=user, create_data=create_data)
 
         self.assertEqual(
             WorryBoardModel.objects.all()[0].id,
@@ -66,7 +68,8 @@ class TestWorryBoardService(TestCase):
         user_worry_board = WorryBoardModel.objects.create(author=user, category=category, content="수정전")
         update_data = {"category": category.id, "content": "수정함"}
         if check_is_it_clean_text(update_data["content"]):
-            update_worry_board_data(worry_board_id=user_worry_board.id, update_data=update_data)
+            with self.assertNumQueries(3):
+                update_worry_board_data(worry_board_id=user_worry_board.id, update_data=update_data)
 
         self.assertEqual(user_worry_board.id, WorryBoardModel.objects.get(author=user).id)
 
@@ -77,7 +80,8 @@ class TestWorryBoardService(TestCase):
         user = UserModel.objects.create(username="Ko", nickname="Ko")
         category = WorryCategory.objects.create(cate_name="일상")
         user_worry_board = WorryBoardModel.objects.create(author=user, category=category, content="삭제할 데이터")
-        delete_worry_board_data(author=user, worry_board_id=user_worry_board.id)
+        with self.assertNumQueries(4):
+            delete_worry_board_data(author=user, worry_board_id=user_worry_board.id)
 
         self.assertEqual(0, WorryBoardModel.objects.count())
 

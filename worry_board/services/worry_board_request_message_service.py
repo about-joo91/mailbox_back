@@ -7,7 +7,7 @@ from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import RequestMessageSerializer
 
 
-def get_paginated_request_message_data(page_num: int, case: str, author: str) -> Tuple[List, int]:
+def get_paginated_request_message_data(page_num: int, case: str, author: UserModel) -> Tuple[List, int]:
     """
     request_data를 가져오는 service
     """
@@ -23,21 +23,22 @@ def get_paginated_request_message_data(page_num: int, case: str, author: str) ->
     return paginated_request_message, total_count
 
 
-def create_request_message_data(author: str, worry_board_id: int, request_message: Dict):
+def create_request_message_data(author: UserModel, worry_board_id: int, request_message: Dict[str, str]):
     """
     request_message를 만드는 service
     """
     get_request_message = RequestMessageModel.objects.filter(author=author, worry_board_id=worry_board_id).exists()
     if get_request_message is False:
-        author = UserModel.objects.filter(id=author.id).get()
-        worry_board = WorryBoardModel.objects.filter(id=worry_board_id).get()
-        request_status = RequestStatusModel.objects.filter(status="요청취소").get()
+        worry_board = WorryBoardModel.objects.get(id=worry_board_id)
+        request_status = RequestStatusModel.objects.get(status="요청취소")
         request_message_serializer = RequestMessageSerializer(data=request_message)
         request_message_serializer.is_valid(raise_exception=True)
-        request_message_serializer.save(author=author, worry_board=worry_board, request_status=request_status)
+        request_message_serializer.save(
+            author_id=author.id, worry_board_id=worry_board.id, request_status_id=request_status.id
+        )
 
 
-def update_request_message_data(for_updata_date: Dict, request_message_id: int) -> None:
+def update_request_message_data(for_updata_date: Dict[str, str], request_message_id: int) -> None:
     """
     request_message를 수정하는 service
     """

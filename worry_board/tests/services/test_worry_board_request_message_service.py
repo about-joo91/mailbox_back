@@ -37,7 +37,8 @@ class TestWorryBoardRequestMessageService(TestCase):
         worry_board = WorryBoardModel.objects.get(content="test_worry_board")
         case = "sended"
         RequestMessageModel.objects.create(author=user, worry_board=worry_board)
-        paginated_request_message, total_count = get_paginated_request_message_data(page_num, case, user)
+        with self.assertNumQueries(1):
+            paginated_request_message, total_count = get_paginated_request_message_data(page_num, case, user)
 
         self.assertEqual(1, total_count)
         self.assertEqual(
@@ -53,8 +54,9 @@ class TestWorryBoardRequestMessageService(TestCase):
         """
         request_message_data를 생성하는 함수에 대한 검증
         """
-        user = UserModel.objects.get(username="ko")
+
         worry_board = WorryBoardModel.objects.get(content="test_worry_board")
+        user = UserModel.objects.get(username="ko")
         request_message_data = {"request_message": "request_message 생성중"}
         if check_is_it_clean_text(request_message_data["request_message"]):
             create_request_message_data(

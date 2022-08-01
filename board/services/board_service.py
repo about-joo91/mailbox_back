@@ -10,7 +10,7 @@ from board.serializers import BoardCommentSerializer, BoardSerializer
 from user.models import User as UserModel
 
 
-def check_is_it_clean_text(check_content):
+def check_is_it_clean_text(check_content: dict[str, str]):
     """
     작성하는 데이터에 욕설이 있는지 검증하는 service
     """
@@ -30,39 +30,38 @@ def get_paginated_board_data(page_num: int) -> Tuple[List, int]:
     return paginated_board, total_count
 
 
-def create_board_data(board_data: Dict, author_id: int) -> None:
+def create_board_data(board_data: Dict[str, str], author: UserModel) -> None:
     """
     board 데이터를 작성하는 service
     """
-    author = UserModel.objects.filter(id=author_id).get()
     create_board_serializer = BoardSerializer(data=board_data)
     create_board_serializer.is_valid(raise_exception=True)
     create_board_serializer.save(author=author)
 
 
-def update_board_data(board_id: int, update_data: Dict, user_id: int) -> None:
+def update_board_data(board_id: int, update_data: Dict[str, str], author: UserModel) -> None:
     """
     board 데이터를 업데이트 하는 service
     """
     update_board = BoardModel.objects.get(id=board_id)
-    if user_id != update_board.author.id:
+    if author != update_board.author:
         raise exceptions.PermissionDenied
     update_board_serializer = BoardSerializer(update_board, data=update_data, partial=True)
     update_board_serializer.is_valid(raise_exception=True)
     update_board_serializer.save()
 
 
-def delete_board_data(board_id: int, author_id: int) -> None:
+def delete_board_data(board_id: int, author: UserModel) -> None:
     """
     board 데이터를 삭제하는 service
     """
     delete_model = BoardModel.objects.get(id=board_id)
-    if author_id != delete_model.author.id:
+    if author != delete_model.author:
         raise exceptions.PermissionDenied
     delete_model.delete()
 
 
-def make_like_data(author: int, board_id: int) -> None:
+def make_like_data(author: UserModel, board_id: int) -> None:
     """
     like 데이터를 만드는 service
     """
@@ -70,7 +69,7 @@ def make_like_data(author: int, board_id: int) -> None:
     BoardLikeModel.objects.create(author=author, board=target_board)
 
 
-def delete_like_data(author: int, board_id: int) -> None:
+def delete_like_data(author: UserModel, board_id: int) -> None:
     """
     like 데이터를 삭제하는 service
     """
@@ -92,11 +91,10 @@ def create_board_comment_data(author: UserModel, board_id: int, create_data: Dic
     해당 board의 comment 데이터를 만드는 service
     """
 
-    author = UserModel.objects.filter(id=author.id).get()
-    board = BoardModel.objects.filter(id=board_id).get()
+    board = BoardModel.objects.get(id=board_id)
     create_board_comment_serializer = BoardCommentSerializer(data=create_data)
     create_board_comment_serializer.is_valid(raise_exception=True)
-    create_board_comment_serializer.save(board=board)
+    create_board_comment_serializer.save(author=author, board=board)
 
 
 def update_board_comment_data(update_data: Dict, comment_id: int) -> None:

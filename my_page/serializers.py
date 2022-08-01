@@ -1,8 +1,15 @@
 from rest_framework import serializers
 
 from main_page.models import Letter as LetterModel
+from main_page.models import LetterReview as LetterReviewModel
 from user.models import MongleGrade as MongleGradeModel
 from user.models import User as UserModel
+
+
+class LetterReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LetterReviewModel
+        fields = ["id", "grade", "content"]
 
 
 class MongleSerializer(serializers.ModelSerializer):
@@ -28,8 +35,15 @@ class LetterUserSerializer(serializers.ModelSerializer):
 
 class LetterSerializer(serializers.ModelSerializer):
     category = serializers.SerializerMethodField()
-    letter_author = serializers.SerializerMethodField(read_only=True)
-    received_user = serializers.SerializerMethodField(read_only=True)
+    letter_author = serializers.SerializerMethodField()
+    received_user = serializers.SerializerMethodField()
+    review_data = serializers.SerializerMethodField()
+
+    def get_review_data(self, obj):
+        try:
+            return {"is_reviewed": True, "review": LetterReviewSerializer(obj.letterreview).data}
+        except LetterModel.letterreview.RelatedObjectDoesNotExist:
+            return {"is_reviewed": False}
 
     def get_letter_author(self, obj):
         return LetterUserSerializer(obj.letter_author).data
@@ -51,4 +65,5 @@ class LetterSerializer(serializers.ModelSerializer):
             "is_read",
             "letter_author",
             "received_user",
+            "review_data",
         ]

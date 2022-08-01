@@ -127,6 +127,13 @@ class MainPageView(APIView):
                 {"detail": "몽글그레이드 정보가 없습니다 생성해주세요."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        try:
+            final_worryboard_list = recommend_worryboard_list(cur_user)
+        except KeyError:
+            final_worryboard_list = []
+        except AttributeError:
+            final_worryboard_list = []
+
         grade_order_best_reviews = best_review_list_service()
         create_order_live_reviews = live_review_list_service()
         return Response(
@@ -144,7 +151,7 @@ class MainPageView(APIView):
                 ).data,
                 "recommend_worry_board_list": WorryBoardSerializer(
                     final_worryboard_list, context={"request": request}, many=True
-                ),
+                ).data,
             },
             status=status.HTTP_200_OK,
         )

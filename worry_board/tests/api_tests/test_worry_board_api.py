@@ -65,9 +65,8 @@ class TestWorryBoardAPI(APITestCase):
         response = client.get(url)
         result = response.json()
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual("APItest", result["boards"][0]["content"])
-        self.assertEqual(result["total_count"], 1)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(result["detail"], "게시판을 조회할 수 없습니다. 다시 시도해주세요.")
 
     def test_post_worry_board_API(self) -> None:
         """
@@ -124,7 +123,7 @@ class TestWorryBoardAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(400, response.status_code)
-        self.assertEqual(result["category"], ["이 필드는 필수 항목입니다."])
+        self.assertEqual(result["detail"], "이 필드는 필수 항목입니다.")
 
     def test_when_wrong_caregory_in_post_worry_board_API(self) -> None:
         """

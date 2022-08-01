@@ -117,41 +117,70 @@ class BorderCommentView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
-        board_id = int(self.request.query_params.get("board_id"))
-        board_comment_data = get_board_comment_data(board_id)
-        return Response(
-            {
-                "board_comments": BoardSerializer(board_comment_data, many=True, context={"request": request}).data,
-            },
-            status=status.HTTP_200_OK,
-        )
+        try:
+            board_id = int(self.request.query_params.get("board_id"))
+            board_comment_data = get_board_comment_data(board_id)
+            return Response(
+                {
+                    "board_comments": BoardSerializer(board_comment_data, many=True, context={"request": request}).data,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except TypeError:
+            return Response(
+                {"detail": "params의 board_id가 비어있습니다."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
     def post(self, request):
         author = request.user
         board_id = int(self.request.query_params.get("board_id"))
         if check_is_it_clean_text(request.data["content"]):
-            create_board_comment_data(author, board_id, request.data)
-            return Response({"detail": "댓글이 생성되었습니다."}, status=status.HTTP_200_OK)
+            try:
+                create_board_comment_data(author, board_id, request.data)
+                return Response({"detail": "댓글이 생성되었습니다."}, status=status.HTTP_200_OK)
+            except exceptions.ValidationError as e:
+                error_message = "".join([str(value) for values in e.detail.values() for value in values])
+                return Response({"detail": error_message}, status=status.HTTP_400_BAD_REQUEST)
+
         else:
             return Response(
-                {"detail": "부적절한 내용이 담겨있어 댓글을 작성 할 수 없습니다"},
+                {"detail": "부적절한 내용이 담겨있어 댓글을 작성 할 수 없습니다."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
     def put(self, request, comment_id):
+
         if check_is_it_clean_text(request.data["content"]):
-            update_board_comment_data(request.data, comment_id)
-            return Response({"detail": "댓글이 수정되었습니다."}, status=status.HTTP_200_OK)
+            try:
+                if request.user != BoardCommentModel.objects.get(id=comment_id).author:
+                    return Response(
+                        {"detail": "수정할 수 있는 권한이 없습니다."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                update_board_comment_data(request.data, comment_id)
+                return Response({"detail": "댓글이 수정되었습니다."}, status=status.HTTP_200_OK)
+            except BoardCommentModel.DoesNotExist:
+                return Response(
+                    {"detail": "해당 댓글을 찾을 수 없습니다."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+            except exceptions.ValidationError as e:
+                error_message = "".join([str(value) for values in e.detail.values() for value in values])
+                return Response({"detail": error_message}, status=status.HTTP_400_BAD_REQUEST)
+
         else:
             return Response(
                 {"detail": "부적절한 내용이 담겨있어 댓글을 수정 할 수 없습니다"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    def delete(self, request, comment_id):
+    def delete(self, request, comment_id=0):
 
         try:
             delete_board_comment_data(comment_id, request.user.id)
             return Response({"detail": "댓글이 삭제되었습니다."}, status=status.HTTP_200_OK)
         except BoardCommentModel.DoesNotExist:
-            return Response({"detail": "댓글이 존재하지 않습니다.."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "댓글이 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
+        except TypeError:
+            return Response({"detail": "comment_id가 비어있습니다."}, status=status.HTTP_404_NOT_FOUND)

@@ -117,10 +117,7 @@ class TestWorryBoardService(TestCase):
         """
         user = UserModel.objects.create(username="Ko", nickname="Ko")
         category = WorryCategory.objects.create(cate_name="일상")
-        create_data = {
-            "category": category.id,
-            "content": "90자를 넘기는지에 대한 검증입니다. 조금 길더라도 양해 바랍니다. 90자를 넘기는지에 대한 검증입니다. 조금 길더라도 양해 바랍니다. 90자를 넘기는지에 대한 검증입니다. 조금 길더라도 양해 바랍니다.",
-        }
+        create_data = {"category": category.id, "content": str("a" * 100)}
 
         with self.assertRaises(ValidationError):
             if check_is_it_clean_text(create_data["content"]):

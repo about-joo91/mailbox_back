@@ -107,9 +107,9 @@ def update_board_comment_data(update_data: Dict, comment_id: int) -> None:
     update_comment_serializer.save()
 
 
-def delete_board_comment_data(comment_id: int, author_id: int) -> None:
+def delete_board_comment_data(comment_id: int, author: UserModel) -> None:
     """
     해당 board의 comment 데이터를 삭제하는 service
     """
-    delete_comment = BoardCommentModel.objects.get(id=comment_id, author=author_id)
+    delete_comment = BoardCommentModel.objects.get(id=comment_id, author=author)
     delete_comment.delete()

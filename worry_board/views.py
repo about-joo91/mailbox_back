@@ -1,4 +1,4 @@
-from rest_framework import permissions, status
+from rest_framework import exceptions, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -29,28 +29,33 @@ class WorryBoardView(APIView):
     def get(self, request):
         try:
             category = int(self.request.query_params.get("category"))
-        except TypeError:
-            category = 1
-        try:
             page_num = int(self.request.query_params.get("page_num"))
-        except TypeError:
-            page_num = 1
-        paginated_worry_board, total_count = get_paginated_worry_board_data(page_num, category)
 
-        return Response(
-            {
-                "boards": WorryBoardSerializer(paginated_worry_board, many=True, context={"request": request}).data,
-                "total_count": total_count,
-            },
-            status=status.HTTP_200_OK,
-        )
+            paginated_worry_board, total_count = get_paginated_worry_board_data(page_num, category)
+            return Response(
+                {
+                    "boards": WorryBoardSerializer(paginated_worry_board, many=True, context={"request": request}).data,
+                    "total_count": total_count,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except TypeError:
+            return Response({"detail": "게시판을 조회할 수 없습니다. 다시 시도해주세요."}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request):
         author = request.user
         if check_is_it_clean_text(request.data["content"]):
-            create_worry_board_data(author, request.data)
-
-            return Response({"detail": "고민 게시글을 게시하였습니다."}, status=status.HTTP_200_OK)
+            try:
+                create_worry_board_data(author, request.data)
+                return Response({"detail": "고민 게시글을 게시하였습니다."}, status=status.HTTP_200_OK)
+            except exceptions.ValidationError as e:
+                error_message = "".join([str(value) for values in e.detail.values() for value in values])
+                return Response({"detail": error_message}, status=status.HTTP_400_BAD_REQUEST)
+            except AssertionError:
+                return Response(
+                    {"detail": "category가 비어있습니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
         else:
             return Response(
                 {"detail": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
@@ -81,6 +86,14 @@ class WorryBoardView(APIView):
                     {"detail": "parameter가 비어있습니다"},
                     status=status.HTTP_400_BAD_REQUEST,
                 )
+            except WorryBoardModel.DoesNotExist:
+                return Response(
+                    {"detail": "고민글이 존재하지 않습니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            except exceptions.ValidationError as e:
+                error_message = "".join([str(value) for values in e.detail.values() for value in values])
+                return Response({"detail": error_message}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(
                 {"detail": "부적절한 내용이 담겨있어 게시글을 수정 할 수 없습니다"},

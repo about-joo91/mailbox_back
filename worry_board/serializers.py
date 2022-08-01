@@ -1,3 +1,4 @@
+from pymysql import NULL
 from rest_framework import serializers
 
 from worry_board.models import RequestMessage as RequestMessageModel
@@ -8,6 +9,7 @@ class WorryBoardSerializer(serializers.ModelSerializer):
     create_date = serializers.SerializerMethodField()
     is_worry_board_writer = serializers.SerializerMethodField()
     request_status = serializers.SerializerMethodField()
+    request_message_id = serializers.SerializerMethodField()
 
     def get_create_date(self, obj):
         format_data = "%m-%d %H:%M"
@@ -27,6 +29,12 @@ class WorryBoardSerializer(serializers.ModelSerializer):
         except RequestMessageModel.DoesNotExist:
             return "요청"
 
+    def get_request_message_id(self, obj):
+        try:
+            return obj.requestmessage_set.get().id
+        except RequestMessageModel.DoesNotExist:
+            return NULL
+
     class Meta:
         model = WorryBoardModel
         fields = [
@@ -36,6 +44,7 @@ class WorryBoardSerializer(serializers.ModelSerializer):
             "content",
             "is_worry_board_writer",
             "request_status",
+            "request_message_id",
         ]
 
         extra_kwargs = {"request_status": {"read_only": True}}

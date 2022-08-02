@@ -16,7 +16,7 @@ services:
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
-  mail_box:
+  web_server:
     image: aboutjoo/mail_box:latest
     env_file:
       - ./.env.prod

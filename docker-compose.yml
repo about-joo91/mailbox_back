@@ -1,9 +1,41 @@
 version: '3.9'
 services:
-  mail_box:
-    image: aboutjoo/mail_box:latest
-    env_file:
-      - "/home/ubuntu/.env"
+  nginx:
+    build: ./nginx
+    volumes:
+      - static_volume:/app/static
     ports:
-      - "80:8000"
+      - 80:80
+    depends_on:
+      - mail_box
+  mail_box:
+    build: .
     command: gunicorn --bind 0.0.0.0:8000 --workers=5 mail_box.wsgi:application  &
+    ports:
+      - 8000:8000
+    working_dir: /app/
+    volumes:
+      - ./:/app/
+      - static_volume:/app/static
+    env_file:
+      - ./.env.dev
+    expose:
+      - 8000
+    depends_on:
+      - db
+  db:
+    image: mysql:8.0.25
+    restart: always
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: "mail_box"
+      MYSQL_USER: "root"
+      MYSQL_PASSWORD: 1234
+    volumes:
+      - mysql_db:/var/lib/mysql
+    ports:
+      - 3306:3306
+volumes:
+  static_volume:
+  mysql_db:

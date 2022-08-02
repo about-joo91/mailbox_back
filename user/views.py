@@ -36,7 +36,7 @@ class UserView(APIView):
             post_user_signup_data(request.data)
             return Response({"detail": "회원가입을 성공하였습니다"}, status=status.HTTP_200_OK)
         except exceptions.ValidationError as e:
-            error = "".join([str(value) for values in e.detail.values() for value in values])
+            error = "\n".join([str(value) for values in e.detail.values() for value in values])
             return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
 
 

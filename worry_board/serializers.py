@@ -1,3 +1,4 @@
+DOESNOTEXIXT = -1
 from rest_framework import serializers
 
 from worry_board.models import RequestMessage as RequestMessageModel
@@ -30,10 +31,11 @@ class WorryBoardSerializer(serializers.ModelSerializer):
             return "요청"
 
     def get_request_message_id(self, obj):
+
         try:
             return obj.requestmessage_set.get().id
         except RequestMessageModel.DoesNotExist:
-            return -1
+            return DOESNOTEXIXT
 
     class Meta:
         model = WorryBoardModel

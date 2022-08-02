@@ -138,8 +138,7 @@ DATABASES = {
         "NAME": os.environ["MONGLE_DB_NAME"],  # DB Name
         "USER": os.environ["MONGLE_USER"],  # DB User
         "PASSWORD": os.environ["MONGLE_PASSWORD"],  # Password
-        "HOST": "db",
-        # "HOST": os.environ["MONGLE_HOST"],
+        "HOST": os.environ["MONGLE_HOST"],
         "PORT": os.environ["MONGLE_PORT"],  # 데이터베이스 포트
         "OPTIONS": {
             "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",

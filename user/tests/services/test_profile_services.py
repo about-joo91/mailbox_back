@@ -22,8 +22,8 @@ class TestUserProfileServices(TestCase):
         with self.assertNumQueries(3):
             user_profile_data = get_user_profile_data(user.id)
 
-        self.assertEqual(0, user_profile_data["mongle_level"])
-        self.assertEqual(0, user_profile_data["mongle_grade"])
+        self.assertEqual("", user_profile_data["fullname"])
+        self.assertEqual("", user_profile_data["description"])
         self.assertEqual(
             "https://user-images.githubusercontent.com/55477835/181283419-20705c71-a20a-46ab-a30e-bb4edece1670.png",
             user_profile_data["profile_img"],

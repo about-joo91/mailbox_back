@@ -2,6 +2,7 @@ from typing import Dict, List
 
 from main_page.models import WorryCategory as WorryCategoryModel
 from user.models import UserProfile as UserProfileModel
+from user.models import UserProfileCategory
 
 
 def get_category_of_profile_except_mine(user_id: int) -> List[Dict]:
@@ -30,5 +31,8 @@ def delete_category_of_profile(user_id: int, p_category: int) -> None:
     """
     내 프로필의 카테고리를 제거하는 함수
     """
-    worry_category = WorryCategoryModel.objects.filter(id=p_category).get()
-    UserProfileModel.objects.filter(user_id=user_id).get().categories.remove(worry_category)
+    user_profile_category = UserProfileCategory.objects.select_related("user_profile__user").get(id=p_category)
+    if user_profile_category.user_profile.user.id == user_id:
+        user_profile_category.delete()
+    else:
+        raise PermissionError

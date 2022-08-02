@@ -389,4 +389,6 @@ $RECYCLE.BIN/
 
 
 config.py
+.env.prod
+.env.dev
 # End of https://www.toptal.com/developers/gitignore/api/python,windows,macos,linux,virtualenv,visualstudiocode,pycharm

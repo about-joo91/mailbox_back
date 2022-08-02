@@ -29,7 +29,7 @@ SECRET_KEY = os.environ["MONGLE_SECRET_KEY"]
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "13.209.201.47"]
 
 # Application definition
 
@@ -138,7 +138,8 @@ DATABASES = {
         "NAME": os.environ["MONGLE_DB_NAME"],  # DB Name
         "USER": os.environ["MONGLE_USER"],  # DB User
         "PASSWORD": os.environ["MONGLE_PASSWORD"],  # Password
-        "HOST": os.environ["MONGLE_HOST"],
+        "HOST": "db",
+        # "HOST": os.environ["MONGLE_HOST"],
         "PORT": os.environ["MONGLE_PORT"],  # 데이터베이스 포트
         "OPTIONS": {
             "init_command": "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -191,6 +192,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "static"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

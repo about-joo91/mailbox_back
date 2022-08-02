@@ -5,6 +5,7 @@ from rest_framework.test import APIClient, APITestCase
 from user.models import MongleGrade
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
+from user.serializers import MongleGradeSerializer
 
 
 class TestProfileAPI(APITestCase):
@@ -28,8 +29,7 @@ class TestProfileAPI(APITestCase):
 
         self.assertEqual(result["fullname"], user_profile.fullname)
         self.assertEqual(result["description"], user_profile.description)
-        self.assertEqual(result["mongle_level"], mongle_grade.level)
-        self.assertEqual(result["mongle_grade"], mongle_grade.grade)
+        self.assertEqual(result["mongle_grade"], MongleGradeSerializer(mongle_grade).data)
         self.assertEqual(result["profile_img"], user_profile.profile_img)
 
     def test_when_user_profile_is_none_in_get_user_profile(self) -> None:

@@ -43,6 +43,7 @@ class MainPageDataSerializer(serializers.ModelSerializer):
         return {
             "grade": obj.monglegrade.grade,
             "profile_img": obj.userprofile.profile_img,
+            "mongle_img": obj.monglegrade.mongle,
         }
 
     class Meta:

@@ -109,13 +109,14 @@ class MainPageView(APIView):
     def get(self, request):
         cur_user = request.user
 
+        final_worryboard_list = recommend_worryboard_list(cur_user)
+
         not_read_my_letter_count = my_letter_count(request.user.id)
 
         worry_categories = WorryCategoryModel.objects.prefetch_related("worryboard_set").all()
         order_by_cate_worry_list = worry_worryboard_union(worry_categories)
         main_page_data_and_user_profile = {}
         try:
-            final_worryboard_list = recommend_worryboard_list(cur_user)
             main_page_data_and_user_profile = MainPageDataSerializer(
                 UserModel.objects.select_related("userprofile").get(id=cur_user.id)
             ).data
@@ -126,6 +127,8 @@ class MainPageView(APIView):
                 {"detail": "몽글그레이드 정보가 없습니다 생성해주세요."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        try:
+            final_worryboard_list = recommend_worryboard_list(cur_user)
         except KeyError:
             final_worryboard_list = []
         except AttributeError:

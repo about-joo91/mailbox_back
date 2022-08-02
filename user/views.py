@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from main_page.models import WorryCategory
 from user.services.report_service import create_user_report
 from user.services.user_profile_category_service import (
     create_category_of_profile,
@@ -19,6 +18,7 @@ from user.services.user_signup_login_service import get_user_signup_data, post_u
 from .models import MongleGrade
 from .models import User as UserModel
 from .models import UserProfile as UserProfileModel
+from .models import UserProfileCategory
 
 
 # Create your views here.
@@ -114,13 +114,13 @@ class UserProfileCategoryView(APIView):
             cur_user = request.user
             delete_category_of_profile(user_id=cur_user.id, p_category=p_category)
             return Response({"detail": "카테고리를 지웠습니다."}, status=status.HTTP_200_OK)
-        except WorryCategory.DoesNotExist:
+        except UserProfileCategory.DoesNotExist:
             return Response(
-                {"detail": "카테고리를 조회할 수 없습니다. 다시 시도해주세요."},
+                {"detail": "해당 카테고리를 조회할 수 없습니다. 다시 시도해주세요."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except UserProfileModel.DoesNotExist:
-            return Response({"detail": "유저 프로필 정보가 없습니다. 생성해주세요"}, status=status.HTTP_404_NOT_FOUND)
+        except PermissionError:
+            return Response({"detail": "권한이 없습니다."}, status=status.HTTP_203_NON_AUTHORITATIVE_INFORMATION)
 
 
 class ReportUserView(APIView):

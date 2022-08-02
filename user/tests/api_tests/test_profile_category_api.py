@@ -5,6 +5,7 @@ from rest_framework.test import APIClient, APITestCase
 from main_page.models import WorryCategory
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
+from user.models import UserProfileCategory
 from user.services.user_profile_category_service import create_category_of_profile
 
 
@@ -149,13 +150,17 @@ class TestProfileCategoryAPI(APITestCase):
         """
         client = APIClient()
         user = UserModel.objects.create(username="joo", nickname="joo")
-        UserProfileModel.objects.create(user=user)
+        user_profile = UserProfileModel.objects.create(user=user)
         worry_category = WorryCategory.objects.create(cate_name="가족")
         create_category_of_profile(user.id, [worry_category.id])
         self.assertEqual(1, user.userprofile.categories.all().count())
 
+        userprofile_category = UserProfileCategory.objects.filter(
+            user_profile=user_profile, category=worry_category
+        ).get()
+
         client.force_authenticate(user=user)
-        url = "/user/profile/category/" + str(worry_category.id)
+        url = "/user/profile/category/" + str(userprofile_category.id)
         response = client.delete(url)
         result = response.json()
 
@@ -180,14 +185,14 @@ class TestProfileCategoryAPI(APITestCase):
         response = client.delete(url)
         result = response.json()
 
-        self.assertEqual("카테고리를 조회할 수 없습니다. 다시 시도해주세요.", result["detail"])
+        self.assertEqual("해당 카테고리를 조회할 수 없습니다. 다시 시도해주세요.", result["detail"])
         self.assertEqual(404, response.status_code)
         self.assertEqual(1, user.userprofile.categories.all().count())
 
     def test_when_category_does_not_exist_in_delete_userprofile_category(self) -> None:
         """
         UserProfileCategoryView의 delete 함수에 대한 검증
-        case : 카테고리가 없을 때
+        case : 아이디 값이 유효하지 않을 때
         """
         client = APIClient()
         user = UserModel.objects.create(username="joo", nickname="joo")
@@ -198,27 +203,8 @@ class TestProfileCategoryAPI(APITestCase):
         response = client.delete(url)
         result = response.json()
 
-        self.assertEqual("카테고리를 조회할 수 없습니다. 다시 시도해주세요.", result["detail"])
+        self.assertEqual("해당 카테고리를 조회할 수 없습니다. 다시 시도해주세요.", result["detail"])
         self.assertEqual(404, response.status_code)
-
-    def test_when_userprofile_does_not_exist_in_delete_userprofile_category(
-        self,
-    ) -> None:
-        """
-        UserProfileCategoryView의 delete 함수에 대한 검증
-        case : 유저프로필이 없을 때
-        """
-        client = APIClient()
-        user = UserModel.objects.create(username="joo", nickname="joo")
-        worry_category = WorryCategory.objects.create(cate_name="가족")
-
-        client.force_authenticate(user=user)
-        url = "/user/profile/category/" + str(worry_category.id)
-        response = client.delete(url)
-        result = response.json()
-
-        self.assertEqual(404, response.status_code)
-        self.assertEqual("유저 프로필 정보가 없습니다. 생성해주세요", result["detail"])
 
     def test_when_user_is_unauthenticated_in_delete_user_profile_category(self) -> None:
         """

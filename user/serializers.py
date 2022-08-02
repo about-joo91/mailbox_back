@@ -38,20 +38,22 @@ class UserSignupSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class MongleGradeSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ["mongle", "level", "grade"]
+        model = MongleGrade
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     categories = serializers.SerializerMethodField()
-    mongle_level = serializers.SerializerMethodField(read_only=True)
     mongle_grade = serializers.SerializerMethodField(read_only=True)
 
     def get_categories(self, obj):
         return [{"id": cate.id, "cate_name": cate.category.cate_name} for cate in obj.userprofilecategory_set.all()]
 
-    def get_mongle_level(self, obj):
-        return obj.user.monglegrade.level
-
     def get_mongle_grade(self, obj):
-        return obj.user.monglegrade.grade
+        return MongleGradeSerializer(obj.user.monglegrade).data
 
     def get_user(self, obj):
         return obj.user.nickname
@@ -67,7 +69,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
         fields = [
             "user",
             "description",
-            "mongle_level",
             "mongle_grade",
             "fullname",
             "profile_img",

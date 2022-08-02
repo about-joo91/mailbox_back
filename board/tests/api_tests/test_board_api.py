@@ -103,7 +103,7 @@ class TestBoardAPI(APITestCase):
         self.assertEqual(401, response.status_code)
         self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
 
-    def testincluding_swear_word_in__board_content(self) -> None:
+    def test_including_swear_word_in_board_content(self) -> None:
         """
         BoardView의 post 함수를 검증하는 함수
         case : 욕설을 포함한 내용을 post하는 경우

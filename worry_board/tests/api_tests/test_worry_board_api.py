@@ -140,6 +140,27 @@ class TestWorryBoardAPI(APITestCase):
 
         self.assertEqual(400, response.status_code)
 
+    def test_when_word_over_90_text_post_worry_board_API(self) -> None:
+        """
+        WorryBoardView의 post 함수를 검증하는 함수
+        case : 제한된 글자 수 90을 넘은 경우
+        """
+        client = APIClient()
+        user = UserModel.objects.get(username="test")
+        category = WorryCategoryModel.objects.get(cate_name="가족")
+        request_data = {
+            "category": category.id,
+            "content": str("A" * 100),
+        }
+
+        client.force_authenticate(user=user)
+        url = "/worry_board/"
+        response = client.post(url, data=json.dumps(request_data), content_type="application/json")
+        result = response.json()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(result["detail"], "이 필드의 글자 수가 90 이하인지 확인하십시오.")
+
     def test_put_worry_board_API(self) -> None:
         """
         WorryBoardView의 put 함수를 검증하는 함수
@@ -225,6 +246,25 @@ class TestWorryBoardAPI(APITestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(result["detail"], "worry_board_id가 비어있습니다.")
+
+    def test_when_content_over_90_text_put_worry_board_API(self) -> None:
+        """
+        WorryBoardView의 put 함수를 검증하는 함수
+        case : 제한된 텍스트 90을 넘었을 경우
+        """
+        client = APIClient()
+        user = UserModel.objects.get(username="test")
+        worry_board = WorryBoardModel.objects.get(content="APItest")
+        category = WorryCategoryModel.objects.get(cate_name="가족")
+        request_data = {"category": category.id, "content": str("A" * 130)}
+
+        client.force_authenticate(user=user)
+        url = "/worry_board/" + str(worry_board.id)
+        response = client.put(url, data=json.dumps(request_data), content_type="application/json")
+        result = response.json()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(result["detail"], "이 필드의 글자 수가 90 이하인지 확인하십시오.")
 
     def test_delete_worry_board_API(self) -> None:
         """

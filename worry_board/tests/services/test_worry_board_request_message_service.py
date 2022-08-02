@@ -152,20 +152,6 @@ class TestWorryBoardRequestMessageService(TestCase):
             RequestMessageModel.objects.get(author=user).request_message,
         )
 
-    def test_when_success_delete_request_message_data(self) -> None:
-        """
-        request_message_data를 삭제하는 함수에 대한 검증
-        """
-        user = UserModel.objects.get(username="ko")
-        worry_board = WorryBoardModel.objects.get(content="test_worry_board")
-        create_request_message = RequestMessageModel.objects.create(
-            author=user, worry_board=worry_board, request_message="test"
-        )
-
-        delete_request_message_data(request_message_id=create_request_message.id)
-
-        self.assertEqual(0, RequestMessageModel.objects.count())
-
     def test_when_post_including_swear_word_in_update_request_message_data(
         self,
     ) -> None:
@@ -190,3 +176,60 @@ class TestWorryBoardRequestMessageService(TestCase):
 
         with self.assertRaises(RequestMessageModel.DoesNotExist):
             RequestMessageModel.objects.get(request_message="바보같은놈")
+
+    def test_when_worry_board_does_not_exist_in_update_request_message_data(self) -> None:
+        """
+        request_message_data를 수정하는 함수에 대한 검증
+        case : 해당 request_message가 없을 경우
+        """
+        request_message_data = {"request_message": "request_message 생성중"}
+
+        with self.assertRaises(RequestMessageModel.DoesNotExist):
+            if check_is_it_clean_text(request_message_data["request_message"]):
+                update_request_message_data(
+                    for_updata_date=request_message_data,
+                    request_message_id=9999,
+                )
+
+    def test_when_over_request_message_lengths_120_in_update_request_message_data(self) -> None:
+        """
+        request_message_data를 수정하는 함수에 대한 검증
+        case : 글자 제한수 120을 넘었을 경우
+        """
+
+        user = UserModel.objects.get(username="ko")
+        worry_board = WorryBoardModel.objects.get(content="test_worry_board")
+        create_request_message = RequestMessageModel.objects.create(
+            author=user, worry_board=worry_board, request_message="test"
+        )
+        request_message_data = {"request_message": str("A" * 140)}
+
+        with self.assertRaises(ValidationError):
+            if check_is_it_clean_text(request_message_data["request_message"]):
+                update_request_message_data(
+                    for_updata_date=request_message_data,
+                    request_message_id=create_request_message.id,
+                )
+
+    def test_when_success_delete_request_message_data(self) -> None:
+        """
+        request_message_data를 삭제하는 함수에 대한 검증
+        """
+        user = UserModel.objects.get(username="ko")
+        worry_board = WorryBoardModel.objects.get(content="test_worry_board")
+        create_request_message = RequestMessageModel.objects.create(
+            author=user, worry_board=worry_board, request_message="test"
+        )
+
+        delete_request_message_data(request_message_id=create_request_message.id)
+
+        self.assertEqual(0, RequestMessageModel.objects.count())
+
+    def test_when_worry_board_does_not_exist_in_delete_request_message_data(self) -> None:
+        """
+        request_message_data를 삭제하는 함수에 대한 검증
+        case : 삭제할 request_message가 없을 경우
+        """
+
+        with self.assertRaises(RequestMessageModel.DoesNotExist):
+            delete_request_message_data(request_message_id=9999)

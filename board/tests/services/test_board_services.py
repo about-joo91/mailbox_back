@@ -367,7 +367,7 @@ class TestBoardService(TestCase):
     def test_delete_board_comment_data_which_doesnot_exist(self) -> None:
         """
         board_comment 데이터를 삭제하는 service 함수 검증
-        case: 없는 게시글을 삭제하려고 할 때
+        case: 없는 board_comment를 삭제하려고 할 때
         """
         user = UserModel.objects.get(username="ko", nickname="ko")
         with self.assertRaises(BoardCommentModel.DoesNotExist):

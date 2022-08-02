@@ -134,22 +134,22 @@ class TestRequestMessageAPI(APITestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(result["detail"], "게시물 작성자에게 요청하였습니다!")
 
-    def test_when_worry_board_does_not_exist_in_post_request_message_API(self) -> None:
+    def test_when_worry_wrong_board_in_post_request_message_API(self) -> None:
         """
         RequestMessage의 post 함수를 검증하는 함수
-        case : worry_board가 없는 경우
+        case : 존재하지 않는 worry_board가 들어갔을 경우
         """
         client = APIClient()
         user = UserModel.objects.get(username="test")
         request_data = {"request_message": "new_request_message"}
 
         client.force_authenticate(user=user)
-        url = "/worry_board/request/"
+        url = "/worry_board/request/999999"
         response = client.post(url, data=json.dumps(request_data), content_type="application/json")
+        result = response.json()
 
         self.assertEqual(response.status_code, 404)
-        with self.assertRaises(ValueError):
-            response.json()
+        self.assertEqual(result["detail"], "worry_board가 존재하지 않습니다.")
 
     def test_when_already_requested_in_post_request_message_API(self) -> None:
         """
@@ -207,6 +207,24 @@ class TestRequestMessageAPI(APITestCase):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
 
+    def test_including_swear_word_in_post_request_message_API(self) -> None:
+        """
+        RequestMessage의 post 함수를 검증하는 함수
+        case : 욕설을 포함한 내용을 post하는 경우
+        """
+        client = APIClient()
+        user = UserModel.objects.get(username="test")
+        target_worry_board = WorryBoardModel.objects.filter(content="user가 new_request_message를 보낼 worry_board")[0]
+        request_data = {"request_message": "바보 멍청이"}
+
+        client.force_authenticate(user=user)
+        url = "/worry_board/request/" + str(target_worry_board.id)
+        response = client.post(url, data=json.dumps(request_data), content_type="application/json")
+        result = response.json()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(result["detail"], "부적절한 내용이 담겨있어 요청을 보낼 수 없습니다.")
+
     def test_put_request_message_API(self) -> None:
         """
         RequestMessage의 put 함수를 검증하는 함수
@@ -259,6 +277,24 @@ class TestRequestMessageAPI(APITestCase):
         self.assertEqual(response.status_code, 401)
 
         self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
+
+    def test_including_swear_word_in_put_request_message_API(self) -> None:
+        """
+        RequestMessage의 put 함수를 검증하는 함수
+        case : 욕설을 포함한 내용을 포함했을 경우
+        """
+        client = APIClient()
+        user = UserModel.objects.get(username="test")
+        target_request_message = RequestMessageModel.objects.filter(request_message="user기준 보낸 메세지")[0]
+        request_data = {"request_message": "바보 멍청이"}
+
+        client.force_authenticate(user=user)
+        url = "/worry_board/request/pd/" + str(target_request_message.id)
+        response = client.put(url, data=json.dumps(request_data), content_type="application/json")
+        result = response.json()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(result["detail"], "부적절한 내용이 담겨있어 요청을 보낼 수 없습니다.")
 
     def test_delete_request_message_API(self) -> None:
         """

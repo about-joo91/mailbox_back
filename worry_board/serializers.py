@@ -1,4 +1,3 @@
-from pymysql import NULL
 from rest_framework import serializers
 
 from worry_board.models import RequestMessage as RequestMessageModel
@@ -24,6 +23,7 @@ class WorryBoardSerializer(serializers.ModelSerializer):
 
     def get_request_status(self, obj):
         author = self.context["request"].user
+
         try:
             return obj.requestmessage_set.get(author=author).request_status.status
         except RequestMessageModel.DoesNotExist:
@@ -33,7 +33,7 @@ class WorryBoardSerializer(serializers.ModelSerializer):
         try:
             return obj.requestmessage_set.get().id
         except RequestMessageModel.DoesNotExist:
-            return NULL
+            return -1
 
     class Meta:
         model = WorryBoardModel

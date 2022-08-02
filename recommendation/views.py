@@ -1,7 +1,7 @@
-import requests
-import zipfile
 import io
-import pandas as pd
+import zipfile
+
+import requests
 
 
 # Create your views here.

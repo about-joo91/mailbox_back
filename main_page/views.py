@@ -109,6 +109,8 @@ class MainPageView(APIView):
     def get(self, request):
         cur_user = request.user
 
+        final_worryboard_list = recommend_worryboard_list(cur_user)
+
         not_read_my_letter_count = my_letter_count(request.user.id)
 
         worry_categories = WorryCategoryModel.objects.prefetch_related("worryboard_set").all()

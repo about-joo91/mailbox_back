@@ -23,7 +23,7 @@ class Recommendation:
 
         final_worryboard_list = WorryBoardModel.objects.filter(Q(id__in=recommend_ids)).exclude(
             Q(id__in=LetterModel.objects.values_list("worryboard_id", flat=True)) | Q(author=cur_user)
-        )[:3]
+        )[:10]
 
         return final_worryboard_list
 

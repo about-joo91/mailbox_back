@@ -34,21 +34,22 @@ class WorryBoardView(APIView):
             if page_num == 0:
                 page_num = 1
 
-            paginated_worry_board, total_count = get_paginated_worry_board_data(page_num, category)
             try:
-                final_worryboard_list = recommend_worryboard_list(request.user)
+                recommended_worryboard = recommend_worryboard_list(request.user)
             except KeyError:
-                final_worryboard_list = []
+                recommended_worryboard = []
             except AttributeError:
-                final_worryboard_list = []
+                recommended_worryboard = []
+
+            paginated_worry_board, total_count = get_paginated_worry_board_data(
+                page_num, category, recommended_worryboard
+            )
 
             return Response(
                 {
                     "boards": WorryBoardSerializer(paginated_worry_board, many=True, context={"request": request}).data,
                     "total_count": total_count,
-                    "recommend_worry_board_list": WorryBoardSerializer(
-                        final_worryboard_list, context={"request": request}, many=True
-                    ).data,
+                    "recommended_cnt": len(recommended_worryboard),
                 },
                 status=status.HTTP_200_OK,
             )

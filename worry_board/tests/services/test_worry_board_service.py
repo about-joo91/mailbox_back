@@ -39,7 +39,7 @@ class TestWorryBoardService(TestCase):
             WorryBoardModel.objects.all()[0].id,
             WorryBoardModel.objects.get(author=user).id,
         )
-        self.assertEqual(paginated_worry_board[0], WorryBoardModel.objects.filter(author=user)[0])
+        self.assertEqual(paginated_worry_board[0], WorryBoardModel.objects.get(author=user))
 
     def test_when_success_create_worry_board_data(self) -> None:
         """

@@ -2,7 +2,6 @@ FROM python:3.10-slim-buster
 
 ENV PYTHONUNBUFFERED = 1
 
-
 RUN mkdir /app
 
 WORKDIR /app

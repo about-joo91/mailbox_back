@@ -16,6 +16,7 @@ class RequestMessage(models.Model):
     worry_board = models.ForeignKey("worry_board.WorryBoard", on_delete=models.CASCADE)
     create_date = models.DateTimeField(auto_now_add=True)
     request_status = models.ForeignKey("RequestStatus", on_delete=models.CASCADE, null=True)
+    can_write_letter = models.BooleanField(default=False)
 
 
 class RequestStatus(models.Model):

@@ -1,6 +1,6 @@
 from rest_framework.test import APIClient, APITestCase
 
-from main_page.models import Letter
+from main_page.models import Letter as LetterModel
 from main_page.models import WorryCategory as WorryCategoryModel
 from main_page.services.letter_service import letter_is_read_service, letter_post_service
 from user.models import MongleGrade
@@ -267,10 +267,12 @@ class TestMyRecievedLetterView(APITestCase):
                 "content": "dd",
             },
         )
-        new_letter = Letter.objects.filter(worryboard__author=worry_board_author, letter_author=letter_author).get()
+        new_letter = LetterModel.objects.filter(
+            worryboard__author=worry_board_author, letter_author=letter_author
+        ).get()
         letter_is_read_service(new_letter.id, worry_board_author)
         client.force_authenticate(user=worry_board_author)
-        url = "/my_page/my_recieved_letter"
+        url = "/my_page/my_received_letter"
         response = client.get(url, {"letter_num": 0})
         result = response.json()
 
@@ -311,7 +313,7 @@ class TestMyRecievedLetterView(APITestCase):
             },
         )
         client.force_authenticate(user=worry_board_author)
-        url = "/my_page/my_recieved_letter"
+        url = "/my_page/my_received_letter"
         response = client.get(url, {"letter_num": 0})
         result = response.json()
 
@@ -334,16 +336,16 @@ class TestMyRecievedLetterView(APITestCase):
         )
         user = UserModel.objects.get(username="test_user")
         client.force_authenticate(user=user)
-        url = "/my_page/my_recieved_letter"
+        url = "/my_page/my_received_letter"
         response = client.get(url)
 
         self.assertEqual("올바른 편지 번호를 입력해주세요.", response.json()["detail"])
         self.assertEqual(404, response.status_code)
 
-    def test_when_letter_does_not_exist_in_get_my_letter_view(self) -> None:
+    def test_when_letter_does_not_exist_in_get_my_recieved_letter_view(self) -> None:
         """
         MyRecievedLetterView의 get함수를 검증
-        case: 없는 레터 값이 주어졌을 때
+        case: 편지가 없을 때
         """
         client = APIClient()
         post_user_signup_data(
@@ -353,22 +355,23 @@ class TestMyRecievedLetterView(APITestCase):
                 "nickname": "1",
             }
         )
+        LetterModel.objects.create()
         user = UserModel.objects.get(username="test_worry_board_author")
         client.force_authenticate(user=user)
-        url = "/my_page/my_recieved_letter"
+        url = "/my_page/my_received_letter"
         response = client.get(url, {"letter_num": 0})
 
         self.assertEqual("편지가 없습니다. 편지를 받으러 가볼까요?", response.json()["detail"])
         self.assertEqual(303, response.status_code)
 
-    def test_unauthorized_user_in_get_my_letter_view(self) -> None:
+    def test_unauthorized_user_in_get_my_recieved_letter_view(self) -> None:
         """
         MyRecievedLetterView의 get함수를 검증
         case: 인증되지 않은 유저일 때
         """
         client = APIClient()
 
-        url = "/my_page/my_recieved_letter"
+        url = "/my_page/my_received_letter"
         response = client.get(url, {"letter_num": 0})
 
         self.assertEqual(
@@ -455,7 +458,9 @@ class TestMyNotReadLetterView(APITestCase):
                 "content": "dd",
             },
         )
-        new_letter = Letter.objects.filter(worryboard__author=worry_board_author, letter_author=letter_author).get()
+        new_letter = LetterModel.objects.filter(
+            worryboard__author=worry_board_author, letter_author=letter_author
+        ).get()
         letter_is_read_service(new_letter.id, worry_board_author)
         client.force_authenticate(user=worry_board_author)
         url = "/my_page/my_not_read_letter"
@@ -495,7 +500,9 @@ class TestMyNotReadLetterView(APITestCase):
                 "content": "dd",
             },
         )
-        new_letter = Letter.objects.filter(worryboard__author=worry_board_author, letter_author=letter_author).get()
+        new_letter = LetterModel.objects.filter(
+            worryboard__author=worry_board_author, letter_author=letter_author
+        ).get()
         letter_is_read_service(new_letter.id, worry_board_author)
         client.force_authenticate(user=worry_board_author)
         url = "/my_page/my_not_read_letter"

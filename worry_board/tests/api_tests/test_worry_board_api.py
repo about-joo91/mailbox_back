@@ -176,8 +176,8 @@ class TestWorryBoardAPI(APITestCase):
         response = client.put(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
-        self.assertEqual(WorryBoardModel.objects.filter(author=user)[0].content, "update_post")
-        self.assertEqual(worry_board.id, WorryBoardModel.objects.filter(author=user)[0].id)
+        self.assertEqual(WorryBoardModel.objects.get(author=user).content, "update_post")
+        self.assertEqual(worry_board.id, WorryBoardModel.objects.get(author=user).id)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(result["detail"], "고민 게시글이 수정되었습니다.")
 
@@ -197,7 +197,7 @@ class TestWorryBoardAPI(APITestCase):
         response = client.put(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
-        self.assertEqual(WorryBoardModel.objects.filter(author=user)[0].content, "APItest")
+        self.assertEqual(WorryBoardModel.objects.get(author=user).content, "APItest")
         self.assertEqual(response.status_code, 401)
 
         self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
@@ -222,7 +222,7 @@ class TestWorryBoardAPI(APITestCase):
         response = client.put(url, data=json.dumps(request_data), content_type="application/json")
         result = response.json()
 
-        self.assertEqual(WorryBoardModel.objects.filter(author=not_author)[0].content, "APItest")
+        self.assertEqual(WorryBoardModel.objects.get(author=not_author).content, "APItest")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(result["detail"], "자기가 작성하지 않은 게시물은 수정이 불가합니다.")
 

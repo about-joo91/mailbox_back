@@ -82,6 +82,7 @@ class RequestMessageSerializer(serializers.ModelSerializer):
             "worry_board_category",
             "worry_board_content",
             "request_status",
+            "can_write_letter",
         ]
         extra_kwargs = {
             "author": {"read_only": True},

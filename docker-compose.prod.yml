@@ -1,30 +1,25 @@
 version: '3.9'
 services:
   nginx:
-    build: ./nginx
+    image: nginx
     volumes:
       - static_volume:/app/static
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
     ports:
       - 80:80
       - 443:443
     depends_on:
-      - mail_box
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
-  mail_box:
+      - web_server
+  web_server:
     image: aboutjoo/mail_box:latest
+    entrypoint: sh -c "python manage.py collectstatic --no-input && python manage.py migrate && uwsgi --ini uwsgi.ini"
     env_file:
       - ./.env.prod
     ports:
       - "8000:8000"
     command: gunicorn --bind 0.0.0.0:8000 --workers=5 mail_box.wsgi:application  &
+    working_dir: /app/
     volumes:
-      - ./:/app
+      - ./:/app/
       - static_volume:/app/static
     expose:
       - 8000

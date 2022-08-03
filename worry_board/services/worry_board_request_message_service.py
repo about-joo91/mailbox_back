@@ -38,13 +38,13 @@ def create_request_message_data(author: UserModel, worry_board_id: int, request_
         )
 
 
-def update_request_message_data(for_updata_date: Dict[str, str], request_message_id: int) -> None:
+def update_request_message_data(for_update_data: Dict[str, str], request_message_id: int) -> None:
     """
     request_message를 수정하는 service
     """
     update_request_message = RequestMessageModel.objects.get(id=request_message_id)
     update_request_message_serializer = RequestMessageSerializer(
-        update_request_message, data=for_updata_date, partial=True
+        update_request_message, data=for_update_data, partial=True
     )
     update_request_message_serializer.is_valid(raise_exception=True)
     update_request_message_serializer.save()
@@ -58,3 +58,33 @@ def delete_request_message_data(request_message_id: int):
 
     if delete_request_message:
         delete_request_message.delete()
+
+
+def accept_request_message_data(request_message_id: int) -> None:
+    """
+    기존의 request_message를 수정하여
+    받은 request_message를 수락하는 service
+    """
+    accept_request_message = RequestMessageModel.objects.get(id=request_message_id)
+    request_status = RequestStatusModel.objects.get(status="수락됨")
+    for_update_data = {"can_write_letter": True}
+    update_request_message_serializer = RequestMessageSerializer(
+        accept_request_message, data=for_update_data, partial=True
+    )
+    update_request_message_serializer.is_valid(raise_exception=True)
+    update_request_message_serializer.save(request_status_id=request_status.id)
+
+
+def disaccept_request_message_data(request_message_id: int) -> None:
+    """
+    기존의 request_message를 수정하여
+    받은 request_message를 거절하는 service
+    """
+    accept_request_message = RequestMessageModel.objects.get(id=request_message_id)
+    request_status = RequestStatusModel.objects.get(status="반려됨")
+    for_update_data = {"can_write_letter": False}
+    update_request_message_serializer = RequestMessageSerializer(
+        accept_request_message, data=for_update_data, partial=True
+    )
+    update_request_message_serializer.is_valid(raise_exception=True)
+    update_request_message_serializer.save(request_status_id=request_status.id)

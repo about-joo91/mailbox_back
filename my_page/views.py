@@ -64,21 +64,19 @@ class MyRecievedLetterView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def get(self, request: Request) -> Response:
-
+        cur_user = request.user
+        letter_cnt = cur_user.received_letter_cnt
+        if not letter_cnt:
+            return Response(
+                {"detail": "편지가 없습니다. 편지를 받으러 가볼까요?"},
+                status=status.HTTP_303_SEE_OTHER,
+            )
         try:
-            cur_user = request.user
             cur_user.refresh_from_db()
             letter_num = int(self.request.query_params.get("letter_num"))
 
             not_read_letter_query = Q(worryboard__author=cur_user) & Q(is_read=False)
             not_read_letter_cnt = get_not_read_letter_count(not_read_letter_query)
-
-            letter_cnt = cur_user.received_letter_cnt
-            if not letter_cnt:
-                return Response(
-                    {"detail": "편지가 없습니다. 편지를 받으러 가볼까요?"},
-                    status=status.HTTP_303_SEE_OTHER,
-                )
 
             letter_this_page_query = Q(worryboard__author=cur_user) & Q(is_read=True)
             letter_this_page = get_letter_data_by_user(query=letter_this_page_query, letter_num=letter_num)

@@ -29,19 +29,23 @@ class TestRequestMessageAPI(APITestCase):
             category=category,
             content="user가 new_request_message를 보낼 worry_board",
         )
+        RequestStatusModel.objects.create(status="요청")
+        cancle_request_status = RequestStatusModel.objects.create(status="요청취소")
+        RequestStatusModel.objects.create(status="수락됨")
+        RequestStatusModel.objects.create(status="반려됨")
 
         RequestMessageModel.objects.create(
             author=user,
             worry_board=not_author_user_worry_board,
             request_message="user기준 보낸 메세지",
+            request_status=cancle_request_status,
         )
         RequestMessageModel.objects.create(
             author=not_author_user,
             worry_board=user_worry_board,
             request_message="user기준 받은 메세지",
+            request_status=cancle_request_status,
         )
-        RequestStatusModel.objects.create(status="요청")
-        RequestStatusModel.objects.create(status="요청취소")
 
     def test_get_sended_request_message_API(self) -> None:
         """
@@ -119,7 +123,7 @@ class TestRequestMessageAPI(APITestCase):
         """
         client = APIClient()
         user = UserModel.objects.get(username="test")
-        target_worry_board = WorryBoardModel.objects.filter(content="user가 new_request_message를 보낼 worry_board")[0]
+        target_worry_board = WorryBoardModel.objects.get(content="user가 new_request_message를 보낼 worry_board")
         request_data = {"request_message": "new_request_message"}
 
         client.force_authenticate(user=user)
@@ -179,7 +183,7 @@ class TestRequestMessageAPI(APITestCase):
         """
         client = APIClient()
         user = UserModel.objects.get(username="test")
-        target_worry_board = WorryBoardModel.objects.filter(author=user)[0]
+        target_worry_board = WorryBoardModel.objects.get(author=user)
         request_data = {"request_message": "new_request_message"}
 
         client.force_authenticate(user=user)
@@ -197,7 +201,7 @@ class TestRequestMessageAPI(APITestCase):
         """
         client = APIClient()
 
-        target_worry_board = WorryBoardModel.objects.filter(content="user가 new_request_message를 보낼 worry_board")[0]
+        target_worry_board = WorryBoardModel.objects.get(content="user가 new_request_message를 보낼 worry_board")
         request_data = {"request_message": "new_request_message"}
 
         url = "/worry_board/request/" + str(target_worry_board.id)
@@ -214,7 +218,7 @@ class TestRequestMessageAPI(APITestCase):
         """
         client = APIClient()
         user = UserModel.objects.get(username="test")
-        target_worry_board = WorryBoardModel.objects.filter(content="user가 new_request_message를 보낼 worry_board")[0]
+        target_worry_board = WorryBoardModel.objects.get(content="user가 new_request_message를 보낼 worry_board")
         request_data = {"request_message": "바보 멍청이"}
 
         client.force_authenticate(user=user)
@@ -231,7 +235,7 @@ class TestRequestMessageAPI(APITestCase):
         """
         client = APIClient()
         user = UserModel.objects.get(username="test")
-        target_request_message = RequestMessageModel.objects.filter(request_message="user기준 보낸 메세지")[0]
+        target_request_message = RequestMessageModel.objects.get(request_message="user기준 보낸 메세지")
         request_data = {"request_message": "update_request_message"}
 
         client.force_authenticate(user=user)
@@ -267,7 +271,7 @@ class TestRequestMessageAPI(APITestCase):
         case : 로그인하지 않은 사용자가 put하는 경우
         """
         client = APIClient()
-        target_request_message = RequestMessageModel.objects.filter(request_message="user기준 보낸 메세지")[0]
+        target_request_message = RequestMessageModel.objects.get(request_message="user기준 보낸 메세지")
         request_data = {"request_message": "update_request_message"}
 
         url = "/worry_board/request/pd/" + str(target_request_message.id)
@@ -285,7 +289,7 @@ class TestRequestMessageAPI(APITestCase):
         """
         client = APIClient()
         user = UserModel.objects.get(username="test")
-        target_request_message = RequestMessageModel.objects.filter(request_message="user기준 보낸 메세지")[0]
+        target_request_message = RequestMessageModel.objects.get(request_message="user기준 보낸 메세지")
         request_data = {"request_message": "바보 멍청이"}
 
         client.force_authenticate(user=user)
@@ -302,7 +306,7 @@ class TestRequestMessageAPI(APITestCase):
         """
         client = APIClient()
         user = UserModel.objects.get(username="test")
-        target_request_message = RequestMessageModel.objects.filter(request_message="user기준 보낸 메세지")[0]
+        target_request_message = RequestMessageModel.objects.get(request_message="user기준 보낸 메세지")
 
         client.force_authenticate(user=user)
         url = "/worry_board/request/pd/" + str(target_request_message.id)
@@ -338,7 +342,7 @@ class TestRequestMessageAPI(APITestCase):
         case : 로그인하지 않은 사용자가 조회하는 경우
         """
         client = APIClient()
-        target_request_message = RequestMessageModel.objects.filter(request_message="user기준 보낸 메세지")[0]
+        target_request_message = RequestMessageModel.objects.get(request_message="user기준 보낸 메세지")
 
         url = "/worry_board/request/pd/" + str(target_request_message.id)
         response = client.delete(url)
@@ -346,3 +350,140 @@ class TestRequestMessageAPI(APITestCase):
 
         self.assertEqual(401, response.status_code)
         self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
+
+    def test_accept_request_message_API(self) -> None:
+        """
+        request_message를 수락,거절하는 함수를 검증하는 함수
+        case1 : request_message를 수락하는 경우
+
+        """
+        client = APIClient()
+        user = UserModel.objects.get(username="test")
+        target_request_message = RequestMessageModel.objects.get(request_message="user기준 받은 메세지")
+
+        client.force_authenticate(user=user)
+        url = "/worry_board/request/accept/" + str(target_request_message.id) + "/accept"
+        response = client.put(url)
+        result = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(result["detail"], "요청 메세지를 수락하였습니다.")
+
+    def test_when_is_user_is_unauthenticated_in_accept_request_message_API(self) -> None:
+        """
+        request_message를 수락,거절하는 함수를 검증하는 함수
+        case1 : request_message를 수락하는 경우
+        case2 : 로그인하지 않은 사용자가 조회하는 경우
+        """
+        client = APIClient()
+        target_request_message = RequestMessageModel.objects.get(request_message="user기준 보낸 메세지")
+
+        url = "/worry_board/request/accept/" + str(target_request_message.id) + "/accept"
+        response = client.put(url)
+        result = response.json()
+
+        self.assertEqual(401, response.status_code)
+        self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
+
+    def test_when_request_message_does_not_exist_in_accept_request_message_API(self) -> None:
+        """
+        request_message를 수락,거절하는 함수를 검증하는 함수
+        case1 : request_message를 수락하는 경우
+        case2 : 잘못된 request_message_id를 받았을 때
+        """
+        client = APIClient()
+        user = UserModel.objects.get(username="test")
+
+        client.force_authenticate(user=user)
+        url = "/worry_board/request/accept/" + str(99999) + "/accept"
+        response = client.put(url)
+        result = response.json()
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(result["detail"], "해당 요청은 존재하지 않습니다.")
+
+    def test_when_does_not_my_request_message_in_accept_request_message_API(self) -> None:
+        """
+        request_message를 수락,거절하는 함수를 검증하는 함수
+        case1 : request_message를 수락하는 경우
+        case2 : 내가 받은 메세지가 아닐경우
+        """
+        client = APIClient()
+        user = UserModel.objects.get(username="test")
+        target_request_message = RequestMessageModel.objects.get(request_message="user기준 보낸 메세지")
+
+        client.force_authenticate(user=user)
+        url = "/worry_board/request/accept/" + str(target_request_message.id) + "/accept"
+        response = client.put(url)
+        result = response.json()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(result["detail"], "수락 권한이 없습니다.")
+
+    def test_disaccept_request_message_API(self) -> None:
+        """
+        request_message를 수락,거절하는 함수를 검증하는 함수
+        case1 : request_message를 거절하는 경우
+        """
+        client = APIClient()
+        user = UserModel.objects.get(username="test")
+        target_request_message = RequestMessageModel.objects.get(request_message="user기준 받은 메세지")
+
+        client.force_authenticate(user=user)
+        url = "/worry_board/request/accept/" + str(target_request_message.id) + "/disaccept"
+        response = client.put(url)
+        result = response.json()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(result["detail"], "요청 메세지를 거절하였습니다.")
+
+    def test_when_is_user_is_unauthenticated_in_disaccept_request_message_API(self) -> None:
+        """
+        request_message를 수락,거절하는 함수를 검증하는 함수
+        case1 : request_message를 거절하는 경우
+        case2 : 로그인하지 않은 사용자가 조회하는 경우
+        """
+        client = APIClient()
+        target_request_message = RequestMessageModel.objects.get(request_message="user기준 받은 메세지")
+
+        url = "/worry_board/request/accept/" + str(target_request_message.id) + "/disaccept"
+        response = client.put(url)
+        result = response.json()
+
+        self.assertEqual(401, response.status_code)
+        self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
+
+    def test_when_request_message_does_not_exist_in_disaccept_request_message_API(self) -> None:
+        """
+        request_message를 수락,거절하는 함수를 검증하는 함수
+        case1 : request_message를 거절하는 경우
+        case2 : 잘못된 request_message_id를 받았을 때
+        """
+        client = APIClient()
+        user = UserModel.objects.get(username="test")
+
+        client.force_authenticate(user=user)
+        url = "/worry_board/request/accept/" + str(9999) + "/disaccept"
+        response = client.put(url)
+        result = response.json()
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(result["detail"], "해당 요청은 존재하지 않습니다.")
+
+    def test_when_does_not_my_request_message_in_disaccept_request_message_API(self) -> None:
+        """
+        request_message를 수락,거절하는 함수를 검증하는 함수
+        case1 : request_message를 거절하는 경우
+        case2 : 내가 받은 메세지가 아닐경우
+        """
+        client = APIClient()
+        user = UserModel.objects.get(username="test")
+        target_request_message = RequestMessageModel.objects.get(request_message="user기준 보낸 메세지")
+
+        client.force_authenticate(user=user)
+        url = "/worry_board/request/accept/" + str(target_request_message.id) + "/disaccept"
+        response = client.put(url)
+        result = response.json()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(result["detail"], "거절 권한이 없습니다.")

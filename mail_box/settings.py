@@ -27,9 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ["MONGLE_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "13.209.201.47", "172.31.56.122"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "13.209.201.47", "172.31.56.122", "www.api-mongle.shop", "api-mongle.shop"]
 
 # Application definition
 

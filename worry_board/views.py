@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from recommendation.services.recomendation_service import recommend_worryboard_list
 from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import RequestMessageSerializer, WorryBoardSerializer
@@ -35,11 +36,22 @@ class WorryBoardView(APIView):
             if page_num == 0:
                 page_num = 1
 
-            paginated_worry_board, total_count = get_paginated_worry_board_data(page_num, category)
+            try:
+                recommended_worryboard = recommend_worryboard_list(request.user)
+            except KeyError:
+                recommended_worryboard = []
+            except AttributeError:
+                recommended_worryboard = []
+
+            paginated_worry_board, total_count = get_paginated_worry_board_data(
+                page_num, category, recommended_worryboard
+            )
+
             return Response(
                 {
                     "boards": WorryBoardSerializer(paginated_worry_board, many=True, context={"request": request}).data,
                     "total_count": total_count,
+                    "recommended_cnt": len(recommended_worryboard),
                 },
                 status=status.HTTP_200_OK,
             )

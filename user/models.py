@@ -22,9 +22,9 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser):
-    username = models.CharField("사용자 계정", max_length=50, unique=True)
-    password = models.CharField("비밀번호", max_length=128)
-    nickname = models.CharField("닉네임", max_length=20)
+    username = models.CharField("사용자 계정", max_length=50, unique=True, blank=True)
+    password = models.CharField("비밀번호", max_length=128, blank=True)
+    nickname = models.CharField("닉네임", max_length=20, blank=True)
     received_letter_cnt = models.IntegerField(default=0)
     sent_letter_cnt = models.IntegerField(default=0)
 

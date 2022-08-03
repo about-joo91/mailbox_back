@@ -16,7 +16,7 @@ def get_letter_data_by_user(query: Q, letter_num: int) -> dict[str, str]:
             .filter(query)[letter_num]
         ).data
         return letter_model_by_user
-    return {}
+    raise LetterModel.DoesNotExist
 
 
 def get_not_read_letter_count(query: Q) -> int:

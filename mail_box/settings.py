@@ -29,7 +29,7 @@ SECRET_KEY = os.environ["MONGLE_SECRET_KEY"]
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "13.209.201.47"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "13.209.201.47", "www.api-mongle.shop"]
 
 # Application definition
 

@@ -1,3 +1,6 @@
+import os
+
+import boto3
 from django.db.models import Q
 from rest_framework import exceptions, status
 from rest_framework.permissions import IsAuthenticated
@@ -194,3 +197,29 @@ class LetterReviewView(APIView):
             return Response({"detail": "없는 리뷰에 접근하려고 합니다."}, status=status.HTTP_404_NOT_FOUND)
         except TypeError:
             return Response({"detail": "없는 리뷰에 접근하려고 합니다."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ProfileImgView(APIView):
+    def post(self, request: Request) -> Response:
+        img = request.FILES["image"]
+        cur_user = request.user
+        s3 = boto3.client(
+            "s3",
+            aws_access_key_id=os.environ["MONGLE_AWS_ACCESS_KEY_ID"],
+            aws_secret_access_key=os.environ["MONGLE_AWS_SECRET_ACCESS_KEY"],
+        )
+        splited_file = str(img).split(".")
+        content_type = splited_file[1]
+        if cur_user.nickname in cur_user.userprofile.profile_img:
+            file_name_before = cur_user.userprofile.profile_img.split("/")[-1]
+            s3.delete_object(Bucket=os.environ["MONGLE_BUCKET_NAME"], Key=file_name_before)
+        s3.put_object(
+            ACL="public-read",
+            Bucket=os.environ["MONGLE_BUCKET_NAME"],
+            Body=img,
+            Key=cur_user.nickname,
+            ContentType=content_type,
+        )
+        cur_user.userprofile.profile_img = f"https://mongle-bucket.s3.ap-northeast-2.amazonaws.com/{cur_user.nickname}"
+        cur_user.userprofile.save()
+        return Response({"detail": "프로필 변경을 완료하였습니다."}, status=status.HTTP_200_OK)

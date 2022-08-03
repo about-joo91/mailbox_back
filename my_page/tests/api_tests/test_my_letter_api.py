@@ -270,7 +270,7 @@ class TestMyRecievedLetterView(APITestCase):
         new_letter = Letter.objects.filter(worryboard__author=worry_board_author, letter_author=letter_author).get()
         letter_is_read_service(new_letter.id, worry_board_author)
         client.force_authenticate(user=worry_board_author)
-        url = "/my_page/my_recieved_letter"
+        url = "/my_page/my_received_letter"
         response = client.get(url, {"letter_num": 0})
         result = response.json()
 
@@ -311,7 +311,7 @@ class TestMyRecievedLetterView(APITestCase):
             },
         )
         client.force_authenticate(user=worry_board_author)
-        url = "/my_page/my_recieved_letter"
+        url = "/my_page/my_received_letter"
         response = client.get(url, {"letter_num": 0})
         result = response.json()
 
@@ -334,7 +334,7 @@ class TestMyRecievedLetterView(APITestCase):
         )
         user = UserModel.objects.get(username="test_user")
         client.force_authenticate(user=user)
-        url = "/my_page/my_recieved_letter"
+        url = "/my_page/my_received_letter"
         response = client.get(url)
 
         self.assertEqual("올바른 편지 번호를 입력해주세요.", response.json()["detail"])
@@ -353,9 +353,10 @@ class TestMyRecievedLetterView(APITestCase):
                 "nickname": "1",
             }
         )
+
         user = UserModel.objects.get(username="test_worry_board_author")
         client.force_authenticate(user=user)
-        url = "/my_page/my_recieved_letter"
+        url = "/my_page/my_received_letter"
         response = client.get(url, {"letter_num": 0})
 
         self.assertEqual("편지가 없습니다. 편지를 받으러 가볼까요?", response.json()["detail"])
@@ -368,7 +369,7 @@ class TestMyRecievedLetterView(APITestCase):
         """
         client = APIClient()
 
-        url = "/my_page/my_recieved_letter"
+        url = "/my_page/my_received_letter"
         response = client.get(url, {"letter_num": 0})
 
         self.assertEqual(

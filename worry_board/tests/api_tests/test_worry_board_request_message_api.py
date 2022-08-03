@@ -3,7 +3,9 @@ import json
 from rest_framework.test import APIClient, APITestCase
 
 from main_page.models import WorryCategory as WorryCategoryModel
+from user.models import MongleGrade
 from user.models import User as UserModel
+from user.models import UserProfile
 from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import RequestStatus as RequestStatusModel
 from worry_board.models import WorryBoard as WorryBoardModel
@@ -19,7 +21,8 @@ class TestRequestMessageAPI(APITestCase):
         user = UserModel.objects.create(username="test", nickname="test")
         not_author_user = UserModel.objects.create(username="not_author", nickname="not_author")
         category = WorryCategoryModel.objects.create(cate_name="가족")
-
+        UserProfile.objects.create(user=user)
+        MongleGrade.objects.create(user=user)
         user_worry_board = WorryBoardModel.objects.create(author=user, category=category, content="APItest")
         not_author_user_worry_board = WorryBoardModel.objects.create(
             author=not_author_user, category=category, content="APItest"
@@ -82,7 +85,7 @@ class TestRequestMessageAPI(APITestCase):
         self.assertEqual(401, response.status_code)
         self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
 
-    def test_get_recieved_request_message_API(self) -> None:
+    def test_get_received_request_message_API(self) -> None:
         """
         RequestMessage의 get 함수를 검증하는 함수
         case : 내가 받은 메세지
@@ -92,7 +95,7 @@ class TestRequestMessageAPI(APITestCase):
         user = UserModel.objects.get(username="test")
         client.force_authenticate(user=user)
 
-        url = "/worry_board/request/recieved"
+        url = "/worry_board/request/received"
         response = client.get(url)
         result = response.json()
 
@@ -100,7 +103,7 @@ class TestRequestMessageAPI(APITestCase):
         self.assertEqual("user기준 받은 메세지", response.json()["request_message"][0]["request_message"])
         self.assertEqual(result["total_count"], 1)
 
-    def test_when_is_user_is_unauthenticated_in_get_recieved_request_message_API(
+    def test_when_is_user_is_unauthenticated_in_get_received_request_message_API(
         self,
     ) -> None:
         """
@@ -110,7 +113,7 @@ class TestRequestMessageAPI(APITestCase):
         """
         client = APIClient()
 
-        url = "/worry_board/request/recieved"
+        url = "/worry_board/request/received"
         response = client.get(url)
         result = response.json()
 

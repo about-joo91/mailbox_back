@@ -21,22 +21,29 @@
 정한 테마 색상을 토대로 편지를 쓴다는 컨셉에 맞게 편지를 작성할 수 있고 접근성이 너무 낮다는 팀원들의 피드백에 맞춰 익명 게시판도 만들게 되었습니다.
 
 ## 메인 캐릭터 - 몽글이
-![](https://velog.velcdn.com/images/aboutjoo/post/a0f5bc54-0c1e-446b-a1cd-77ffa918a7b8/image.jpeg)
+<p align="center">
+<img style="width:250px;" src="https://user-images.githubusercontent.com/55477835/182720723-943798ac-468d-4c67-b3bc-39a035d32492.png">
+<img style="width:250px;" src="https://user-images.githubusercontent.com/55477835/182720832-aec05e94-6c21-401d-9183-03b5a5c57f5b.png">
+<img style="width:250px;;" src="https://user-images.githubusercontent.com/55477835/182720902-1648eb3f-1735-4cfb-8379-04393f284462.png">
+</p>
 
 ## 사용기술
+- cloudfront와 route53, s3를 활용한 https 프론트 배포
+- elb와 acm docker ec2를 활용한 https 백엔드 배포
+- pre-commit hook을 통한 코드 포맷팅
+- 272개의 test코드를 통한 에러 핸들링
+- 별개의 flask 서버를 운용하여 추천기능 구현
 - 딥러닝을 활용한 비속어 필터링 기술
 페이지의 의도와 맞지않는 편지내용이 들어갈 수도 있으므로 비속어나 비방언어를 사용하면 편지를 쓰지 못하게 막는다.
 https://github.com/smilegate-ai/korean_unsmile_dataset
-- 블랙을 사용하여 ci시 python 코드 포매팅
-- github action과 도커를 통한 ci/cd 기능 구현
+- github actions과 도커를 통한 ci/cd 기능 구현
 
 ## ERD
+![mongle_erd](https://user-images.githubusercontent.com/55477835/182724054-fd7394ac-121c-498a-8396-19e009e61685.png)
 
-![mail_box](https://user-images.githubusercontent.com/101394490/178623485-8189e5c6-a4ea-4aad-b5ae-10b0dc251ae1.png)
-
-
-## api명세서 
-https://thinkable-sassafras-50a.notion.site/ab237d868d5d46d0a159bc07b523cdb3?v=9442da6f0ae744fea4619ad4f7d6a8f5
+## api명세서
+post맨 mock server를 활용한 api명세서
+https://ab00cd1c-6488-4d3d-b3d2-960170290875.mock.pstmn.io
 
 ## 컨벤션
 - feat/ : 새로운 기능 추가/수정/삭제

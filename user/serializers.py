@@ -7,12 +7,15 @@ from .models import UserProfile as UserProfileModel
 
 class UserSignupSerializer(serializers.ModelSerializer):
     def validate(self, data):
-        if UserModel.objects.filter(nickname=data["nickname"]).exists():
-            raise serializers.ValidationError("중복된 닉네임이 존재합니다.")
-
         condition = all(x not in ["!", "@", "#", "$", "%", "^", "&", "*", "_"] for x in data["password"])
         if len(data["username"]) < 4:
             raise serializers.ValidationError("아이디는 4자 이상 입력해주세요.")
+
+        elif len(data["nickname"]) == 0:
+            raise serializers.ValidationError("닉네임을 입력해주세요.")
+        elif UserModel.objects.filter(nickname=data["nickname"]).exists():
+            raise serializers.ValidationError("중복된 닉네임이 존재합니다.")
+
         elif len(data["password"]) < 8 or condition:
             raise serializers.ValidationError("비밀번호는 8자 이상 특수문자 포함해 입력해주세요")
         return data
@@ -36,20 +39,6 @@ class UserSignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserModel
         fields = "__all__"
-
-        # 각 필드에 해당하는 다양한 옵션 지정
-        extra_kwargs = {
-            "username": {
-                "error_messages": {
-                    "required": "아이디를 입력해주세요.",
-                },
-                "required": True,
-                "allow_null": False,
-            },
-            "nickname": {
-                "error_messages": {"required": "닉네임을 입력해주세요."},
-            },
-        }
 
 
 class MongleGradeSerializer(serializers.ModelSerializer):

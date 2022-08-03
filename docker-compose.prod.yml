@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   nginx:
-    build: ./nginx
+    image: nginx
     volumes:
       - static_volume:/app/static
     ports:
@@ -11,12 +11,13 @@ services:
       - web_server
   web_server:
     image: aboutjoo/mail_box:latest
+    entrypoint: sh -c "python manage.py collectstatic --no-input && python manage.py migrate && uwsgi --ini uwsgi.ini"
     env_file:
       - ./.env.prod
     ports:
       - "8000:8000"
-    working_dir: /app/
     command: gunicorn --bind 0.0.0.0:8000 --workers=5 mail_box.wsgi:application  &
+    working_dir: /app/
     volumes:
       - ./:/app/
       - static_volume:/app/static

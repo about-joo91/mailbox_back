@@ -7,8 +7,10 @@ from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import RequestMessageSerializer, WorryBoardSerializer
 from worry_board.services.worry_board_request_message_service import (
+    accept_request_message_data,
     create_request_message_data,
     delete_request_message_data,
+    disaccept_request_message_data,
     get_paginated_request_message_data,
     update_request_message_data,
 )
@@ -73,7 +75,7 @@ class WorryBoardView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        if WorryBoardModel.objects.filter(id=worry_board_id)[0].author != author:
+        if WorryBoardModel.objects.get(id=worry_board_id).author != author:
             return Response(
                 {"detail": "자기가 작성하지 않은 게시물은 수정이 불가합니다."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -202,4 +204,36 @@ class RequestMessageView(APIView):
             return Response({"detail": "해당 요청 메세지가 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
 
 
-# class RequestStatusView(APIView)
+class AcceptRequestMessageView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    """
+    request_message를 수락하는 View
+    """
+
+    def put(self, request, request_message_id, case):
+        if case == "accept":
+            try:
+                request_message = RequestMessageModel.objects.get(id=request_message_id)
+                if request_message.worry_board.author != request.user:
+                    return Response({"detail": "수락 권한이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+                if request_message.request_status.status == "반려됨":
+                    return Response({"detail": "이미 거절한 요청은 수락할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+                accept_request_message_data(request_message_id)
+                return Response({"detail": "요청 메세지를 수락하였습니다."}, status=status.HTTP_200_OK)
+            except RequestMessageModel.DoesNotExist:
+                return Response({"detail": "해당 요청은 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+        elif case == "disaccept":
+            try:
+                request_message = RequestMessageModel.objects.get(id=request_message_id)
+                if request_message.worry_board.author != request.user:
+                    return Response({"detail": "거절 권한이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+                if request_message.request_status.status == "수락됨":
+                    return Response({"detail": "이미 수락한 요청은 거절할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+                disaccept_request_message_data(request_message_id)
+                return Response({"detail": "요청 메세지를 거절하였습니다."}, status=status.HTTP_200_OK)
+
+            except RequestMessageModel.DoesNotExist:
+                return Response({"detail": "해당 요청은 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)

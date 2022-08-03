@@ -7,8 +7,10 @@ from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import RequestStatus as RequestStatusModel
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.services.worry_board_request_message_service import (
+    accept_request_message_data,
     create_request_message_data,
     delete_request_message_data,
+    disaccept_request_message_data,
     get_paginated_request_message_data,
     update_request_message_data,
 )
@@ -23,10 +25,17 @@ class TestWorryBoardRequestMessageService(TestCase):
     @classmethod
     def setUpTestData(cls):
         user = UserModel.objects.create(username="ko", nickname="ko")
+        not_author_user = UserModel.objects.create(username="not_author_user", nickname="not_author_user")
         category = WorryCategory.objects.create(cate_name="일상")
-        WorryBoardModel.objects.create(author=user, category=category, content="test_worry_board")
+        user_board = WorryBoardModel.objects.create(author=user, category=category, content="test_worry_board")
+
         RequestStatusModel.objects.create(status="요청")
-        RequestStatusModel.objects.create(status="요청취소")
+        cancle_request_status = RequestStatusModel.objects.create(status="요청취소")
+        RequestStatusModel.objects.create(status="수락됨")
+        RequestStatusModel.objects.create(status="반려됨")
+        RequestMessageModel.objects.create(
+            author=not_author_user, worry_board=user_board, request_status=cancle_request_status
+        )
 
     def test_when_success_get_paginated_request_message_data(self) -> None:
         """
@@ -47,7 +56,7 @@ class TestWorryBoardRequestMessageService(TestCase):
         )
         self.assertEqual(
             paginated_request_message[0],
-            RequestMessageModel.objects.filter(author=user)[0],
+            RequestMessageModel.objects.get(author=user),
         )
 
     def test_when_success_create_request_message_data(self) -> None:
@@ -66,7 +75,7 @@ class TestWorryBoardRequestMessageService(TestCase):
             )
 
         self.assertEqual(
-            RequestMessageModel.objects.all()[0].id,
+            RequestMessageModel.objects.all().last().id,
             RequestMessageModel.objects.get(author=user).id,
         )
 
@@ -142,13 +151,13 @@ class TestWorryBoardRequestMessageService(TestCase):
 
         if check_is_it_clean_text(request_message_data["request_message"]):
             update_request_message_data(
-                for_updata_date=request_message_data,
+                for_update_data=request_message_data,
                 request_message_id=create_request_message.id,
             )
 
         self.assertEqual(create_request_message.id, RequestMessageModel.objects.get(author=user).id)
         self.assertEqual(
-            RequestMessageModel.objects.all()[0].request_message,
+            request_message_data["request_message"],
             RequestMessageModel.objects.get(author=user).request_message,
         )
 
@@ -187,7 +196,7 @@ class TestWorryBoardRequestMessageService(TestCase):
         with self.assertRaises(RequestMessageModel.DoesNotExist):
             if check_is_it_clean_text(request_message_data["request_message"]):
                 update_request_message_data(
-                    for_updata_date=request_message_data,
+                    for_update_data=request_message_data,
                     request_message_id=9999,
                 )
 
@@ -207,7 +216,7 @@ class TestWorryBoardRequestMessageService(TestCase):
         with self.assertRaises(ValidationError):
             if check_is_it_clean_text(request_message_data["request_message"]):
                 update_request_message_data(
-                    for_updata_date=request_message_data,
+                    for_update_data=request_message_data,
                     request_message_id=create_request_message.id,
                 )
 
@@ -223,7 +232,7 @@ class TestWorryBoardRequestMessageService(TestCase):
 
         delete_request_message_data(request_message_id=create_request_message.id)
 
-        self.assertEqual(0, RequestMessageModel.objects.count())
+        self.assertEqual(1, RequestMessageModel.objects.count())
 
     def test_when_worry_board_does_not_exist_in_delete_request_message_data(self) -> None:
         """
@@ -233,3 +242,108 @@ class TestWorryBoardRequestMessageService(TestCase):
 
         with self.assertRaises(RequestMessageModel.DoesNotExist):
             delete_request_message_data(request_message_id=9999)
+
+    def test_accept_request_message_data(self) -> None:
+        """
+        받은 Request_message를 수락하는 함수에 대한 검증
+        """
+        user = UserModel.objects.get(username="ko", nickname="ko")
+        not_author_user = UserModel.objects.get(username="not_author_user", nickname="not_author_user")
+        user_board = WorryBoardModel.objects.get(author=user, content="test_worry_board")
+
+        user_recieved_request_message = RequestMessageModel.objects.get(author=not_author_user, worry_board=user_board)
+        accept_request_message_data(user_recieved_request_message.id)
+
+        self.assertEqual(
+            "수락됨", RequestMessageModel.objects.get(author=not_author_user, worry_board=user_board).request_status.status
+        )
+
+    def test_when_request_message_does_not_exixt_in_accept_request_message_data(self) -> None:
+        """
+        받은 Request_message를 수락하는 함수에 대한 검증
+        case : request_message가 존재하지 않을 경우
+        """
+
+        with self.assertRaises(RequestMessageModel.DoesNotExist):
+            accept_request_message_data(-1)
+
+    def test_when_use_none_request_status_in_accept_request_message_data(self) -> None:
+        """
+        받은 Request_message를 수락하는 함수에 대한 검증
+        case : 수락됨이라는 status가 존재하지 않을 경우
+        """
+        RequestStatusModel.objects.get(status="수락됨").delete()
+
+        user = UserModel.objects.get(username="ko", nickname="ko")
+        not_author_user = UserModel.objects.get(username="not_author_user", nickname="not_author_user")
+        user_board = WorryBoardModel.objects.get(author=user, content="test_worry_board")
+
+        user_recieved_request_message = RequestMessageModel.objects.get(author=not_author_user, worry_board=user_board)
+
+        with self.assertRaises(RequestStatusModel.DoesNotExist):
+            accept_request_message_data(user_recieved_request_message.id)
+
+    def test_when_already_disaccepted_in_accept_request_message_data(self) -> None:
+        """
+        받은 Request_message를 수락하는 함수에 대한 검증
+        case : 이미 반려된 request_message인 경우
+        """
+        user = UserModel.objects.get(username="ko", nickname="ko")
+        not_author_user = UserModel.objects.get(username="not_author_user", nickname="not_author_user")
+        user_board = WorryBoardModel.objects.get(author=user, content="test_worry_board")
+        disaccepted_request_status = RequestStatusModel.objects.get(status="반려됨")
+        user_recieved_request_message = RequestMessageModel.objects.create(
+            author=not_author_user, worry_board=user_board, request_status=disaccepted_request_status
+        )
+        accept_request_message_data(user_recieved_request_message.id)
+
+        self.assertEqual(
+            "수락됨",
+            RequestMessageModel.objects.filter(author=not_author_user, worry_board=user_board)
+            .last()
+            .request_status.status,
+        )
+
+    def test_disaccept_request_message_data(self) -> None:
+        """
+        받은 Request_message를 거절하는 함수에 대한 검증
+        """
+        user = UserModel.objects.get(username="ko", nickname="ko")
+        not_author_user = UserModel.objects.get(username="not_author_user", nickname="not_author_user")
+        user_board = WorryBoardModel.objects.get(author=user, content="test_worry_board")
+
+        user_recieved_request_message = RequestMessageModel.objects.get(author=not_author_user, worry_board=user_board)
+        disaccept_request_message_data(user_recieved_request_message.id)
+
+        self.assertEqual(
+            "반려됨", RequestMessageModel.objects.get(author=not_author_user, worry_board=user_board).request_status.status
+        )
+
+    def test_when_request_message_does_not_exixt_in_disaccept_request_message_data(self) -> None:
+        """
+        받은 Request_message를 거절하는 함수에 대한 검증
+        case : request_message가 존재하지 않을 경우
+        """
+        with self.assertRaises(RequestMessageModel.DoesNotExist):
+            disaccept_request_message_data(-1)
+
+    def test_when_already_accepted_in_disaccept_request_message_data(self) -> None:
+        """
+        받은 Request_message를 거절하는 함수에 대한 검증
+        case : 이미 수락된 request_message인 경우
+        """
+        user = UserModel.objects.get(username="ko", nickname="ko")
+        not_author_user = UserModel.objects.get(username="not_author_user", nickname="not_author_user")
+        user_board = WorryBoardModel.objects.get(author=user, content="test_worry_board")
+        accepted_request_status = RequestStatusModel.objects.get(status="수락됨")
+        user_recieved_request_message = RequestMessageModel.objects.create(
+            author=not_author_user, worry_board=user_board, request_status=accepted_request_status
+        )
+
+        disaccept_request_message_data(user_recieved_request_message.id)
+        self.assertEqual(
+            "반려됨",
+            RequestMessageModel.objects.filter(author=not_author_user, worry_board=user_board)
+            .last()
+            .request_status.status,
+        )

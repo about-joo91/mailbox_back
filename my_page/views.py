@@ -117,6 +117,7 @@ class MyNotReadLetterView(APIView):
     def get(self, request: Request) -> Response:
         try:
             cur_user = request.user
+            cur_user.refresh_from_db()
             letter_num = int(self.request.query_params.get("letter_num"))
 
             query = Q(worryboard__author=cur_user) & Q(is_read=False)

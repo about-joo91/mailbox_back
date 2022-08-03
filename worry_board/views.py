@@ -231,6 +231,8 @@ class AcceptRequestMessageView(APIView):
                     return Response({"detail": "수락 권한이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
                 if request_message.request_status.status == "반려됨":
                     return Response({"detail": "이미 거절한 요청은 수락할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+                if request_message.request_status.status == "수락됨":
+                    return Response({"detail": "이미 수락한 요청은 수락할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
                 accept_request_message_data(request_message_id)
                 return Response({"detail": "요청 메세지를 수락하였습니다."}, status=status.HTTP_200_OK)
             except RequestMessageModel.DoesNotExist:
@@ -243,6 +245,8 @@ class AcceptRequestMessageView(APIView):
                     return Response({"detail": "거절 권한이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
                 if request_message.request_status.status == "수락됨":
                     return Response({"detail": "이미 수락한 요청은 거절할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+                if request_message.request_status.status == "반려됨":
+                    return Response({"detail": "이미 거절한 요청은 거절할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
                 disaccept_request_message_data(request_message_id)
                 return Response({"detail": "요청 메세지를 거절하였습니다."}, status=status.HTTP_200_OK)

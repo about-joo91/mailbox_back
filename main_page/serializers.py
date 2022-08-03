@@ -55,11 +55,6 @@ class BestReviewSerializer(serializers.ModelSerializer):
     letter_review_like_id = serializers.SerializerMethodField()
     review_id = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
-    is_liked = serializers.SerializerMethodField()
-
-    def get_is_liked(self, obj):
-        cur_user = self.context["request"].user
-        return LetterreviewLikeModel.objects.filter(user=cur_user, letter_review=obj).exists()
 
     def get_letter_review_like_id(self, obj):
         cur_user = self.context["request"].user
@@ -77,7 +72,6 @@ class BestReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = LetterReviewModel
         fields = [
-            "is_liked",
             "like_count",
             "review_id",
             "letter_review_like_id",
@@ -92,11 +86,6 @@ class LiveReviewSerializer(serializers.ModelSerializer):
     letter_review_like_id = serializers.SerializerMethodField()
     review_id = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
-    is_liked = serializers.SerializerMethodField()
-
-    def get_is_liked(self, obj):
-        cur_user = self.context["request"].user
-        return LetterreviewLikeModel.objects.filter(user=cur_user, letter_review=obj).exists()
 
     def get_letter_review_like_id(self, obj):
         cur_user = self.context["request"].user
@@ -114,7 +103,6 @@ class LiveReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = LetterReviewModel
         fields = [
-            "is_liked",
             "like_count",
             "review_id",
             "letter_review_like_id",

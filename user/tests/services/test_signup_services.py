@@ -44,7 +44,7 @@ class TestUserRegistrationAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 400)
-        self.assertIn("이 필드는 blank일 수 없습니다.", result["detail"])
+        self.assertIn("닉네임을 입력해주세요.", result["detail"])
 
     def test_nickname_duplicate_check(self) -> None:
         """

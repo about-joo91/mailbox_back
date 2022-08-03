@@ -57,8 +57,9 @@ class BestReviewSerializer(serializers.ModelSerializer):
     like_count = serializers.SerializerMethodField()
 
     def get_letter_review_like_id(self, obj):
+        cur_user = self.context["request"].user
         try:
-            return obj.letterreviewlike_set.get().id
+            return obj.letterreviewlike_set.get(user=cur_user, letter_review=obj).id
         except LetterreviewLikeModel.DoesNotExist:
             pass
 
@@ -87,8 +88,9 @@ class LiveReviewSerializer(serializers.ModelSerializer):
     like_count = serializers.SerializerMethodField()
 
     def get_letter_review_like_id(self, obj):
+        cur_user = self.context["request"].user
         try:
-            return obj.letterreviewlike_set.get().id
+            return obj.letterreviewlike_set.get(user=cur_user, letter_review=obj).id
         except LetterreviewLikeModel.DoesNotExist:
             pass
 

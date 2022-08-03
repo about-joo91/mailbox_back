@@ -251,8 +251,8 @@ class TestWorryBoardRequestMessageService(TestCase):
         not_author_user = UserModel.objects.get(username="not_author_user", nickname="not_author_user")
         user_board = WorryBoardModel.objects.get(author=user, content="test_worry_board")
 
-        user_recieved_request_message = RequestMessageModel.objects.get(author=not_author_user, worry_board=user_board)
-        accept_request_message_data(user_recieved_request_message.id)
+        user_received_request_message = RequestMessageModel.objects.get(author=not_author_user, worry_board=user_board)
+        accept_request_message_data(user_received_request_message.id)
 
         self.assertEqual(
             "수락됨", RequestMessageModel.objects.get(author=not_author_user, worry_board=user_board).request_status.status
@@ -278,10 +278,10 @@ class TestWorryBoardRequestMessageService(TestCase):
         not_author_user = UserModel.objects.get(username="not_author_user", nickname="not_author_user")
         user_board = WorryBoardModel.objects.get(author=user, content="test_worry_board")
 
-        user_recieved_request_message = RequestMessageModel.objects.get(author=not_author_user, worry_board=user_board)
+        user_received_request_message = RequestMessageModel.objects.get(author=not_author_user, worry_board=user_board)
 
         with self.assertRaises(RequestStatusModel.DoesNotExist):
-            accept_request_message_data(user_recieved_request_message.id)
+            accept_request_message_data(user_received_request_message.id)
 
     def test_when_already_disaccepted_in_accept_request_message_data(self) -> None:
         """
@@ -292,10 +292,10 @@ class TestWorryBoardRequestMessageService(TestCase):
         not_author_user = UserModel.objects.get(username="not_author_user", nickname="not_author_user")
         user_board = WorryBoardModel.objects.get(author=user, content="test_worry_board")
         disaccepted_request_status = RequestStatusModel.objects.get(status="반려됨")
-        user_recieved_request_message = RequestMessageModel.objects.create(
+        user_received_request_message = RequestMessageModel.objects.create(
             author=not_author_user, worry_board=user_board, request_status=disaccepted_request_status
         )
-        accept_request_message_data(user_recieved_request_message.id)
+        accept_request_message_data(user_received_request_message.id)
 
         self.assertEqual(
             "수락됨",
@@ -312,8 +312,8 @@ class TestWorryBoardRequestMessageService(TestCase):
         not_author_user = UserModel.objects.get(username="not_author_user", nickname="not_author_user")
         user_board = WorryBoardModel.objects.get(author=user, content="test_worry_board")
 
-        user_recieved_request_message = RequestMessageModel.objects.get(author=not_author_user, worry_board=user_board)
-        disaccept_request_message_data(user_recieved_request_message.id)
+        user_received_request_message = RequestMessageModel.objects.get(author=not_author_user, worry_board=user_board)
+        disaccept_request_message_data(user_received_request_message.id)
 
         self.assertEqual(
             "반려됨", RequestMessageModel.objects.get(author=not_author_user, worry_board=user_board).request_status.status
@@ -336,11 +336,11 @@ class TestWorryBoardRequestMessageService(TestCase):
         not_author_user = UserModel.objects.get(username="not_author_user", nickname="not_author_user")
         user_board = WorryBoardModel.objects.get(author=user, content="test_worry_board")
         accepted_request_status = RequestStatusModel.objects.get(status="수락됨")
-        user_recieved_request_message = RequestMessageModel.objects.create(
+        user_received_request_message = RequestMessageModel.objects.create(
             author=not_author_user, worry_board=user_board, request_status=accepted_request_status
         )
 
-        disaccept_request_message_data(user_recieved_request_message.id)
+        disaccept_request_message_data(user_received_request_message.id)
         self.assertEqual(
             "반려됨",
             RequestMessageModel.objects.filter(author=not_author_user, worry_board=user_board)

@@ -231,14 +231,14 @@ class TestMyLetter(APITestCase):
         self.assertEqual("잘못된 요청입니다. 다시 시도해주세요.", result["detail"])
 
 
-class TestMyRecievedLetterView(APITestCase):
+class TestMyReceivedLetterView(APITestCase):
     """
-    MyRecievedLetterView를 검증하는 클래스
+    MyReceivedLetterView를 검증하는 클래스
     """
 
-    def test_get_my_recieved_letter_view(self) -> None:
+    def test_get_my_received_letter_view(self) -> None:
         """
-        MyRecievedLetterView의 get함수를 검증
+        MyReceivedLetterView의 get함수를 검증
         """
         client = APIClient()
         post_user_signup_data(
@@ -280,9 +280,9 @@ class TestMyRecievedLetterView(APITestCase):
         self.assertEqual(1, result["letter_cnt"])
         self.assertEqual("1", result["letter"]["category"])
 
-    def test_when_all_letters_are_not_read_get_my_recieved_letter_view(self) -> None:
+    def test_when_all_letters_are_not_read_get_my_received_letter_view(self) -> None:
         """
-        MyRecievedLetterView의 get함수를 검증
+        MyReceivedLetterView의 get함수를 검증
         case: 읽은 편지가 없을 때
         """
         client = APIClient()
@@ -321,9 +321,9 @@ class TestMyRecievedLetterView(APITestCase):
         # 유저데이터만 넘기는지 검사
         self.assertEqual("2", result["nickname"])
 
-    def test_when_letter_num_is_not_added_in_get_my_recieved_letter_view(self) -> None:
+    def test_when_letter_num_is_not_added_in_get_my_received_letter_view(self) -> None:
         """
-        MyRecievedLetterView의 get함수를 검증
+        MyReceivedLetterView의 get함수를 검증
         case: 쿼리파람스에 letter_num값이 없을 때
         """
         client = APIClient()
@@ -366,7 +366,7 @@ class TestMyRecievedLetterView(APITestCase):
 
     def test_unauthorized_user_in_get_my_recieved_letter_view(self) -> None:
         """
-        MyRecievedLetterView의 get함수를 검증
+        MyReceivedLetterView의 get함수를 검증
         case: 인증되지 않은 유저일 때
         """
         client = APIClient()

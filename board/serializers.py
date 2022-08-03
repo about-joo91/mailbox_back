@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from board.models import Board as BoardModel
 from board.models import BoardComment as BoardCommentModel
+from user.models import User
 
 
 class BoardSerializer(serializers.ModelSerializer):
@@ -9,9 +10,11 @@ class BoardSerializer(serializers.ModelSerializer):
     like_count = serializers.SerializerMethodField()
     is_liked = serializers.SerializerMethodField()
     is_board_writer = serializers.SerializerMethodField()
+    user_id = serializers.SerializerMethodField()
     board_comment = serializers.SerializerMethodField()
     board_comment_count = serializers.SerializerMethodField()
     create_date = serializers.SerializerMethodField()
+    user_profile_data = serializers.SerializerMethodField()
 
     def get_like_count(self, obj):
         return obj.boardlike_set.count()
@@ -23,6 +26,9 @@ class BoardSerializer(serializers.ModelSerializer):
     def get_is_board_writer(self, obj):
         cur_user = self.context["request"].user
         return bool(obj.author == cur_user)
+
+    def get_user_id(self, obj):
+        return obj.author.id
 
     def get_board_comment(self, obj):
         request = self.context["request"]
@@ -39,6 +45,14 @@ class BoardSerializer(serializers.ModelSerializer):
 
         return time_data
 
+    def get_user_profile_data(self, obj):
+        cur_user = self.context["request"].user
+        return {
+            "grade": User.objects.get(id=cur_user.id).monglegrade.grade,
+            "profile_img": User.objects.get(id=cur_user.id).userprofile.profile_img,
+            "mongle_img": User.objects.get(id=cur_user.id).monglegrade.mongle,
+        }
+
     class Meta:
         model = BoardModel
         fields = [
@@ -49,6 +63,8 @@ class BoardSerializer(serializers.ModelSerializer):
             "like_count",
             "is_liked",
             "is_board_writer",
+            "user_id",
+            "user_profile_data",
             "board_comment",
             "board_comment_count",
         ]

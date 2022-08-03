@@ -55,7 +55,7 @@ class MyLetterView(APIView):
             return Response({"detail": "올바른 편지 번호를 입력해주세요."}, status=status.HTTP_404_NOT_FOUND)
 
 
-class MyRecievedLetterView(APIView):
+class MyReceivedLetterView(APIView):
     """
     내가 받은 편지를 조회하는 View
     """

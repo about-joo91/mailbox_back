@@ -82,7 +82,7 @@ class TestRequestMessageAPI(APITestCase):
         self.assertEqual(401, response.status_code)
         self.assertEqual(result["detail"], "자격 인증데이터(authentication credentials)가 제공되지 않았습니다.")
 
-    def test_get_recieved_request_message_API(self) -> None:
+    def test_get_received_request_message_API(self) -> None:
         """
         RequestMessage의 get 함수를 검증하는 함수
         case : 내가 받은 메세지
@@ -92,7 +92,7 @@ class TestRequestMessageAPI(APITestCase):
         user = UserModel.objects.get(username="test")
         client.force_authenticate(user=user)
 
-        url = "/worry_board/request/recieved"
+        url = "/worry_board/request/received"
         response = client.get(url)
         result = response.json()
 
@@ -100,7 +100,7 @@ class TestRequestMessageAPI(APITestCase):
         self.assertEqual("user기준 받은 메세지", response.json()["request_message"][0]["request_message"])
         self.assertEqual(result["total_count"], 1)
 
-    def test_when_is_user_is_unauthenticated_in_get_recieved_request_message_API(
+    def test_when_is_user_is_unauthenticated_in_get_received_request_message_API(
         self,
     ) -> None:
         """
@@ -110,7 +110,7 @@ class TestRequestMessageAPI(APITestCase):
         """
         client = APIClient()
 
-        url = "/worry_board/request/recieved"
+        url = "/worry_board/request/received"
         response = client.get(url)
         result = response.json()
 

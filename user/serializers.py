@@ -40,15 +40,14 @@ class UserSignupSerializer(serializers.ModelSerializer):
         # 각 필드에 해당하는 다양한 옵션 지정
         extra_kwargs = {
             "username": {
-                # error_messages : 에러 메세지를 자유롭게 설정 할 수 있다.
                 "error_messages": {
-                    # required : 값이 입력되지 않았을 때 보여지는 메세지
-                    "username": "아이디를 입력해주세요.",
-                    # invalid : 값의 포맷이 맞지 않을 때 보여지는 메세지
-                    # 'invalid': '알맞은 형식의 이메일을 입력해주세요.'
+                    "required": "아이디를 입력해주세요.",
                 },
-                # required : validator에서 해당 값의 필요 여부를 판단한다.
-                # 'required': False # default : True
+                "required": True,
+                "allow_null": False,
+            },
+            "nickname": {
+                "error_messages": {"required": "닉네임을 입력해주세요."},
             },
         }
 

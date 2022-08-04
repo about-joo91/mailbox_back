@@ -47,7 +47,7 @@ https://github.com/smilegate-ai/korean_unsmile_dataset
 
 ## api명세서
 - post맨 mock server를 활용한 api명세서
-https://documenter.getpostman.com/view/9279033/Uzs9wMsa
+- https://documenter.getpostman.com/view/9279033/Uzs9wMsa
 
 ## 컨벤션
 - feat/ : 새로운 기능 추가/수정/삭제

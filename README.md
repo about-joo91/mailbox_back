@@ -46,8 +46,8 @@ https://github.com/smilegate-ai/korean_unsmile_dataset
 ![mongle_erd](https://user-images.githubusercontent.com/55477835/182724054-fd7394ac-121c-498a-8396-19e009e61685.png)
 
 ## api명세서
-post맨 mock server를 활용한 api명세서
-https://ab00cd1c-6488-4d3d-b3d2-960170290875.mock.pstmn.io
+- post맨 mock server를 활용한 api명세서
+https://documenter.getpostman.com/view/9279033/Uzs9wMsa
 
 ## 컨벤션
 - feat/ : 새로운 기능 추가/수정/삭제

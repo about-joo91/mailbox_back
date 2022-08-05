@@ -67,7 +67,8 @@ class BestReviewSerializer(serializers.ModelSerializer):
         return obj.id
 
     def get_like_count(self, obj):
-        return obj.letterreviewlike_set.filter(letter_review=obj).count()
+
+        return obj.like_count
 
     class Meta:
         model = LetterReviewModel
@@ -98,7 +99,7 @@ class LiveReviewSerializer(serializers.ModelSerializer):
         return obj.id
 
     def get_like_count(self, obj):
-        return obj.letterreviewlike_set.filter(letter_review=obj).count()
+        return obj.like_count
 
     class Meta:
         model = LetterReviewModel

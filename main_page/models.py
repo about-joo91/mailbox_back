@@ -22,6 +22,7 @@ class LetterReview(models.Model):
     grade = models.IntegerField()
     content = models.TextField()
     create_date = models.DateTimeField(auto_now_add=True)
+    like_count = models.IntegerField(default=0)
 
 
 class LetterReviewLike(models.Model):

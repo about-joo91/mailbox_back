@@ -32,11 +32,11 @@ def best_review_list_service():
     메인페이지 베스트리뷰 게시물을 가져오기 위한 service
     """
 
-    return LetterReviewModel.objects.all().order_by("-grade")[:10]
+    return LetterReviewModel.objects.order_by("-like_count").order_by("-grade")[:10]
 
 
 def live_review_list_service():
     """
     메인페이지 라이브리뷰 게시물을 가져오기 위한 service
     """
-    return LetterReviewModel.objects.all().order_by("-create_date")[:10]
+    return LetterReviewModel.objects.order_by("-create_date")[:10]

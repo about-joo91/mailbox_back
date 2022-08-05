@@ -52,7 +52,9 @@ class TestBoardAPI(APITestCase):
         client = APIClient()
 
         url = "/board/?page_num=1"
+
         response = client.get(url)
+
         result = response.json()
 
         self.assertEqual(401, response.status_code)

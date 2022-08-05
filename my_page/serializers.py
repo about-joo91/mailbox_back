@@ -2,8 +2,8 @@ from rest_framework import serializers
 
 from main_page.models import Letter as LetterModel
 from main_page.models import LetterReview as LetterReviewModel
-from user.models import MongleGrade as MongleGradeModel
 from user.models import User as UserModel
+from user.serializers import MongleGradeSerializer
 
 
 class LetterReviewSerializer(serializers.ModelSerializer):
@@ -12,25 +12,19 @@ class LetterReviewSerializer(serializers.ModelSerializer):
         fields = ["id", "grade", "content"]
 
 
-class MongleSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = MongleGradeModel
-        fields = ["grade", "level", "mongle"]
-
-
 class LetterUserSerializer(serializers.ModelSerializer):
-    monglegrade = serializers.SerializerMethodField()
+    mongle_grade = serializers.SerializerMethodField()
     profile_img = serializers.SerializerMethodField()
 
     def get_profile_img(self, obj):
         return obj.userprofile.profile_img
 
-    def get_monglegrade(self, obj):
-        return MongleSerializer(obj.monglegrade).data
+    def get_mongle_grade(self, obj):
+        return MongleGradeSerializer(obj.monglegrade).data
 
     class Meta:
         model = UserModel
-        fields = ["nickname", "profile_img", "monglegrade"]
+        fields = ["nickname", "profile_img", "mongle_grade"]
 
 
 class LetterSerializer(serializers.ModelSerializer):

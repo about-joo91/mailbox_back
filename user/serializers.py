@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import MongleGrade
+from .models import MongleGrade, MongleLevel
 from .models import User as UserModel
 from .models import UserProfile as UserProfileModel
 
@@ -26,7 +26,8 @@ class UserSignupSerializer(serializers.ModelSerializer):
         user.set_password(p)
         user.save()
         UserProfileModel(user=user).save()
-        MongleGrade(user=user).save()
+        mongle_level = MongleLevel.objects.get(id=1)
+        MongleGrade(user=user, mongle_level=mongle_level).save()
         return user
 
     def update(ser, *args, **kwargs):
@@ -42,8 +43,17 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
 
 class MongleGradeSerializer(serializers.ModelSerializer):
+    mongle_image = serializers.SerializerMethodField()
+    level = serializers.SerializerMethodField()
+
+    def get_mongle_image(self, obj):
+        return obj.mongle_level.mongle_image
+
+    def get_level(self, obj):
+        return obj.mongle_level.level
+
     class Meta:
-        fields = ["mongle", "level", "grade"]
+        fields = ["mongle_image", "level", "grade"]
         model = MongleGrade
 
 

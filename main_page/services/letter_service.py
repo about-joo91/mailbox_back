@@ -6,6 +6,7 @@ from main_page.models import Letter as LetterModel
 from main_page.models import LetterReview as LetterReviewModel
 from main_page.models import LetterReviewLike as LetterReviewLikeModel
 from main_page.serializers import LetterSerilaizer
+from my_page.services.letter_review_service import update_mongle_grade
 from user.models import User as UserModel
 from worry_board.models import WorryBoard as WorryBoardModel
 
@@ -25,6 +26,8 @@ def letter_post_service(letter_author: UserModel, request_data: dict) -> None:
 
     worry_board.author.received_letter_cnt = F("received_letter_cnt") + 1
     worry_board.author.save()
+
+    update_mongle_grade(letter_author=letter_author, grade=1, rate_type="letter")
 
 
 def letter_is_read_service(letter_id: LetterModel, user_id=UserModel) -> None:

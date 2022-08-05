@@ -264,6 +264,7 @@ class TestLoginUser(TestCase):
     def test_when_different_user_review_like_delete_service(self) -> None:
         """
         편지 리뷰 좋아요 삭제 함수 검증
+        case: 다른 유저가 삭제를 요청 할 경우
         """
         user = UserModel.objects.create(username="hajin", nickname="hajin")
         author = UserModel.objects.create(username="author", nickname="author")

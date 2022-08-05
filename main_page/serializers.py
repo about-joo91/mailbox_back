@@ -54,7 +54,6 @@ class MainPageDataSerializer(serializers.ModelSerializer):
 class BestReviewSerializer(serializers.ModelSerializer):
     letter_review_like_id = serializers.SerializerMethodField()
     review_id = serializers.SerializerMethodField()
-    like_count = serializers.SerializerMethodField()
 
     def get_letter_review_like_id(self, obj):
         cur_user = self.context["request"].user
@@ -65,10 +64,6 @@ class BestReviewSerializer(serializers.ModelSerializer):
 
     def get_review_id(self, obj):
         return obj.id
-
-    def get_like_count(self, obj):
-
-        return obj.like_count
 
     class Meta:
         model = LetterReviewModel
@@ -86,7 +81,6 @@ class BestReviewSerializer(serializers.ModelSerializer):
 class LiveReviewSerializer(serializers.ModelSerializer):
     letter_review_like_id = serializers.SerializerMethodField()
     review_id = serializers.SerializerMethodField()
-    like_count = serializers.SerializerMethodField()
 
     def get_letter_review_like_id(self, obj):
         cur_user = self.context["request"].user
@@ -97,9 +91,6 @@ class LiveReviewSerializer(serializers.ModelSerializer):
 
     def get_review_id(self, obj):
         return obj.id
-
-    def get_like_count(self, obj):
-        return obj.like_count
 
     class Meta:
         model = LetterReviewModel

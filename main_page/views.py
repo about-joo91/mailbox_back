@@ -127,6 +127,7 @@ class MainPageView(APIView):
 
         grade_order_best_reviews = best_review_list_service()
         create_order_live_reviews = live_review_list_service()
+
         return Response(
             {
                 "letter_count": not_read_my_letter_count,

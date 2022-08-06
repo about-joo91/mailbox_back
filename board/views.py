@@ -6,7 +6,6 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from board.models import Board as BoardModel
 from board.models import BoardComment as BoardCommentModel
 from board.models import BoardLike as BoardLikeModel
-from board.serializers import BoardSerializer
 from board.services.board_service import (
     check_is_it_clean_text,
     create_board_comment_data,
@@ -16,6 +15,7 @@ from board.services.board_service import (
     delete_like_data,
     get_board_comment_data,
     get_paginated_board_data,
+    get_user_profile_data,
     make_like_data,
     update_board_comment_data,
     update_board_data,
@@ -34,11 +34,13 @@ class BoardView(APIView):
     def get(self, request):
         try:
             page_num = int(self.request.query_params.get("page_num"))
-            paginated_board, total_count = get_paginated_board_data(page_num)
+            paginated_boards, total_count = get_paginated_board_data(page_num, request.user)
+            user_profile_data = get_user_profile_data(request.user)
             return Response(
                 {
-                    "boards": BoardSerializer(paginated_board, many=True, context={"request": request}).data,
+                    "boards": paginated_boards,
                     "total_count": total_count,
+                    "user_profile_data": user_profile_data,
                 },
                 status=status.HTTP_200_OK,
             )
@@ -118,12 +120,12 @@ class BorderCommentView(APIView):
 
     def get(self, request):
         try:
+            author = request.user
             board_id = int(self.request.query_params.get("board_id"))
-            board_comment_data = get_board_comment_data(board_id)
+            board_comments = get_board_comment_data(board_id, author)
+            user_profile_data = get_user_profile_data(author)
             return Response(
-                {
-                    "board_comments": BoardSerializer(board_comment_data, many=True, context={"request": request}).data,
-                },
+                {"board_comments": board_comments, "user_profile_data": user_profile_data},
                 status=status.HTTP_200_OK,
             )
         except TypeError:

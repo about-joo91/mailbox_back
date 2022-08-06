@@ -63,11 +63,8 @@ class TestBoardService(TestCase):
         page_num을 통해서 board 데이터를 가져오는 service 함수 검증
         """
 
-        paginated_board, total_count = get_paginated_board_data(1)
-
-        with self.assertNumQueries(1):
-            get_paginated_board_data(1)
-
+        author = UserModel.objects.get(username="ko", nickname="ko")
+        paginated_board, total_count = get_paginated_board_data(1, author=author)
         self.assertEqual(BoardModel.objects.all().count(), total_count)
 
     def test_get_paginated_board_data_with_unauthenticated_user(self) -> None:
@@ -280,9 +277,10 @@ class TestBoardService(TestCase):
         """
         board_comment 데이터를 불러오는 service에 대한 검증
         """
+        user = UserModel.objects.get(username="ko", nickname="ko")
         user_board = BoardModel.objects.get(content="content")
 
-        self.assertEqual(1, get_board_comment_data(user_board.id).count())
+        self.assertEqual("content", get_board_comment_data(user_board.id, author=user)[0]["content"])
 
     def test_create_board_comment_data(self) -> None:
         """

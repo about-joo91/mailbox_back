@@ -7,15 +7,18 @@ from worry_board.serializers import WorryBoardSerializer
 
 
 def get_paginated_worry_board_data(
-    page_num: int, category: int, recommended_worryboard: list = []
+    page_num: int, category: int, author: UserModel, recommended_worryboard: list = []
 ) -> Tuple[List, int, List]:
     """
     worry_board의 데이터를 가져오는 service
     """
     if category == 0:
-        paginated_worry_board = WorryBoardModel.objects.all().order_by("-create_date")[
-            10 * (page_num - 1) : 10 + 10 * (page_num - 1)
-        ]
+        paginated_worry_board = (
+            WorryBoardModel.objects.select_related("author")
+            .prefetch_related("requestmessage_set")
+            .all()
+            .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        )
         total_count = WorryBoardModel.objects.count()
 
     elif category == 7:
@@ -23,12 +26,15 @@ def get_paginated_worry_board_data(
         total_count = recommended_worryboard.count()
 
     else:
-        paginated_worry_board = WorryBoardModel.objects.filter(category=category).order_by("-create_date")[
-            10 * (page_num - 1) : 10 + 10 * (page_num - 1)
-        ]
+        paginated_worry_board = (
+            WorryBoardModel.objects.select_related("author")
+            .prefetch_related("requestmessage_set")
+            .filter(category=category)
+            .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        )
         total_count = WorryBoardModel.objects.filter(category=category).count()
-
-    return paginated_worry_board, total_count
+    paginated_worry_boards = WorryBoardSerializer(paginated_worry_board, many=True, context={"author": author}).data
+    return paginated_worry_boards, total_count
 
 
 def create_worry_board_data(author: UserModel, create_data: Dict[str, str]) -> None:

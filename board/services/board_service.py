@@ -21,13 +21,21 @@ def check_is_it_clean_text(check_content: dict[str, str]):
     return False
 
 
-def get_paginated_board_data(page_num: int) -> Tuple[List, int]:
+def get_paginated_board_data(page_num: int, author: UserModel) -> Tuple[List, int]:
     """
     page_num을 통해서 board 데이터를 가져오는 service
     """
-    paginated_board = BoardModel.objects.all().order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+
+    paginated_board_data = (
+        BoardModel.objects.select_related("author")
+        .prefetch_related("boardlike_set")
+        .prefetch_related("boardcomment_set__author")
+        .all()
+        .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+    )
+    paginated_boards = BoardSerializer(paginated_board_data, many=True, context={"author": author}).data
     total_count = BoardModel.objects.count()
-    return paginated_board, total_count
+    return paginated_boards, total_count
 
 
 def create_board_data(board_data: Dict[str, str], author: UserModel) -> None:
@@ -78,12 +86,19 @@ def delete_like_data(author: UserModel, board_id: int) -> None:
     liked_board.delete()
 
 
-def get_board_comment_data(board_id: int) -> List:
+def get_board_comment_data(board_id: int, author: UserModel) -> List:
     """
     해당 board의 comment 데이터의 댓글을 불러오는 service
     """
-    board_comment = BoardModel.objects.filter(id=board_id)
-    return board_comment
+
+    board_comment_data = (
+        BoardModel.objects.prefetch_related("boardcomment_set")
+        .prefetch_related("boardlike_set")
+        .select_related("author")
+        .filter(id=board_id)
+    )
+    board_comments = BoardSerializer(board_comment_data, many=True, context={"author": author}).data
+    return board_comments
 
 
 def create_board_comment_data(author: UserModel, board_id: int, create_data: Dict) -> None:
@@ -113,3 +128,13 @@ def delete_board_comment_data(comment_id: int, author: UserModel) -> None:
     """
     delete_comment = BoardCommentModel.objects.get(id=comment_id, author=author)
     delete_comment.delete()
+
+
+def get_user_profile_data(author: UserModel):
+    """
+    유저프로필의 데이터를 가져오는 service
+    """
+    mongle_grade = author.monglegrade.grade
+    profile_img = author.userprofile.profile_img
+    mongle_img = author.monglegrade.mongle
+    return mongle_grade, profile_img, mongle_img

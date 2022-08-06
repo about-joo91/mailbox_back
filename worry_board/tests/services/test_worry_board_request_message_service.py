@@ -55,8 +55,8 @@ class TestWorryBoardRequestMessageService(TestCase):
             WorryBoardModel.objects.get(author=user).id,
         )
         self.assertEqual(
-            paginated_request_message[0],
-            RequestMessageModel.objects.get(author=user),
+            paginated_request_message[0]["id"],
+            RequestMessageModel.objects.get(author=user).id,
         )
 
     def test_when_success_create_request_message_data(self) -> None:

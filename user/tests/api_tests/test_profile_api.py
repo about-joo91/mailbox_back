@@ -2,7 +2,8 @@ import json
 
 from rest_framework.test import APIClient, APITestCase
 
-from user.models import MongleGrade
+from user.models import MongleGrade as MongleGradeModel
+from user.models import MongleLevel as MongleLevelModel
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
 from user.serializers import MongleGradeSerializer
@@ -13,24 +14,37 @@ class TestProfileAPI(APITestCase):
     UserProfileView의 API를 검증하는 클래스
     """
 
+    @classmethod
+    def setUpTestData(cls):
+
+        user = UserModel.objects.create(username="joo", nickname="joo")
+        UserProfileModel.objects.create(user=user)
+        mongle_level = MongleLevelModel.objects.create()
+        MongleGradeModel.objects.create(user=user, mongle_level=mongle_level)
+
+        no_profile = UserModel.objects.create(username="no_profile", nickname="no_profile")
+        MongleGradeModel.objects.create(user=no_profile, mongle_level=mongle_level)
+
+        no_mongle_user = UserModel.objects.create(username="no_mongle", nickname="no_mongle")
+        UserProfileModel.objects.create(user=no_mongle_user)
+
     def test_get_user_profile(self) -> None:
         """
         UserProfileView 의 get 함수를 검증하는 함수
         """
         client = APIClient()
-        user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
-        user_profile = UserProfileModel.objects.create(user=user)
-        mongle_grade = MongleGrade.objects.create(user=user)
+
+        user = UserModel.objects.get(username="joo")
 
         client.force_authenticate(user=user)
         url = "/user/profile"
         response = client.get(url)
         result = response.json()
 
-        self.assertEqual(result["fullname"], user_profile.fullname)
-        self.assertEqual(result["description"], user_profile.description)
-        self.assertEqual(result["mongle_grade"], MongleGradeSerializer(mongle_grade).data)
-        self.assertEqual(result["profile_img"], user_profile.profile_img)
+        self.assertEqual(result["fullname"], user.userprofile.fullname)
+        self.assertEqual(result["description"], user.userprofile.description)
+        self.assertEqual(result["mongle_grade"], MongleGradeSerializer(user.monglegrade).data)
+        self.assertEqual(result["profile_img"], user.userprofile.profile_img)
 
     def test_when_user_profile_is_none_in_get_user_profile(self) -> None:
         """
@@ -38,7 +52,7 @@ class TestProfileAPI(APITestCase):
         case : 유저프로필이 없을 때
         """
         client = APIClient()
-        user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
+        user = UserModel.objects.get(username="no_profile")
 
         client.force_authenticate(user=user)
         url = "/user/profile"
@@ -68,8 +82,7 @@ class TestProfileAPI(APITestCase):
         """
 
         client = APIClient()
-        user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
-        UserProfileModel.objects.create(user=user)
+        user = UserModel.objects.get(username="joo")
 
         client.force_authenticate(user=user)
         url = "/user/profile"
@@ -98,7 +111,7 @@ class TestProfileAPI(APITestCase):
         case : 유저프로필이 없을 때
         """
         client = APIClient()
-        user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
+        user = UserModel.objects.get(username="no_profile")
 
         client.force_authenticate(user=user)
         url = "/user/profile"
@@ -123,8 +136,7 @@ class TestProfileAPI(APITestCase):
         case : 데이터가 유효하지 않을 때
         """
         client = APIClient()
-        user = UserModel.objects.create(username="joo", password="1234", nickname="joo")
-        UserProfileModel.objects.create(user=user)
+        user = UserModel.objects.get(username="joo")
 
         client.force_authenticate(user=user)
         url = "/user/profile"

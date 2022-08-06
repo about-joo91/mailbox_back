@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from board.models import Board as BoardModel
 from board.models import BoardComment as BoardCommentModel
-from user.models import User
 
 
 class BoardSerializer(serializers.ModelSerializer):
@@ -14,25 +13,24 @@ class BoardSerializer(serializers.ModelSerializer):
     board_comment = serializers.SerializerMethodField()
     board_comment_count = serializers.SerializerMethodField()
     create_date = serializers.SerializerMethodField()
-    user_profile_data = serializers.SerializerMethodField()
 
     def get_like_count(self, obj):
         return obj.boardlike_set.count()
 
     def get_is_liked(self, obj):
-        cur_user = self.context["request"].user
-        return bool(obj.boardlike_set.filter(author=cur_user.id))
+        author = self.context["author"]
+        return obj.boardlike_set.filter(author=author).exists()
 
     def get_is_board_writer(self, obj):
-        cur_user = self.context["request"].user
+        cur_user = self.context["author"]
         return bool(obj.author == cur_user)
 
     def get_user_id(self, obj):
         return obj.author.id
 
     def get_board_comment(self, obj):
-        request = self.context["request"]
-        return BoardCommentSerializer(obj.boardcomment_set, many=True, context={"request": request}).data
+        author = self.context["author"]
+        return BoardCommentSerializer(obj.boardcomment_set, many=True, context={"author": author}).data
 
     def get_board_comment_count(self, obj):
         return obj.boardcomment_set.count()
@@ -45,14 +43,6 @@ class BoardSerializer(serializers.ModelSerializer):
 
         return time_data
 
-    def get_user_profile_data(self, obj):
-        cur_user = self.context["request"].user
-        return {
-            "grade": User.objects.get(id=cur_user.id).monglegrade.grade,
-            "profile_img": User.objects.get(id=cur_user.id).userprofile.profile_img,
-            "mongle_img": User.objects.get(id=cur_user.id).monglegrade.mongle,
-        }
-
     class Meta:
         model = BoardModel
         fields = [
@@ -64,7 +54,6 @@ class BoardSerializer(serializers.ModelSerializer):
             "is_liked",
             "is_board_writer",
             "user_id",
-            "user_profile_data",
             "board_comment",
             "board_comment_count",
         ]
@@ -75,8 +64,8 @@ class BoardCommentSerializer(serializers.ModelSerializer):
     is_detail_page_writer = serializers.SerializerMethodField()
 
     def get_is_comment_writer(self, obj):
-        cur_user = self.context["request"].user
-        return bool(obj.author == cur_user)
+        author = self.context["author"]
+        return bool(obj.author == author)
 
     def get_is_detail_page_writer(self, obj):
         is_detail = obj.author == obj.board.author

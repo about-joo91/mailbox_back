@@ -12,15 +12,20 @@ def get_paginated_request_message_data(page_num: int, case: str, author: UserMod
     request_data를 가져오는 service
     """
     if case == "sended":
-        paginated_request_message = RequestMessageModel.objects.filter(author=author).order_by("-create_date")[
-            10 * (page_num - 1) : 10 + 10 * (page_num - 1)
-        ]
+        paginated_request_message = (
+            RequestMessageModel.objects.select_related("worry_board__category")
+            .filter(author=author)
+            .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        )
     elif case == "received":
         paginated_request_message = RequestMessageModel.objects.filter(worry_board__author=author).order_by(
             "-create_date"
         )[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+    paginated_request_messages = RequestMessageSerializer(
+        paginated_request_message, many=True, context={"author": author}
+    ).data
     total_count = paginated_request_message.count()
-    return paginated_request_message, total_count
+    return paginated_request_messages, total_count
 
 
 def create_request_message_data(author: UserModel, worry_board_id: int, request_message: Dict[str, str]):

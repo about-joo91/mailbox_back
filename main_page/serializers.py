@@ -30,7 +30,9 @@ class MainPageDataSerializer(serializers.ModelSerializer):
     user_profile_data = serializers.SerializerMethodField()
 
     def get_rank_list(self, obj):
-        grade_in_order_user_list = UserModel.objects.select_related("userprofile").all().order_by("-monglegrade")[:10]
+        grade_in_order_user_list = (
+            UserModel.objects.select_related("monglegrade").all().order_by("-monglegrade__grade")[:10]
+        )
         rank_list = [
             {
                 "username": rank_list.username,

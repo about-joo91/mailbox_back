@@ -93,3 +93,12 @@ def disaccept_request_message_data(request_message_id: int) -> None:
     )
     update_request_message_serializer.is_valid(raise_exception=True)
     update_request_message_serializer.save(request_status_id=request_status.id)
+
+
+def update_request_status(author: UserModel, worry_board_id):
+    """
+    편지작성을 완료 후 reqeust_status를 작성 완료로 변경하는 service
+    """
+    worry_board = WorryBoardModel.objects.get(id=worry_board_id)
+    request_message = worry_board.requestmessage_set.filter(author=author)
+    request_message.update(request_status=5)

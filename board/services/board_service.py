@@ -22,7 +22,7 @@ def check_is_it_clean_text(check_content: dict[str, str]):
     return False
 
 
-def get_paginated_board_data(page_num: int, author: UserModel, is_mine: bool) -> Tuple[List, int]:
+def get_paginated_board_data(page_num: int, author: UserModel, is_mine: str) -> Tuple[List, int]:
     """
     page_num을 통해서 board 데이터를 가져오는 service
     """

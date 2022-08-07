@@ -73,7 +73,8 @@ class TestBoardService(TestCase):
         """
 
         author = UserModel.objects.get(username="ko", nickname="ko")
-        paginated_board, total_count = get_paginated_board_data(1, author=author)
+        is_mine = "False"
+        paginated_board, total_count = get_paginated_board_data(1, author=author, is_mine=is_mine)
         self.assertEqual(BoardModel.objects.all().count(), total_count)
 
     def test_get_paginated_board_data_with_unauthenticated_user(self) -> None:

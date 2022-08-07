@@ -7,8 +7,6 @@ from user.serializers import UserProfileSerializer
 def get_user_profile_data(user_id: int) -> Dict:
     user_profile = (
         UserProfileModel.objects.filter(user_id=user_id)
-        .select_related("user")
-        .select_related("user__monglegrade")
         .select_related("user__monglegrade__mongle_level")
         .prefetch_related("categories")
         .get()

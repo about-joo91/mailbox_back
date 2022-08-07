@@ -10,7 +10,7 @@ from user.models import MongleGrade, MongleLevel
 from user.models import User as UserModel
 
 MONGLE_GRADE_RATE = {"review": 10, "letter": 100, "board": 5}
-MONGLE_GRADE_BISECTS = [199, 599, 1199]
+MONGLE_GRADE_BISECTS = [199, 599, 1199, 2499]
 
 
 def update_mongle_grade(user: UserModel, grade: int, rate_type: str) -> None:

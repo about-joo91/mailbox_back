@@ -21,7 +21,7 @@ class TestBoardAPI(APITestCase):
         not_cur_user = UserModel.objects.create(username="not_cur_user", nickname="not_cur_user")
 
         UserProfile.objects.create(user=cur_user)
-        mongle_level = MongleLevel.objects.create()
+        mongle_level = MongleLevel.objects.create(id=1)
         MongleGrade.objects.create(user=cur_user, mongle_level=mongle_level)
 
         cur_user_board = BoardModel.objects.create(author=cur_user, title="title", content="content")

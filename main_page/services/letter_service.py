@@ -10,6 +10,7 @@ from main_page.serializers import LetterSerilaizer
 from my_page.services.letter_review_service import update_mongle_grade
 from user.models import User as UserModel
 from worry_board.models import WorryBoard as WorryBoardModel
+from worry_board.services.worry_board_request_message_service import update_request_status
 
 
 @transaction.atomic
@@ -25,6 +26,8 @@ def letter_post_service(letter_author: UserModel, request_data: dict) -> None:
 
     letter_author.sent_letter_cnt = F("sent_letter_cnt") + 1
     letter_author.save()
+
+    update_request_status(letter_author, worry_board_id)
 
     worry_board.author.received_letter_cnt = F("received_letter_cnt") + 1
     worry_board.author.save()

@@ -37,16 +37,17 @@ class WorryBoardView(APIView):
             user_profile_data = get_user_profile_data(request.user)
             if page_num == 0:
                 page_num = 1
-
+            paginated_worry_boards = []
+            total_count = 0
             try:
                 recommended_worryboard = recommend_worryboard_list(request.user)
             except KeyError:
                 recommended_worryboard = []
             except AttributeError:
                 recommended_worryboard = []
-                paginated_worry_boards, total_count = get_paginated_worry_board_data(
-                    page_num, category, author, recommended_worryboard
-                )
+            paginated_worry_boards, total_count = get_paginated_worry_board_data(
+                page_num, category, author, recommended_worryboard
+            )
             return Response(
                 {
                     "boards": paginated_worry_boards,

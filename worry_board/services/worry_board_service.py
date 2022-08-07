@@ -5,6 +5,9 @@ from user.models import User as UserModel
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import WorryBoardSerializer
 
+RECOMMEND_BOARD = 7
+ALL_WORRY_BOARD = 0
+
 
 def get_paginated_worry_board_data(
     page_num: int, category: int, author: UserModel, recommended_worryboard: list = []
@@ -12,7 +15,7 @@ def get_paginated_worry_board_data(
     """
     worry_board의 데이터를 가져오는 service
     """
-    if category == 0:
+    if category == ALL_WORRY_BOARD:
         paginated_worry_board = (
             WorryBoardModel.objects.select_related("author")
             .prefetch_related("requestmessage_set")
@@ -21,7 +24,7 @@ def get_paginated_worry_board_data(
         )
         total_count = WorryBoardModel.objects.count()
 
-    elif category == 7:
+    elif category == RECOMMEND_BOARD:
         paginated_worry_board = recommended_worryboard[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
         total_count = recommended_worryboard.count()
 

@@ -1,5 +1,7 @@
 from typing import Dict
 
+from django.db import transaction
+
 from user.models import User
 from user.serializers import UserSignupSerializer
 
@@ -11,6 +13,7 @@ def get_user_signup_data(user: User) -> Dict:
     return UserSignupSerializer(user).data
 
 
+@transaction.atomic
 def post_user_signup_data(user_data: Dict) -> None:
     """
     회원가입

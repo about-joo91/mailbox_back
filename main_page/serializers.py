@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from user.models import User as UserModel
+from user.serializers import MongleGradeSerializer
 
 from .models import Letter as LetterModel
 from .models import LetterReview as LetterReviewModel
@@ -41,9 +42,8 @@ class MainPageDataSerializer(serializers.ModelSerializer):
 
     def get_user_profile_data(self, obj):
         return {
-            "grade": obj.monglegrade.grade,
             "profile_img": obj.userprofile.profile_img,
-            "mongle_img": obj.monglegrade.mongle,
+            "mongle_grade": MongleGradeSerializer(obj.monglegrade).data,
         }
 
     class Meta:

@@ -17,7 +17,10 @@ from board.services.board_service import (
     update_board_comment_data,
     update_board_data,
 )
+from user.models import MongleGrade as MongleGradeModel
+from user.models import MongleLevel as MongleLevelModel
 from user.models import User as UserModel
+from user.models import UserProfile as UserProfileModel
 
 
 class TestBoardService(TestCase):
@@ -28,7 +31,13 @@ class TestBoardService(TestCase):
     @classmethod
     def setUpTestData(cls):
         cur_user = UserModel.objects.create(username="ko", nickname="ko")
+        UserProfileModel.objects.create(user=cur_user)
+        mongle_level = MongleLevelModel.objects.create(id=1)
+        MongleGradeModel.objects.create(user=cur_user, mongle_level=mongle_level)
+
         not_cur_user = UserModel.objects.create(username="not_cur_user", nickname="not_cur_user")
+        UserProfileModel.objects.create(user=not_cur_user)
+        MongleGradeModel.objects.create(user=not_cur_user, mongle_level=mongle_level)
 
         cur_user_board = BoardModel.objects.create(author=cur_user, title="title", content="content")
         not_cur_user_board = BoardModel.objects.create(author=not_cur_user, title="title2", content="content2")
@@ -83,7 +92,7 @@ class TestBoardService(TestCase):
         user = UserModel.objects.get(username="ko", nickname="ko")
         request_data = {"title": "title", "content": "content", "author": user.id}
 
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(3):
             create_board_data(request_data, user)
 
         board = BoardModel.objects.filter(author=user.id).last()

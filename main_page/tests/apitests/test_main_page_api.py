@@ -4,6 +4,7 @@ from main_page.models import Letter as LetterModel
 from main_page.models import LetterReview as LetterReviewModel
 from main_page.models import WorryCategory as WorryCategoryModel
 from user.models import MongleGrade as MogleGardeModel
+from user.models import MongleLevel
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
 from worry_board.models import WorryBoard as WorryBoardModel
@@ -21,7 +22,9 @@ class TestMaingPageAPI(APITestCase):
         client = APIClient()
         user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         UserProfileModel.objects.create(user=user)
-        MogleGardeModel.objects.create(user=user, grade=100, level=1)
+        mongle_level = MongleLevel.objects.create()
+        MogleGardeModel.objects.create(user=user, grade=100, mongle_level=mongle_level)
+
         category_list = ["일상", "연애", "학업", "가족", "인간관계", "육아"]
         for cate_name in category_list:
             WorryCategoryModel.objects.create(cate_name=cate_name)
@@ -62,7 +65,6 @@ class TestMaingPageAPI(APITestCase):
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(result["letter_count"], 30)
-        self.assertEqual(result["main_page_data_and_user_profile"]["user_profile_data"]["grade"], 100)
         self.assertEqual(
             result["main_page_data_and_user_profile"]["rank_list"][0]["username"],
             "hajin",
@@ -127,7 +129,8 @@ class TestMaingPageAPI(APITestCase):
         """
         client = APIClient()
         user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
-        MogleGardeModel.objects.create(user=user, grade=100, level=1)
+        mongle_level = MongleLevel.objects.create()
+        MogleGardeModel.objects.create(user=user, grade=100, mongle_level=mongle_level)
         category_list = ["일상", "연애", "학업", "가족", "인간관계", "육아"]
         for cate_name in category_list:
             WorryCategoryModel.objects.create(cate_name=cate_name)

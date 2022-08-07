@@ -21,7 +21,7 @@ class TestRequestMessageAPI(APITestCase):
         user = UserModel.objects.create(username="test", nickname="test")
         not_author_user = UserModel.objects.create(username="not_author", nickname="not_author")
         category = WorryCategoryModel.objects.create(cate_name="가족")
-        mongle_level = MongleLevel.objects.create()
+        mongle_level = MongleLevel.objects.create(id=1)
         UserProfile.objects.create(user=user)
         MongleGrade.objects.create(user=user, mongle_level=mongle_level)
         user_worry_board = WorryBoardModel.objects.create(author=user, category=category, content="APItest")

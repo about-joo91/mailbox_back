@@ -23,7 +23,7 @@ class TestWorryBoardAPI(APITestCase):
         RequestStatusModel.objects.create(status="요청")
 
         UserProfile.objects.create(user=user)
-        mongle_level = MongleLevel.objects.create()
+        mongle_level = MongleLevel.objects.create(id=1)
         MongleGrade.objects.create(user=user, mongle_level=mongle_level)
 
     def test_get_worry_board_API(self) -> None:

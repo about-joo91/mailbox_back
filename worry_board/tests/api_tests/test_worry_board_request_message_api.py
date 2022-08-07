@@ -3,7 +3,7 @@ import json
 from rest_framework.test import APIClient, APITestCase
 
 from main_page.models import WorryCategory as WorryCategoryModel
-from user.models import MongleGrade, MongleLevel
+from user.models import MongleGrade
 from user.models import User as UserModel
 from user.models import UserProfile
 from worry_board.models import RequestMessage as RequestMessageModel
@@ -21,9 +21,8 @@ class TestRequestMessageAPI(APITestCase):
         user = UserModel.objects.create(username="test", nickname="test")
         not_author_user = UserModel.objects.create(username="not_author", nickname="not_author")
         category = WorryCategoryModel.objects.create(cate_name="가족")
-        mongle_level = MongleLevel.objects.create()
         UserProfile.objects.create(user=user)
-        MongleGrade.objects.create(user=user, mongle_level=mongle_level)
+        MongleGrade.objects.create(user=user)
         user_worry_board = WorryBoardModel.objects.create(author=user, category=category, content="APItest")
         not_author_user_worry_board = WorryBoardModel.objects.create(
             author=not_author_user, category=category, content="APItest"

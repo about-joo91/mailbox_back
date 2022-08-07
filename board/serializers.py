@@ -2,8 +2,6 @@ from rest_framework import serializers
 
 from board.models import Board as BoardModel
 from board.models import BoardComment as BoardCommentModel
-from user.models import UserProfile as UserProfileModel
-from user.serializers import MongleGradeSerializer
 
 
 class BoardSerializer(serializers.ModelSerializer):
@@ -86,17 +84,3 @@ class BoardCommentSerializer(serializers.ModelSerializer):
             "is_detail_page_writer",
         ]
         extra_kwargs = {"board": {"read_only": True}}
-
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    mongle_grade = serializers.SerializerMethodField(read_only=True)
-
-    def get_mongle_grade(self, obj):
-        return MongleGradeSerializer(obj.user.monglegrade).data
-
-    class Meta:
-        model = UserProfileModel
-        fields = [
-            "mongle_grade",
-            "profile_img",
-        ]

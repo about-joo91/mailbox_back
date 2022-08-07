@@ -1,7 +1,6 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
-from user.models import MongleLevel
 from user.models import User as UserModel
 
 
@@ -9,12 +8,6 @@ class TestUserRegistrationAPI(APITestCase):
     """
     회원가입 API 테스트 코드
     """
-
-    @classmethod
-    def setUpTestData(cls):
-        MongleLevel.objects.create(
-            id=1,
-        )
 
     def test_signup(self) -> None:
         url = reverse("user_view")

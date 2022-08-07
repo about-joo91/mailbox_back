@@ -4,9 +4,7 @@ from rest_framework.test import APIClient, APITestCase
 
 from main_page.models import Letter as LetterModel
 from main_page.models import WorryCategory as WorryCategoryModel
-from user.models import MongleLevel
 from user.models import User as UserModel
-from user.services.user_signup_login_service import post_user_signup_data
 from worry_board.models import WorryBoard as WorryBoardModel
 
 
@@ -15,27 +13,16 @@ class TestLetterviewAPI(APITestCase):
     Letterview 의 API를 검증하는 클래스
     """
 
-    @classmethod
-    def setUpTestData(cls):
-        user_data = {"username": "hajin_test", "password": "p@ssword", "nickname": "1"}
-        user_data_author = {"username": "author_test", "password": "p@ssword", "nickname": "2"}
-        MongleLevel.objects.create(id=1)
-        post_user_signup_data(user_data)
-        post_user_signup_data(user_data_author)
-        daily_cate = WorryCategoryModel.objects.create(cate_name="일상")
-        receive_user = UserModel.objects.get(username="hajin_test")
-
-        WorryBoardModel.objects.create(author_id=receive_user.id, content="test", category_id=daily_cate.id)
-
     def test_letter_post(self) -> None:
         """
         Letterview 의 post 함수를 검증하는 함수
         """
         client = APIClient()
-        receive_user = UserModel.objects.get(username="hajin_test")
-        author_user = UserModel.objects.get(username="author_test")
-
-        worry_obj = WorryBoardModel.objects.get(author=receive_user)
+        revice_user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
+        author_user = UserModel.objects.create(username="author", password="1234", nickname="author")
+        WorryCategoryModel.objects.create(cate_name="일상")
+        daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
+        worry_obj = WorryBoardModel.objects.create(author_id=revice_user.id, content="test", category_id=daily_cate.id)
 
         client.force_authenticate(user=author_user)
         url = "/main_page/letter/"
@@ -55,7 +42,7 @@ class TestLetterviewAPI(APITestCase):
         result = response.json()
 
         test_letter_obj = LetterModel.objects.order_by("-create_date")[:1].get().letter_author.id
-        self.assertEqual(1, UserModel.objects.get(id=receive_user.id).received_letter_cnt)
+        self.assertEqual(1, UserModel.objects.get(id=revice_user.id).received_letter_cnt)
         self.assertEqual(1, UserModel.objects.get(id=author_user.id).sent_letter_cnt)
         self.assertEqual(200, response.status_code)
         self.assertEqual(author_user.id, test_letter_obj)
@@ -67,10 +54,11 @@ class TestLetterviewAPI(APITestCase):
         case:  부적절한 내용이 담겨있을 때
         """
         client = APIClient()
-        user = UserModel.objects.get(username="author_test")
-        receive_user = UserModel.objects.get(username="hajin_test")
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
 
-        worry_obj = WorryBoardModel.objects.get(author=receive_user)
+        WorryCategoryModel.objects.create(cate_name="일상")
+        daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
+        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=daily_cate.id)
 
         client.force_authenticate(user=user)
         url = "/main_page/letter/"
@@ -98,10 +86,11 @@ class TestLetterviewAPI(APITestCase):
         case: 이미 편지를 작성했을 경우
         """
         client = APIClient()
-        user = UserModel.objects.get(username="author_test")
-        receive_user = UserModel.objects.get(username="hajin_test")
+        user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
 
-        worry_obj = WorryBoardModel.objects.get(author=receive_user)
+        WorryCategoryModel.objects.create(cate_name="일상")
+        daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
+        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="test", category_id=daily_cate.id)
         LetterModel.objects.create(
             letter_author_id=user.id,
             worryboard_id=worry_obj.id,
@@ -149,28 +138,15 @@ class TestLetterIsReadView(APITestCase):
     LetterisReadView 의 API를 검증하는 클래스
     """
 
-    @classmethod
-    def setUpTestData(cls):
-        user_data = {"username": "hajin_test", "password": "p@ssword", "nickname": "1"}
-        user_data_author = {"username": "author_test", "password": "p@ssword", "nickname": "2"}
-        MongleLevel.objects.create(id=1)
-        post_user_signup_data(user_data)
-        post_user_signup_data(user_data_author)
-
-        daily_cate = WorryCategoryModel.objects.create(cate_name="일상")
-        receive_user = UserModel.objects.get(username="hajin_test")
-
-        WorryBoardModel.objects.create(author_id=receive_user.id, content="test", category_id=daily_cate.id)
-
     def test_letter_is_read_post(self) -> None:
         """
         LetterReviewLike 의 post 함수를 검증하는 함수
         """
         client = APIClient()
-        receive_user = UserModel.objects.get(username="hajin_test")
-        author_user = UserModel.objects.get(username="author_test")
-
-        worry_obj = WorryBoardModel.objects.get(author=receive_user)
+        revice_user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
+        author_user = UserModel.objects.create(username="author", password="1234", nickname="author")
+        daily_cate = WorryCategoryModel.objects.create(cate_name="일상")
+        worry_obj = WorryBoardModel.objects.create(author_id=revice_user.id, content="test", category_id=daily_cate.id)
         letter_obj = LetterModel.objects.create(
             letter_author=author_user,
             worryboard=worry_obj,
@@ -178,12 +154,12 @@ class TestLetterIsReadView(APITestCase):
             content="테스트입니다",
         )
 
-        client.force_authenticate(user=receive_user)
+        client.force_authenticate(user=revice_user)
         url = f"/main_page/letter/{letter_obj.id}"
         response = client.post(
             url,
         )
-        self.assertEqual(0, UserModel.objects.get(id=receive_user.id).received_letter_cnt)
+        self.assertEqual(0, UserModel.objects.get(id=revice_user.id).received_letter_cnt)
         self.assertEqual(200, response.status_code)
 
     def test_when_user_is_unauthenticated_in_letter_read_post(self) -> None:
@@ -192,9 +168,11 @@ class TestLetterIsReadView(APITestCase):
         case : 인증되지 않은 유저일 때
         """
         client = APIClient()
-        receive_user = UserModel.objects.get(username="hajin_test")
-        author_user = UserModel.objects.get(username="author_test")
-        worry_obj = WorryBoardModel.objects.get(author_id=receive_user.id)
+        revice_user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
+        author_user = UserModel.objects.create(username="author", password="1234", nickname="author")
+        WorryCategoryModel.objects.create(cate_name="일상")
+        daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
+        worry_obj = WorryBoardModel.objects.create(author_id=revice_user.id, content="test", category_id=daily_cate.id)
         letter_obj = LetterModel.objects.create(
             letter_author=author_user,
             worryboard=worry_obj,
@@ -214,16 +192,17 @@ class TestLetterIsReadView(APITestCase):
         case : 자신이 받은 편지가 아닐 때
         """
         client = APIClient()
-        receive_user = UserModel.objects.get(username="hajin_test")
-        author_user = UserModel.objects.get(username="author_test")
-        worry_obj = WorryBoardModel.objects.get(author_id=receive_user.id)
+        revice_user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
+        author_user = UserModel.objects.create(username="author", password="1234", nickname="author")
+        WorryCategoryModel.objects.create(cate_name="일상")
+        daily_cate = WorryCategoryModel.objects.get(cate_name="일상")
+        worry_obj = WorryBoardModel.objects.create(author_id=revice_user.id, content="test", category_id=daily_cate.id)
         letter_obj = LetterModel.objects.create(
             letter_author=author_user,
             worryboard=worry_obj,
             title="테스트입니다",
             content="테스트입니다",
         )
-
         client.force_authenticate(user=author_user)
         url = f"/main_page/letter/{letter_obj.id}"
         response = client.post(url)

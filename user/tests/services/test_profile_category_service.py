@@ -61,7 +61,7 @@ class TestProfileCategory(TestCase):
 
         my_categories = user.userprofile.categories.all()
         self.assertEqual(len(categories), len(my_categories))
-        self.assertEqual(True, user.userprofile.categories.filter(cate_name="가족").exists())
+        self.assertEqual("가족", my_categories[0].cate_name)
 
     def test_when_userprofile_is_None_create_category_of_profile(self) -> None:
         """

@@ -22,18 +22,27 @@ def check_is_it_clean_text(check_content: dict[str, str]):
     return False
 
 
-def get_paginated_board_data(page_num: int, author: UserModel) -> Tuple[List, int]:
+def get_paginated_board_data(page_num: int, author: UserModel, is_mine: bool) -> Tuple[List, int]:
     """
     page_num을 통해서 board 데이터를 가져오는 service
     """
+    if is_mine == "True":
+        paginated_board_data = (
+            BoardModel.objects.select_related("author")
+            .prefetch_related("boardlike_set")
+            .prefetch_related("boardcomment_set__author")
+            .filter(author=author)
+            .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        )
+    else:
+        paginated_board_data = (
+            BoardModel.objects.select_related("author")
+            .prefetch_related("boardlike_set")
+            .prefetch_related("boardcomment_set__author")
+            .all()
+            .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        )
 
-    paginated_board_data = (
-        BoardModel.objects.select_related("author")
-        .prefetch_related("boardlike_set")
-        .prefetch_related("boardcomment_set__author")
-        .all()
-        .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
-    )
     paginated_boards = BoardSerializer(paginated_board_data, many=True, context={"author": author}).data
     total_count = BoardModel.objects.count()
     return paginated_boards, total_count
@@ -138,3 +147,20 @@ def get_user_profile_data(author: UserModel):
     유저프로필의 데이터를 가져오는 service
     """
     return UserProfileSerializer(author.userprofile).data
+
+
+def get_paginated_my_board_data(page_num: int, author: UserModel) -> Tuple[List, int]:
+    """
+    page_num을 통해서 나의 board 데이터를 가져오는 service
+    """
+
+    paginated_board_data = (
+        BoardModel.objects.select_related("author")
+        .prefetch_related("boardlike_set")
+        .prefetch_related("boardcomment_set__author")
+        .filter(author=author)
+        .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+    )
+    paginated_boards = BoardSerializer(paginated_board_data, many=True, context={"author": author}).data
+    total_count = BoardModel.objects.count()
+    return paginated_boards, total_count

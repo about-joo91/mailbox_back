@@ -8,10 +8,8 @@ def get_letter_data_by_user(query: Q, letter_num: int) -> dict[str, str]:
     if LetterModel.objects.filter(query).exists():
         letter_model_by_user = LetterSerializer(
             LetterModel.objects.select_related("letter_author__userprofile")
-            .select_related("letter_author__monglegrade")
             .select_related("letter_author__monglegrade__mongle_level")
             .select_related("worryboard__author__userprofile")
-            .select_related("worryboard__author__monglegrade")
             .select_related("worryboard__author__monglegrade__mongle_level")
             .select_related("worryboard__category")
             .select_related("letterreview")

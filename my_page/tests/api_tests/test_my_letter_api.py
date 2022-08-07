@@ -20,7 +20,7 @@ class TestMyLetter(APITestCase):
 
         letter_author = UserModel.objects.create(username="letter_author", nickname="letter_author")
         UserProfileModel.objects.create(user=letter_author)
-        mongle_level = MongleLevelModel.objects.create()
+        mongle_level = MongleLevelModel.objects.create(id=1)
         MongleGradeModel.objects.create(user=letter_author, mongle_level=mongle_level)
 
         worry_author = UserModel.objects.create(username="worry_author", nickname="worry_author")
@@ -185,7 +185,7 @@ class TestMyReceivedLetterView(APITestCase):
 
         letter_author = UserModel.objects.create(username="letter_author", nickname="letter_author")
         UserProfileModel.objects.create(user=letter_author)
-        mongle_level = MongleLevelModel.objects.create()
+        mongle_level = MongleLevelModel.objects.create(id=1)
         MongleGradeModel.objects.create(user=letter_author, mongle_level=mongle_level)
 
         worry_author = UserModel.objects.create(username="worry_author", nickname="worry_author")
@@ -301,7 +301,7 @@ class TestMyNotReadLetterView(APITestCase):
 
         letter_author = UserModel.objects.create(username="letter_author", nickname="letter_author")
         UserProfileModel.objects.create(user=letter_author)
-        mongle_level = MongleLevelModel.objects.create()
+        mongle_level = MongleLevelModel.objects.create(id=1)
         MongleGradeModel.objects.create(user=letter_author, mongle_level=mongle_level)
 
         worry_author = UserModel.objects.create(username="worry_author", nickname="worry_author")

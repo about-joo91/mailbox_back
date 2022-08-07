@@ -7,6 +7,7 @@ from board.models import Board as BoardModel
 from board.models import BoardComment as BoardCommentModel
 from board.models import BoardLike as BoardLikeModel
 from board.serializers import BoardCommentSerializer, BoardSerializer, UserProfileSerializer
+from my_page.services.letter_review_service import update_mongle_grade
 from user.models import User as UserModel
 
 
@@ -44,6 +45,8 @@ def create_board_data(board_data: Dict[str, str], author: UserModel) -> None:
     """
     create_board_serializer = BoardSerializer(data=board_data)
     create_board_serializer.is_valid(raise_exception=True)
+
+    update_mongle_grade(user=author, grade=1, rate_type="board")
     create_board_serializer.save(author=author)
 
 

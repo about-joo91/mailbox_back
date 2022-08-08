@@ -9,18 +9,22 @@ from worry_board.serializers import DetailRequestMessageSerializer, RequestMessa
 
 def get_paginated_request_message_data(page_num: int, case: str, author: UserModel) -> Tuple[List, int]:
     """
-    request_data를 가져오는 service
+    request_message_data를 가져오는 service
     """
     if case == "sended":
         paginated_request_message = (
             RequestMessageModel.objects.select_related("worry_board__category")
+            .prefetch_related("detailworrymessage_set__author")
             .filter(author=author)
             .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
         )
     elif case == "received":
-        paginated_request_message = RequestMessageModel.objects.filter(worry_board__author=author).order_by(
-            "-create_date"
-        )[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        paginated_request_message = (
+            RequestMessageModel.objects.select_related("worry_board__category")
+            .prefetch_related("detailworrymessage_set__author")
+            .filter(worry_board__author=author)
+            .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        )
     paginated_request_messages = RequestMessageSerializer(
         paginated_request_message, many=True, context={"author": author}
     ).data

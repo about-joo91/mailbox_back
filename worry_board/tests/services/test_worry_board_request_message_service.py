@@ -46,7 +46,7 @@ class TestWorryBoardRequestMessageService(TestCase):
         worry_board = WorryBoardModel.objects.get(content="test_worry_board")
         case = "sended"
         RequestMessageModel.objects.create(author=user, worry_board=worry_board)
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(3):
             paginated_request_message, total_count = get_paginated_request_message_data(page_num, case, user)
 
         self.assertEqual(1, total_count)

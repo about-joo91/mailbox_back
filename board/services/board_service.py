@@ -29,22 +29,23 @@ def get_paginated_board_data(page_num: int, author: UserModel, is_mine: str) -> 
     if is_mine == "True":
         paginated_board_data = (
             BoardModel.objects.select_related("author")
-            .prefetch_related("boardlike_set")
             .prefetch_related("boardcomment_set__author")
+            .prefetch_related("boardlike_set")
             .filter(author=author)
             .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
         )
+        total_count = BoardModel.objects.filter(author=author).count()
     else:
         paginated_board_data = (
             BoardModel.objects.select_related("author")
-            .prefetch_related("boardlike_set")
             .prefetch_related("boardcomment_set__author")
+            .prefetch_related("boardlike_set")
             .all()
             .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
         )
 
+        total_count = BoardModel.objects.count()
     paginated_boards = BoardSerializer(paginated_board_data, many=True, context={"author": author}).data
-    total_count = BoardModel.objects.count()
     return paginated_boards, total_count
 
 

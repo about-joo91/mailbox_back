@@ -5,7 +5,7 @@ from rest_framework.test import APIClient, APITestCase
 from board.models import Board as BoardModel
 from board.models import BoardComment as BoardCommentModel
 from board.services.board_service import get_paginated_board_data
-from user.models import MongleGrade
+from user.models import MongleGrade, MongleLevel
 from user.models import User as UserModel
 from user.models import UserProfile
 
@@ -21,7 +21,8 @@ class TestBoardAPI(APITestCase):
         not_cur_user = UserModel.objects.create(username="not_cur_user", nickname="not_cur_user")
 
         UserProfile.objects.create(user=cur_user)
-        MongleGrade.objects.create(user=cur_user)
+        mongle_level = MongleLevel.objects.create(id=1)
+        MongleGrade.objects.create(user=cur_user, mongle_level=mongle_level)
 
         cur_user_board = BoardModel.objects.create(author=cur_user, title="title", content="content")
         not_cur_user_board = BoardModel.objects.create(author=not_cur_user, title="title2", content="content2")
@@ -52,7 +53,9 @@ class TestBoardAPI(APITestCase):
         client = APIClient()
 
         url = "/board/?page_num=1"
+
         response = client.get(url)
+
         result = response.json()
 
         self.assertEqual(401, response.status_code)

@@ -127,12 +127,13 @@ class MainPageView(APIView):
 
         grade_order_best_reviews = best_review_list_service()
         create_order_live_reviews = live_review_list_service()
+
         return Response(
             {
                 "letter_count": not_read_my_letter_count,
                 "main_page_data_and_user_profile": main_page_data_and_user_profile,
                 "order_by_cate_worry_list": WorryBoardSerializer(
-                    order_by_cate_worry_list, context={"request": request}, many=True
+                    order_by_cate_worry_list, context={"author": cur_user}, many=True
                 ).data,
                 "best_review": BestReviewSerializer(
                     grade_order_best_reviews, context={"request": request}, many=True

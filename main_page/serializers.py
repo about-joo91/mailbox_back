@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from user.models import User as UserModel
+from user.serializers import MongleGradeSerializer
 
 from .models import Letter as LetterModel
 from .models import LetterReview as LetterReviewModel
@@ -29,7 +30,9 @@ class MainPageDataSerializer(serializers.ModelSerializer):
     user_profile_data = serializers.SerializerMethodField()
 
     def get_rank_list(self, obj):
-        grade_in_order_user_list = UserModel.objects.select_related("userprofile").all().order_by("-monglegrade")[:10]
+        grade_in_order_user_list = (
+            UserModel.objects.select_related("monglegrade").all().order_by("-monglegrade__grade")[:10]
+        )
         rank_list = [
             {
                 "username": rank_list.username,
@@ -41,9 +44,8 @@ class MainPageDataSerializer(serializers.ModelSerializer):
 
     def get_user_profile_data(self, obj):
         return {
-            "grade": obj.monglegrade.grade,
             "profile_img": obj.userprofile.profile_img,
-            "mongle_img": obj.monglegrade.mongle,
+            "mongle_grade": MongleGradeSerializer(obj.monglegrade).data,
         }
 
     class Meta:
@@ -54,7 +56,6 @@ class MainPageDataSerializer(serializers.ModelSerializer):
 class BestReviewSerializer(serializers.ModelSerializer):
     letter_review_like_id = serializers.SerializerMethodField()
     review_id = serializers.SerializerMethodField()
-    like_count = serializers.SerializerMethodField()
 
     def get_letter_review_like_id(self, obj):
         cur_user = self.context["request"].user
@@ -65,9 +66,6 @@ class BestReviewSerializer(serializers.ModelSerializer):
 
     def get_review_id(self, obj):
         return obj.id
-
-    def get_like_count(self, obj):
-        return obj.letterreviewlike_set.filter(letter_review=obj).count()
 
     class Meta:
         model = LetterReviewModel
@@ -85,7 +83,6 @@ class BestReviewSerializer(serializers.ModelSerializer):
 class LiveReviewSerializer(serializers.ModelSerializer):
     letter_review_like_id = serializers.SerializerMethodField()
     review_id = serializers.SerializerMethodField()
-    like_count = serializers.SerializerMethodField()
 
     def get_letter_review_like_id(self, obj):
         cur_user = self.context["request"].user
@@ -96,9 +93,6 @@ class LiveReviewSerializer(serializers.ModelSerializer):
 
     def get_review_id(self, obj):
         return obj.id
-
-    def get_like_count(self, obj):
-        return obj.letterreviewlike_set.filter(letter_review=obj).count()
 
     class Meta:
         model = LetterReviewModel

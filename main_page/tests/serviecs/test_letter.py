@@ -1,26 +1,45 @@
 from django.db import IntegrityError
 from django.test import TestCase
+from rest_framework import exceptions
 
 from main_page.models import Letter as LetterModel
-from main_page.models import LetterReview as letterReviewModel
-from main_page.models import LetterReviewLike as letterReivewLikeModel
+from main_page.models import LetterReview as LetterReviewModel
+from main_page.models import LetterReviewLike as LetterReivewLikeModel
 from main_page.models import WorryCategory as WorryCategoryModel
-from main_page.services.letter_service import letter_is_read_service, letter_post_service, letter_review_like_service
+from main_page.services.letter_service import (
+    letter_is_read_service,
+    letter_post_service,
+    letter_review_like_delete_service,
+    letter_review_like_service,
+)
 from main_page.services.main_gage_service import my_letter_count
+from user.models import MongleLevel
 from user.models import User as UserModel
+from user.services.user_signup_login_service import post_user_signup_data
 from worry_board.models import WorryBoard as WorryBoardModel
 
 
 class TestLoginUser(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        user_data = {"username": "hajin_test", "password": "p@ssword", "nickname": "hajin"}
+        user_data_author = {"username": "test_user", "password": "p@ssword", "nickname": "author"}
+        MongleLevel.objects.create(id=1)
+        post_user_signup_data(user_data)
+        post_user_signup_data(user_data_author)
+        user = UserModel.objects.get(username="hajin_test")
+
+        worry_cate_obj = WorryCategoryModel.objects.create(cate_name="일상")
+        WorryBoardModel.objects.create(author_id=user.id, content="ttttt", category_id=worry_cate_obj.id)
+
     def test_letter_post_service(self) -> None:
         """
         편지 보내는 함수 검증
         """
-        user = UserModel.objects.create(username="hajin", nickname="hajin")
-        author = UserModel.objects.create(username="author", nickname="author")
+        user = UserModel.objects.get(username="hajin_test")
+        author = UserModel.objects.get(username="test_user")
 
-        worry_cate_obj = WorryCategoryModel.objects.create(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="ttttt", category_id=worry_cate_obj.id)
+        worry_obj = WorryBoardModel.objects.get(author_id=user.id)
 
         request_data = {
             "title": "제목입니다",
@@ -49,9 +68,7 @@ class TestLoginUser(TestCase):
         case: 없는 worryborad 에 편지를 보낼경우
         """
         UserModel.objects.create(username="hajin", nickname="hajin")
-        author = UserModel.objects.create(username="author", nickname="author")
-
-        WorryCategoryModel.objects.create(cate_name="일상")
+        author = UserModel.objects.get(username="test_user")
 
         request_data = {
             "title": "제목입니다",
@@ -68,11 +85,10 @@ class TestLoginUser(TestCase):
         편지 보내는 함수 검증
         case: 같은 worryborad로 편지를 보낼 때
         """
-        user = UserModel.objects.create(username="hajin", nickname="hajin")
-        author = UserModel.objects.create(username="author", nickname="author")
+        user = UserModel.objects.get(username="hajin_test")
+        author = UserModel.objects.get(username="test_user")
 
-        worry_cate_obj = WorryCategoryModel.objects.create(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="ttttt", category_id=worry_cate_obj.id)
+        worry_obj = WorryBoardModel.objects.get(author_id=user.id)
 
         request_data = {
             "title": "제목입니다",
@@ -93,12 +109,10 @@ class TestLoginUser(TestCase):
         내가 받은 편지 읽음 여부를 확인하는 함수 검증
         case : is_read 를 통해 letter_count 가 제대로 나오는지.
         """
-        user = UserModel.objects.create(username="hajin", nickname="hajin")
-        author = UserModel.objects.create(username="author", nickname="author")
-        worry_cate_obj = WorryCategoryModel.objects.create(cate_name="일상")
+        user = UserModel.objects.get(username="hajin_test")
+        author = UserModel.objects.get(username="test_user")
 
-        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="ttttt", category_id=worry_cate_obj.id)
-        WorryBoardModel.objects.create(author_id=user.id, content="ttttt", category_id=worry_cate_obj.id)
+        worry_obj = WorryBoardModel.objects.get(author_id=user.id)
 
         letter_obj = LetterModel.objects.create(
             letter_author_id=author.id,
@@ -116,11 +130,10 @@ class TestLoginUser(TestCase):
         내가 받은 편지 읽음 여부를 확인하는 함수 검증
         case: 자신이 받은 편지가 아닐 경우
         """
-        user = UserModel.objects.create(username="hajin", nickname="hajin")
-        author = UserModel.objects.create(username="author", nickname="author")
-        worry_cate_obj = WorryCategoryModel.objects.create(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="ttttt", category_id=worry_cate_obj.id)
-        WorryBoardModel.objects.create(author_id=user.id, content="ttttt", category_id=worry_cate_obj.id)
+        user = UserModel.objects.get(username="hajin_test")
+        author = UserModel.objects.get(username="test_user")
+        worry_obj = WorryBoardModel.objects.get(author_id=user.id)
+
         letter_obj = LetterModel.objects.create(
             letter_author_id=author.id,
             worryboard_id=worry_obj.id,
@@ -135,17 +148,17 @@ class TestLoginUser(TestCase):
         """
         편지 리뷰 좋아요 함수 검증
         """
-        user = UserModel.objects.create(username="hajin", nickname="hajin")
-        author = UserModel.objects.create(username="author", nickname="author")
-        worry_cate_obj = WorryCategoryModel.objects.create(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="ttttt", category_id=worry_cate_obj.id)
+        user = UserModel.objects.get(username="hajin_test")
+        author = UserModel.objects.get(username="test_user")
+
+        worry_obj = WorryBoardModel.objects.get(author_id=user.id)
         letter_obj = LetterModel.objects.create(
             letter_author_id=author.id,
             worryboard_id=worry_obj.id,
             title="test",
             content="tist",
         )
-        letter_review_obj = letterReviewModel.objects.create(
+        letter_review_obj = LetterReviewModel.objects.create(
             review_author_id=user.id, letter_id=letter_obj.id, grade=100, content="test"
         )
 
@@ -153,19 +166,21 @@ class TestLoginUser(TestCase):
 
         self.assertEqual(
             letter_review_obj.id,
-            letterReivewLikeModel.objects.get(letter_review_id=letter_review_obj.id).letter_review.id,
+            LetterReivewLikeModel.objects.get(letter_review_id=letter_review_obj.id).letter_review.id,
         )
-        self.assertEqual(user.id, letterReivewLikeModel.objects.get(user_id=user.id).user.id)
+        self.assertEqual(user.id, LetterReivewLikeModel.objects.get(user_id=user.id).user.id)
+        self.assertEqual(1, LetterReviewModel.objects.get(id=letter_review_obj.id).like_count)
 
     def test_then_not_valid_letter_review_like_service(self) -> None:
         """
         편지 리뷰 좋아요 함수 검증
         case : 편지 리뷰가  유효하지 않을 경우
         """
-        user = UserModel.objects.create(username="hajin", nickname="hajin")
-        author = UserModel.objects.create(username="author", nickname="author")
-        worry_cate_obj = WorryCategoryModel.objects.create(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="ttttt", category_id=worry_cate_obj.id)
+        user = UserModel.objects.get(username="hajin_test")
+        author = UserModel.objects.get(username="test_user")
+
+        worry_obj = WorryBoardModel.objects.get(author_id=user.id)
+
         LetterModel.objects.create(
             letter_author_id=author.id,
             worryboard_id=worry_obj.id,
@@ -173,7 +188,7 @@ class TestLoginUser(TestCase):
             content="tist",
         )
 
-        with self.assertRaises(letterReviewModel.DoesNotExist):
+        with self.assertRaises(LetterReviewModel.DoesNotExist):
             letter_review_like_service(letter_review_id=9999, user_id=user.id)
 
     def test_thne_like_user_not_valid_letter_review_like_service(self) -> None:
@@ -181,19 +196,103 @@ class TestLoginUser(TestCase):
         편지 리뷰 좋아요 함수 검증
         case : 좋아요를 누른 유저가 유효하지 않을 경우
         """
-        user = UserModel.objects.create(username="hajin", nickname="hajin")
-        author = UserModel.objects.create(username="author", nickname="author")
-        worry_cate_obj = WorryCategoryModel.objects.create(cate_name="일상")
-        worry_obj = WorryBoardModel.objects.create(author_id=user.id, content="ttttt", category_id=worry_cate_obj.id)
+        user = UserModel.objects.get(username="hajin_test")
+        author = UserModel.objects.get(username="test_user")
+
+        worry_obj = WorryBoardModel.objects.get(author_id=user.id)
+
         letter_obj = LetterModel.objects.create(
             letter_author_id=author.id,
             worryboard_id=worry_obj.id,
             title="test",
             content="tist",
         )
-        letter_review_obj = letterReviewModel.objects.create(
+        letter_review_obj = LetterReviewModel.objects.create(
             review_author_id=user.id, letter_id=letter_obj.id, grade=100, content="test"
         )
 
         with self.assertRaises(IntegrityError):
             letter_review_like_service(letter_review_id=letter_review_obj.id, user_id=9999)
+
+    def test_letter_review_like_delete_service(self) -> None:
+        """
+        편지 리뷰 좋아요 삭제 함수 검증
+        """
+        user = UserModel.objects.get(username="hajin_test")
+        author = UserModel.objects.get(username="test_user")
+
+        worry_obj = WorryBoardModel.objects.get(author_id=user.id)
+
+        letter_obj = LetterModel.objects.create(
+            letter_author_id=author.id,
+            worryboard_id=worry_obj.id,
+            title="test",
+            content="tist",
+        )
+        letter_review_obj = LetterReviewModel.objects.create(
+            review_author_id=user.id, letter_id=letter_obj.id, grade=100, content="test"
+        )
+
+        letter_review_like_service(letter_review_id=letter_review_obj.id, user_id=user.id)
+        letter_review_like_service(letter_review_id=letter_review_obj.id, user_id=author.id)
+
+        target = LetterReivewLikeModel.objects.get(user_id=user.id)
+
+        letter_review_like_delete_service(letter_review_like_id=target.id, user_id=user.id)
+
+        self.assertEqual(
+            letter_review_obj.id,
+            LetterReivewLikeModel.objects.get(letter_review_id=letter_review_obj.id).letter_review.id,
+        )
+        self.assertEqual(author.id, LetterReivewLikeModel.objects.get(user_id=author.id).user.id)
+        self.assertEqual(1, LetterReviewModel.objects.get(id=letter_review_obj.id).like_count)
+
+    def test_when_none_review_letter_review_like_delete_service(self) -> None:
+        """
+        편지 리뷰 좋아요 삭제 함수 검증
+        case: 없는 리뷰에 삭제를 요청 할 경우
+        """
+        user = UserModel.objects.get(username="hajin_test")
+        author = UserModel.objects.get(username="test_user")
+
+        worry_obj = WorryBoardModel.objects.get(author_id=user.id)
+        letter_obj = LetterModel.objects.create(
+            letter_author_id=author.id,
+            worryboard_id=worry_obj.id,
+            title="test",
+            content="tist",
+        )
+        letter_review_obj = LetterReviewModel.objects.create(
+            review_author_id=user.id, letter_id=letter_obj.id, grade=100, content="test"
+        )
+
+        letter_review_like_service(letter_review_id=letter_review_obj.id, user_id=user.id)
+
+        with self.assertRaises(LetterReivewLikeModel.DoesNotExist):
+            letter_review_like_delete_service(letter_review_like_id=9999, user_id=user.id)
+
+    def test_when_different_user_review_like_delete_service(self) -> None:
+        """
+        편지 리뷰 좋아요 삭제 함수 검증
+        case: 다른 유저가 삭제를 요청 할 경우
+        """
+        user = UserModel.objects.get(username="hajin_test")
+        author = UserModel.objects.get(username="test_user")
+
+        worry_obj = WorryBoardModel.objects.get(author_id=user.id)
+        letter_obj = LetterModel.objects.create(
+            letter_author_id=author.id,
+            worryboard_id=worry_obj.id,
+            title="test",
+            content="tist",
+        )
+        letter_review_obj = LetterReviewModel.objects.create(
+            review_author_id=user.id, letter_id=letter_obj.id, grade=100, content="test"
+        )
+
+        letter_review_like_service(letter_review_id=letter_review_obj.id, user_id=user.id)
+
+        target = LetterReivewLikeModel.objects.get(user_id=user.id)
+
+        with self.assertRaises(exceptions.PermissionDenied):
+            letter_review_like_delete_service(letter_review_like_id=target.id, user_id=9999)

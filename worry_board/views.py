@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from board.services.board_service import get_user_profile_data
 from recommendation.services.recomendation_service import recommend_worryboard_list
 from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import WorryBoard as WorryBoardModel
-from worry_board.serializers import RequestMessageSerializer, WorryBoardSerializer
 from worry_board.services.worry_board_request_message_service import (
     accept_request_message_data,
     create_request_message_data,
@@ -31,26 +31,28 @@ class WorryBoardView(APIView):
 
     def get(self, request):
         try:
+            author = request.user
             category = int(self.request.query_params.get("category"))
             page_num = int(self.request.query_params.get("page_num"))
+            user_profile_data = get_user_profile_data(request.user)
             if page_num == 0:
                 page_num = 1
-
+            paginated_worry_boards = []
+            total_count = 0
             try:
                 recommended_worryboard = recommend_worryboard_list(request.user)
             except KeyError:
                 recommended_worryboard = []
             except AttributeError:
                 recommended_worryboard = []
-
-            paginated_worry_board, total_count = get_paginated_worry_board_data(
-                page_num, category, recommended_worryboard
+            paginated_worry_boards, total_count = get_paginated_worry_board_data(
+                page_num, category, author, recommended_worryboard
             )
-
             return Response(
                 {
-                    "boards": WorryBoardSerializer(paginated_worry_board, many=True, context={"request": request}).data,
+                    "boards": paginated_worry_boards,
                     "total_count": total_count,
+                    "user_profile_data": user_profile_data,
                     "recommended_cnt": len(recommended_worryboard),
                 },
                 status=status.HTTP_200_OK,
@@ -146,18 +148,18 @@ class RequestMessageView(APIView):
             page_num = int(self.request.query_params.get("page_num"))
         except TypeError:
             page_num = 1
-            author = request.user
-            paginated_request_message, total_count = get_paginated_request_message_data(page_num, case, author)
+        author = request.user
 
-            return Response(
-                {
-                    "request_message": RequestMessageSerializer(
-                        paginated_request_message, many=True, context={"request": request}
-                    ).data,
-                    "total_count": total_count,
-                },
-                status=status.HTTP_200_OK,
-            )
+        paginated_request_messages, total_count = get_paginated_request_message_data(page_num, case, author)
+        user_profile_data = get_user_profile_data(author)
+        return Response(
+            {
+                "request_message": paginated_request_messages,
+                "total_count": total_count,
+                "user_profile_data": user_profile_data,
+            },
+            status=status.HTTP_200_OK,
+        )
 
     def post(self, request, worry_board_id=0):
         """
@@ -231,6 +233,8 @@ class AcceptRequestMessageView(APIView):
                     return Response({"detail": "수락 권한이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
                 if request_message.request_status.status == "반려됨":
                     return Response({"detail": "이미 거절한 요청은 수락할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+                if request_message.request_status.status == "수락됨":
+                    return Response({"detail": "이미 수락한 요청은 수락할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
                 accept_request_message_data(request_message_id)
                 return Response({"detail": "요청 메세지를 수락하였습니다."}, status=status.HTTP_200_OK)
             except RequestMessageModel.DoesNotExist:
@@ -243,6 +247,8 @@ class AcceptRequestMessageView(APIView):
                     return Response({"detail": "거절 권한이 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
                 if request_message.request_status.status == "수락됨":
                     return Response({"detail": "이미 수락한 요청은 거절할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+                if request_message.request_status.status == "반려됨":
+                    return Response({"detail": "이미 거절한 요청은 거절할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
                 disaccept_request_message_data(request_message_id)
                 return Response({"detail": "요청 메세지를 거절하였습니다."}, status=status.HTTP_200_OK)

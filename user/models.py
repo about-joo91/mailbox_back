@@ -55,13 +55,17 @@ class User(AbstractBaseUser):
         return self.is_admin
 
 
+class MongleLevel(models.Model):
+    level = models.IntegerField(default=1)
+    mongle_image = models.URLField(
+        default="https://user-images.githubusercontent.com/55477835/183033723-5d7dc862-add3-4fc2-80e6-7cd5b90fce54.png"
+    )
+
+
 class MongleGrade(models.Model):
     user = models.OneToOneField("User", on_delete=models.CASCADE)
     grade = models.IntegerField(default=0)
-    level = models.IntegerField(default=0)
-    mongle = models.URLField(
-        default="https://user-images.githubusercontent.com/55477835/181283419-20705c71-a20a-46ab-a30e-bb4edece1670.png"
-    )
+    mongle_level = models.ForeignKey("MongleLevel", on_delete=models.SET_NULL, null=True)
 
 
 class UserProfile(models.Model):
@@ -70,7 +74,7 @@ class UserProfile(models.Model):
     fullname = models.TextField(default="")
     categories = models.ManyToManyField("main_page.WorryCategory", through="UserProfileCategory")
     profile_img = models.URLField(
-        default="https://user-images.githubusercontent.com/55477835/181283419-20705c71-a20a-46ab-a30e-bb4edece1670.png"
+        default="https://user-images.githubusercontent.com/55477835/183034958-de0d010a-a105-459b-9d7b-915c04a882c7.png"
     )
 
 

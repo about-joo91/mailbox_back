@@ -1,22 +1,13 @@
 version: '3.9'
 services:
-  nginx:
-    image: nginx
-    volumes:
-      - static_volume:/app/static
-    ports:
-      - 80:80
-    depends_on:
-      - mail_box
   mail_box:
     build: .
-    command: gunicorn --bind 0.0.0.0:8000 --workers=5 mail_box.wsgi:application  &
+    command: python manage.py migrate && python manage.py runserver
     ports:
       - 8000:8000
     working_dir: /app/
     volumes:
       - ./:/app/
-      - static_volume:/app/static
     env_file:
       - ./.env.dev
     expose:
@@ -37,5 +28,4 @@ services:
     ports:
       - 3306:3306
 volumes:
-  static_volume:
   mysql_db:

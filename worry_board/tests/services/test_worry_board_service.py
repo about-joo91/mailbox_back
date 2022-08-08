@@ -32,14 +32,14 @@ class TestWorryBoardService(TestCase):
         category = WorryCategory.objects.create(cate_name="일상")
         page_num = 1
         WorryBoardModel.objects.create(author=user, category=category, content="get테스트")
-        paginated_worry_board, total_count = get_paginated_worry_board_data(page_num, category.id)
+        paginated_worry_board, total_count = get_paginated_worry_board_data(page_num, category.id, user)
 
         self.assertEqual(1, total_count)
         self.assertEqual(
             WorryBoardModel.objects.all()[0].id,
             WorryBoardModel.objects.get(author=user).id,
         )
-        self.assertEqual(paginated_worry_board[0], WorryBoardModel.objects.get(author=user))
+        self.assertEqual(paginated_worry_board[0]["id"], WorryBoardModel.objects.get(author=user).id)
 
     def test_when_success_create_worry_board_data(self) -> None:
         """

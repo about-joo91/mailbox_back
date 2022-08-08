@@ -4,7 +4,7 @@ from user.models import User as UserModel
 from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import RequestStatus as RequestStatusModel
 from worry_board.models import WorryBoard as WorryBoardModel
-from worry_board.serializers import RequestMessageSerializer
+from worry_board.serializers import DetailRequestMessageSerializer, RequestMessageSerializer
 
 
 def get_paginated_request_message_data(page_num: int, case: str, author: UserModel) -> Tuple[List, int]:
@@ -102,3 +102,12 @@ def update_request_status(author: UserModel, worry_board_id):
     worry_board = WorryBoardModel.objects.get(id=worry_board_id)
     request_message = worry_board.requestmessage_set.filter(author=author)
     request_message.update(request_status=5)
+
+
+def post_detail_message(author: UserModel, request_message_id: int, request_data: Dict[str, str]):
+    """
+    요청 수락 시 detail_message를 작성하는 service
+    """
+    detail_request_message_serializer = DetailRequestMessageSerializer(data=request_data)
+    detail_request_message_serializer.is_valid(raise_exception=True)
+    detail_request_message_serializer.save(author_id=author.id, request_message_id=request_message_id)

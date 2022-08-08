@@ -23,6 +23,7 @@ class RequestStatus(models.Model):
     status = models.CharField(max_length=20, unique=True)
 
 
-# class DetailWorryMessage(models.Model):
-#     content = models.TextField("상세내용", max_length=500)
-#     request_message = models.ForeignKey("RequestMessage", on_delete=CASCADE)
+class DetailWorryMessage(models.Model):
+    author = models.ForeignKey("user.User", on_delete=models.CASCADE)
+    content = models.TextField("상세내용", max_length=500)
+    request_message = models.ForeignKey("RequestMessage", on_delete=models.CASCADE)

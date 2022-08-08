@@ -1,6 +1,7 @@
 DOESNOTEXIXT = -1
 from rest_framework import serializers
 
+from worry_board.models import DetailWorryMessage
 from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import WorryBoard as WorryBoardModel
 
@@ -90,4 +91,19 @@ class RequestMessageSerializer(serializers.ModelSerializer):
             "author": {"read_only": True},
             "worry_board": {"read_only": True},
             "request_status": {"read_only": True},
+        }
+
+
+class DetailRequestMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DetailWorryMessage
+        fields = [
+            "id",
+            "author",
+            "request_message",
+            "content",
+        ]
+        extra_kwargs = {
+            "author": {"read_only": True},
+            "request_message": {"read_only": True},
         }

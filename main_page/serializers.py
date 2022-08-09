@@ -35,7 +35,7 @@ class MainPageDataSerializer(serializers.ModelSerializer):
         )
         rank_list = [
             {
-                "username": rank_list.username,
+                "nickname": rank_list.nickname,
                 "profile_img": rank_list.userprofile.profile_img,
             }
             for rank_list in grade_in_order_user_list

@@ -66,7 +66,7 @@ class TestMaingPageAPI(APITestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(result["letter_count"], 30)
         self.assertEqual(
-            result["main_page_data_and_user_profile"]["rank_list"][0]["username"],
+            result["main_page_data_and_user_profile"]["rank_list"][0]["nickname"],
             "hajin",
         )
         self.assertEqual(len(result["order_by_cate_worry_list"]), 18)

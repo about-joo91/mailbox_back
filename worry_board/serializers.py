@@ -1,6 +1,7 @@
 DOESNOTEXIXT = -1
 from rest_framework import serializers
 
+from worry_board.models import DetailWorryMessage
 from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import WorryBoard as WorryBoardModel
 
@@ -58,6 +59,7 @@ class RequestMessageSerializer(serializers.ModelSerializer):
     create_date = serializers.SerializerMethodField()
     worry_board_category = serializers.SerializerMethodField()
     worry_board_content = serializers.SerializerMethodField()
+    detail_worry_message = serializers.SerializerMethodField()
 
     def get_create_date(self, obj):
         format_data = "%m-%d %H:%M"
@@ -73,6 +75,12 @@ class RequestMessageSerializer(serializers.ModelSerializer):
     def get_worry_board_content(self, obj):
         return obj.worry_board.content
 
+    def get_detail_worry_message(self, obj):
+        try:
+            return obj.detailworrymessage_set.get(request_message_id=obj.id).content
+        except DetailWorryMessage.DoesNotExist:
+            return DOESNOTEXIXT
+
     class Meta:
         model = RequestMessageModel
         fields = [
@@ -85,9 +93,25 @@ class RequestMessageSerializer(serializers.ModelSerializer):
             "worry_board_content",
             "request_status",
             "can_write_letter",
+            "detail_worry_message",
         ]
         extra_kwargs = {
             "author": {"read_only": True},
             "worry_board": {"read_only": True},
             "request_status": {"read_only": True},
+        }
+
+
+class DetailRequestMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DetailWorryMessage
+        fields = [
+            "id",
+            "author",
+            "request_message",
+            "content",
+        ]
+        extra_kwargs = {
+            "author": {"read_only": True},
+            "request_message": {"read_only": True},
         }

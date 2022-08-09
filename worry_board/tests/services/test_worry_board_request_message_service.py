@@ -46,7 +46,7 @@ class TestWorryBoardRequestMessageService(TestCase):
         worry_board = WorryBoardModel.objects.get(content="test_worry_board")
         case = "sended"
         RequestMessageModel.objects.create(author=user, worry_board=worry_board)
-        with self.assertNumQueries(1):
+        with self.assertNumQueries(3):
             paginated_request_message, total_count = get_paginated_request_message_data(page_num, case, user)
 
         self.assertEqual(1, total_count)
@@ -115,18 +115,16 @@ class TestWorryBoardRequestMessageService(TestCase):
         with self.assertRaises(RequestMessageModel.DoesNotExist):
             RequestMessageModel.objects.get(author=user).id
 
-    def test_when_over_request_message_lengths_120_in_create_request_message_data(
+    def test_when_over_request_message_lengths_180_in_create_request_message_data(
         self,
     ) -> None:
         """
         request_message_data를 생성하는 함수에 대한 검증
-        case : request_message의 제한수인 120을 넘겼을 경우
+        case : request_message의 제한수인 180을 넘겼을 경우
         """
         user = UserModel.objects.get(username="ko")
         worry_board = WorryBoardModel.objects.get(content="test_worry_board")
-        create_data = {
-            "request_message": "120자를 넘기는지에 대한 검증입니다. 조금 길더라도 양해 바랍니다. 120자를 넘기는지에 대한 검증입니다. 조금 길더라도 양해 바랍니다.  120자를 넘기는지에 대한 검증입니다. 조금 길더라도 양해 바랍니다. 120자를 넘기는지에 대한 검증입니다. 조금 길더라도 양해 바랍니다. 120자를 넘기는지에 대한 검증입니다. 조금 길더라도 양해 바랍니다."
-        }
+        create_data = {"request_message": str("A" * 190)}
 
         with self.assertRaises(ValidationError):
             if check_is_it_clean_text(create_data["request_message"]):
@@ -200,10 +198,10 @@ class TestWorryBoardRequestMessageService(TestCase):
                     request_message_id=9999,
                 )
 
-    def test_when_over_request_message_lengths_120_in_update_request_message_data(self) -> None:
+    def test_when_over_request_message_lengths_180_in_update_request_message_data(self) -> None:
         """
         request_message_data를 수정하는 함수에 대한 검증
-        case : 글자 제한수 120을 넘었을 경우
+        case : 글자 제한수 180을 넘었을 경우
         """
 
         user = UserModel.objects.get(username="ko")
@@ -211,7 +209,7 @@ class TestWorryBoardRequestMessageService(TestCase):
         create_request_message = RequestMessageModel.objects.create(
             author=user, worry_board=worry_board, request_message="test"
         )
-        request_message_data = {"request_message": str("A" * 140)}
+        request_message_data = {"request_message": str("A" * 190)}
 
         with self.assertRaises(ValidationError):
             if check_is_it_clean_text(request_message_data["request_message"]):

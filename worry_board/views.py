@@ -13,6 +13,7 @@ from worry_board.services.worry_board_request_message_service import (
     delete_request_message_data,
     disaccept_request_message_data,
     get_paginated_request_message_data,
+    post_detail_message,
     update_request_message_data,
 )
 from worry_board.services.worry_board_service import (
@@ -255,3 +256,26 @@ class AcceptRequestMessageView(APIView):
 
             except RequestMessageModel.DoesNotExist:
                 return Response({"detail": "해당 요청은 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class DetailWorryMessageView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    """
+    요청을 수락하고 그에 대한 응답을 주는 View
+    """
+
+    def post(self, request, request_message_id):
+        author = request.user
+        if check_is_it_clean_text(request.data["content"]):
+            try:
+                post_detail_message(author, request_message_id, request.data)
+                return Response({"detail": "상세 메세지를 전달하였습니다."}, status=status.HTTP_200_OK)
+            except exceptions.ValidationError as e:
+                error_message = "".join([str(value) for values in e.detail.values() for value in values])
+                return Response({"detail": error_message}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(
+                {"detail": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

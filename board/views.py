@@ -33,8 +33,9 @@ class BoardView(APIView):
 
     def get(self, request):
         try:
+            is_mine = self.request.query_params.get("is_mine")
             page_num = int(self.request.query_params.get("page_num"))
-            paginated_boards, total_count = get_paginated_board_data(page_num, request.user)
+            paginated_boards, total_count = get_paginated_board_data(page_num, request.user, is_mine)
             user_profile_data = get_user_profile_data(request.user)
             return Response(
                 {

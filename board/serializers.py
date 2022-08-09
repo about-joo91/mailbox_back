@@ -64,6 +64,7 @@ class BoardSerializer(serializers.ModelSerializer):
 class BoardCommentSerializer(serializers.ModelSerializer):
     is_comment_writer = serializers.SerializerMethodField()
     is_detail_page_writer = serializers.SerializerMethodField()
+    create_date = serializers.SerializerMethodField()
 
     def get_is_comment_writer(self, obj):
         author = self.context["author"]
@@ -74,6 +75,14 @@ class BoardCommentSerializer(serializers.ModelSerializer):
         if is_detail:
             return 1
         return 0
+
+    def get_create_date(self, obj):
+        format_data = "%m-%d %H:%M"
+
+        time = obj.create_date
+        time_data = time.strftime(format_data)
+
+        return time_data
 
     class Meta:
         model = BoardCommentModel

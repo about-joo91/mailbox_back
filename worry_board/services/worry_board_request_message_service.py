@@ -4,23 +4,27 @@ from user.models import User as UserModel
 from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import RequestStatus as RequestStatusModel
 from worry_board.models import WorryBoard as WorryBoardModel
-from worry_board.serializers import RequestMessageSerializer
+from worry_board.serializers import DetailRequestMessageSerializer, RequestMessageSerializer
 
 
 def get_paginated_request_message_data(page_num: int, case: str, author: UserModel) -> Tuple[List, int]:
     """
-    request_data를 가져오는 service
+    request_message_data를 가져오는 service
     """
     if case == "sended":
         paginated_request_message = (
             RequestMessageModel.objects.select_related("worry_board__category")
+            .prefetch_related("detailworrymessage_set__author")
             .filter(author=author)
             .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
         )
     elif case == "received":
-        paginated_request_message = RequestMessageModel.objects.filter(worry_board__author=author).order_by(
-            "-create_date"
-        )[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        paginated_request_message = (
+            RequestMessageModel.objects.select_related("worry_board__category")
+            .prefetch_related("detailworrymessage_set__author")
+            .filter(worry_board__author=author)
+            .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        )
     paginated_request_messages = RequestMessageSerializer(
         paginated_request_message, many=True, context={"author": author}
     ).data
@@ -93,3 +97,21 @@ def disaccept_request_message_data(request_message_id: int) -> None:
     )
     update_request_message_serializer.is_valid(raise_exception=True)
     update_request_message_serializer.save(request_status_id=request_status.id)
+
+
+def update_request_status(author: UserModel, worry_board_id):
+    """
+    편지작성을 완료 후 reqeust_status를 작성 완료로 변경하는 service
+    """
+    worry_board = WorryBoardModel.objects.get(id=worry_board_id)
+    request_message = worry_board.requestmessage_set.filter(author=author)
+    request_message.update(request_status=5)
+
+
+def post_detail_message(author: UserModel, request_message_id: int, request_data: Dict[str, str]):
+    """
+    요청 수락 시 detail_message를 작성하는 service
+    """
+    detail_request_message_serializer = DetailRequestMessageSerializer(data=request_data)
+    detail_request_message_serializer.is_valid(raise_exception=True)
+    detail_request_message_serializer.save(author_id=author.id, request_message_id=request_message_id)

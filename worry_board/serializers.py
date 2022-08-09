@@ -76,9 +76,8 @@ class RequestMessageSerializer(serializers.ModelSerializer):
         return obj.worry_board.content
 
     def get_detail_worry_message(self, obj):
-        author = self.context["author"]
         try:
-            return obj.detailworrymessage_set.get(author=author).content
+            return obj.detailworrymessage_set.get(request_message_id=obj.id).content
         except DetailWorryMessage.DoesNotExist:
             return DOESNOTEXIXT
 

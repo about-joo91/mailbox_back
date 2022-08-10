@@ -3,6 +3,11 @@ services:
   redis:
     image: redis:alpine
     command: redis-server --port 6379
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    ports:
+      -6379:6379
   web_server:
     image: aboutjoo/mail_box:latest
     env_file:
@@ -11,5 +16,5 @@ services:
       - "80:8000"
     command: gunicorn --bind 0.0.0.0:8000 --workers=5 mail_box.wsgi:application  &
     working_dir: /app/
-    links:
-      - "redis"
+    depends_on:
+      - redis

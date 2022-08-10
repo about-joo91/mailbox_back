@@ -174,7 +174,6 @@ class LetterReviewView(APIView):
             letter_review_id = int(self.request.query_params.get("letter_review_id"))
             cur_user = request.user
             edit_data = request.data
-            print(edit_data)
             edit_letter_review(user=cur_user, letter_review_id=letter_review_id, edit_data=edit_data)
             return Response({"detail": "리뷰 수정이 완료되었습니다."}, status=status.HTTP_200_OK)
         except PermissionError:

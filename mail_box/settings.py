@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 SECRET_KEY = os.environ["MONGLE_SECRET_KEY"]
-
+REDIS_HOST = os.environ["MONGLE_REDIS_HOST"]
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
@@ -150,7 +150,7 @@ DATABASES = {
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://redis_service:6379/1",
+        "LOCATION": f"redis://{REDIS_HOST}:6379/1",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },

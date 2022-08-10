@@ -10,4 +10,5 @@ urlpatterns = [
     path("main_page/", include("main_page.urls")),
     path("worry_board/", include("worry_board.urls")),
     path("user/", include("user.urls")),
+    # path('webpush/', include('webpush_alarm.urls')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

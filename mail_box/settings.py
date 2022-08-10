@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     "worry_board",
     "user",
     "recommendation",
+    "webpush",
+    "webpush_alarm",
 ]
 
 REST_FRAMEWORK = {
@@ -205,3 +207,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 
 SCHEDULER_DEFAULT = True
+
+
+WEBPUSH_SETTINGS = {
+    "VAPID_PUBLIC_KEY": "BDyiIRr-ZM0pP8wruE2vA4Vb4WQVoZ_kCDgl-EM1fdx0KQbAdhzBfMx5syBk68z54ECawJ8KMz2ujEDnriV22_k",
+    "VAPID_PRIVATE_KEY": "1cIu0eo44g9poEt0qX3xLR3R9ch5NMbj6WP4GmvpsWo",
+    "VAPID_ADMIN_EMAIL": "fortest0528@example.com",
+}

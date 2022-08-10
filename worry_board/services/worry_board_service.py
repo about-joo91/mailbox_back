@@ -1,11 +1,12 @@
-import json
 from typing import Dict, List, Tuple
 
-import requests
-
+import unsmile_filtering
 from user.models import User as UserModel
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import WorryBoardSerializer
+
+# import requests
+
 
 RECOMMEND_BOARD = 7
 ALL_WORRY_BOARD = 0
@@ -73,12 +74,8 @@ def check_is_it_clean_text(check_content: str) -> bool:
     """
     작성하는 데이터에 욕설이 있는지 검증하는 service
     """
-    url = "http://0.0.0.0:5001/"
-    data = {"contents": check_content}
-    res = requests.post(url, data=json.dumps(data))
-    print(res.text)
-    # filtering_sys = unsmile_filtering.post_filtering
-    # result = filtering_sys.unsmile_filter(check_content)
-    if res.text == "clean":
+    filtering_sys = unsmile_filtering.post_filtering
+    result = filtering_sys.unsmile_filter(check_content)
+    if result["label"] == "clean":
         return True
     return False

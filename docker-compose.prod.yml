@@ -8,6 +8,9 @@ services:
       - "mode=standalone"
     ports:
       -6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      
   web_server:
     image: aboutjoo/mail_box:latest
     env_file:

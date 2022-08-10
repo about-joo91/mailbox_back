@@ -45,7 +45,6 @@ def get_paginated_board_data(page_num: int, author: UserModel, is_mine: str) -> 
 
     else:
         if not cache.get("boards_data"):
-            print("전체보드삭제")
             paginated_board_data = (
                 BoardModel.objects.select_related("author")
                 .prefetch_related("boardcomment_set__author")

@@ -2,6 +2,7 @@ version: '3.9'
 services:
   redis:
     image: redis:alpine
+    command: redis-server --port 6379
   web_server:
     image: aboutjoo/mail_box:latest
     env_file:
@@ -10,3 +11,5 @@ services:
       - "80:8000"
     command: gunicorn --bind 0.0.0.0:8000 --workers=5 mail_box.wsgi:application  &
     working_dir: /app/
+    links:
+      - "redis"

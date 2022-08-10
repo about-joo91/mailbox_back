@@ -19,7 +19,6 @@ def get_paginated_worry_board_data(
     """
     if category == ALL_WORRY_BOARD:
         if not cache.get("all_paginated_worry_boards"):
-            print("올,삭제됨")
             paginated_worry_board = (
                 WorryBoardModel.objects.select_related("author")
                 .prefetch_related("requestmessage_set")

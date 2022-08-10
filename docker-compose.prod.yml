@@ -7,10 +7,11 @@ services:
       - "name=redis"
       - "mode=standalone"
     ports:
-      -6379:6379
+      - 6379:6379
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
-      
+    volumes:
+      - ./redisdata:/data
   web_server:
     image: aboutjoo/mail_box:latest
     env_file:

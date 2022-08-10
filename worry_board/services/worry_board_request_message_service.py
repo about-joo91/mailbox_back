@@ -1,5 +1,7 @@
 from typing import Dict, List, Tuple
 
+from django.core.cache import cache
+
 from user.models import User as UserModel
 from worry_board.models import RequestMessage as RequestMessageModel
 from worry_board.models import RequestStatus as RequestStatusModel
@@ -45,6 +47,7 @@ def create_request_message_data(author: UserModel, worry_board_id: int, request_
         request_message_serializer.save(
             author_id=author.id, worry_board_id=worry_board.id, request_status_id=request_status.id
         )
+    cache.delete("cate_paginated_worry_boards"), cache.delete("all_paginated_worry_boards")
 
 
 def update_request_message_data(for_update_data: Dict[str, str], request_message_id: int) -> None:
@@ -57,6 +60,7 @@ def update_request_message_data(for_update_data: Dict[str, str], request_message
     )
     update_request_message_serializer.is_valid(raise_exception=True)
     update_request_message_serializer.save()
+    cache.delete("cate_paginated_worry_boards"), cache.delete("all_paginated_worry_boards")
 
 
 def delete_request_message_data(request_message_id: int):
@@ -67,6 +71,7 @@ def delete_request_message_data(request_message_id: int):
 
     if delete_request_message:
         delete_request_message.delete()
+    cache.delete("cate_paginated_worry_boards"), cache.delete("all_paginated_worry_boards")
 
 
 def accept_request_message_data(request_message_id: int) -> None:

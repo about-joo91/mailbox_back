@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from rest_framework.test import APIClient, APITestCase
 
 from main_page.models import Letter as LetterModel
@@ -19,6 +20,7 @@ class TestMaingPageAPI(APITestCase):
         """
         MainPageView의 의 get 함수를 검증하는 함수
         """
+
         client = APIClient()
         user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         UserProfileModel.objects.create(user=user)
@@ -78,9 +80,11 @@ class TestMaingPageAPI(APITestCase):
         MainPageView의 의 get 함수를 검증하는 함수
         case: moglegrade가 없을 때
         """
+        cache.delete("main_profile_data")
         client = APIClient()
         user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         UserProfileModel.objects.create(user=user)
+
         category_list = ["일상", "연애", "학업", "가족", "인간관계", "육아"]
         for cate_name in category_list:
             WorryCategoryModel.objects.create(cate_name=cate_name)
@@ -127,10 +131,12 @@ class TestMaingPageAPI(APITestCase):
         MainPageView의 의 get 함수를 검증하는 함수
         case: userprofile 데이터가 없을 때
         """
+        cache.delete("main_profile_data")
         client = APIClient()
         user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         mongle_level = MongleLevel.objects.create(id=1)
         MogleGardeModel.objects.create(user=user, grade=100, mongle_level=mongle_level)
+
         category_list = ["일상", "연애", "학업", "가족", "인간관계", "육아"]
         for cate_name in category_list:
             WorryCategoryModel.objects.create(cate_name=cate_name)

@@ -21,12 +21,12 @@ class WorryBoardSerializer(serializers.ModelSerializer):
 
     def get_is_worry_board_writer(self, obj):
 
-        author = self.context["author"]
+        author = self.context.get("author", "")
 
         return bool(obj.author == author)
 
     def get_request_status(self, obj):
-        author = self.context["author"]
+        author = self.context.get("author", "")
         try:
             return obj.requestmessage_set.get(author=author).request_status.status
 
@@ -34,7 +34,7 @@ class WorryBoardSerializer(serializers.ModelSerializer):
             return "요청"
 
     def get_request_message_id(self, obj):
-        author = self.context["author"]
+        author = self.context.get("author", "")
         try:
             return obj.requestmessage_set.get(author=author).id
         except RequestMessageModel.DoesNotExist:

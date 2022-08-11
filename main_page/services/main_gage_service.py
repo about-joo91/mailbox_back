@@ -14,14 +14,13 @@ def main_page_data_and_user_profile(user_id: int) -> list[dict]:
     """
     메인 페이지에 유저데이터및 유저프로필을 가져오기 위한 service
     """
-    if not cache.get("main_profile_data"):
-        main_page_data_and_user_profile = {}
-        main_page_data_and_user_profile = MainPageDataSerializer(
-            UserModel.objects.select_related("userprofile").get(id=user_id)
-        ).data
-        cache.set("main_profile_data", main_page_data_and_user_profile, 60 * 60)
 
-    return cache.get("main_profile_data")
+    main_page_data_and_user_profile = {}
+    main_page_data_and_user_profile = MainPageDataSerializer(
+        UserModel.objects.select_related("userprofile").get(id=user_id)
+    ).data
+
+    return main_page_data_and_user_profile
 
 
 def my_letter_count(user_id: int) -> list[dict]:
@@ -29,13 +28,7 @@ def my_letter_count(user_id: int) -> list[dict]:
     메인 페이지에 읽은 편지 개수를 가져오기 위한 service
     """
 
-    if not cache.get("my_letter_count"):
-
-        my_worrys = LetterModel.objects.filter(Q(is_read=False) & Q(worryboard__author=user_id)).count()
-
-        cache.set("my_letter_count", my_worrys, 60 * 60)
-
-    return cache.get("my_letter_count")
+    return LetterModel.objects.filter(Q(is_read=False) & Q(worryboard__author=user_id)).count()
 
 
 def worry_worryboard_union() -> list[dict]:
@@ -61,12 +54,7 @@ def best_review_list_service() -> list[dict]:
     메인페이지 베스트리뷰 게시물을 가져오기 위한 service
     """
 
-    if not cache.get("best_reviews"):
-        best_reviews_data = LetterReviewModel.objects.order_by("-like_count").order_by("-grade")[:10]
-
-        cache.set("best_reviews", best_reviews_data, 60 * 60)
-
-    return cache.get("best_reviews")
+    return LetterReviewModel.objects.order_by("-like_count").order_by("-grade")[:10]
 
 
 def live_review_list_service() -> list[dict]:
@@ -74,9 +62,4 @@ def live_review_list_service() -> list[dict]:
     메인페이지 라이브리뷰 게시물을 가져오기 위한 service
     """
 
-    if not cache.get("live_reviews"):
-        live_reviews_data = LetterReviewModel.objects.order_by("-create_date")[:10]
-
-        cache.set("live_reviews", live_reviews_data, 60 * 60)
-
-    return cache.get("live_reviews")
+    return LetterReviewModel.objects.order_by("-create_date")[:10]

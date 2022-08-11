@@ -198,7 +198,6 @@ class AllCacheDelete(APIView):
         cache.delete("live_reviews")
         cache.delete("best_reviews")
         cache.delete("my_letter_count")
-        cache.delete("main_profile_data")
         cache.delete("my_boards_data"), cache.delete("boards_data")
         cache.delete("cate_paginated_worry_boards"), cache.delete("all_paginated_worry_boards")
         for i in range(1, 7):

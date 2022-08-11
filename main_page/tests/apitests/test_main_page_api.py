@@ -20,7 +20,9 @@ class TestMaingPageAPI(APITestCase):
         """
         MainPageView의 의 get 함수를 검증하는 함수
         """
-
+        cache.delete("main_profile_data")
+        cache.delete("live_reviews")
+        cache.delete("best_reviews")
         client = APIClient()
         user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         UserProfileModel.objects.create(user=user)

@@ -47,7 +47,11 @@ def create_request_message_data(author: UserModel, worry_board_id: int, request_
         request_message_serializer.save(
             author_id=author.id, worry_board_id=worry_board.id, request_status_id=request_status.id
         )
+
+    category = worry_board.category.id
+
     cache.delete("cate_paginated_worry_boards"), cache.delete("all_paginated_worry_boards")
+    cache.delete(f"{category}_paginated_worry_boards")
 
 
 def update_request_message_data(for_update_data: Dict[str, str], request_message_id: int) -> None:
@@ -60,7 +64,9 @@ def update_request_message_data(for_update_data: Dict[str, str], request_message
     )
     update_request_message_serializer.is_valid(raise_exception=True)
     update_request_message_serializer.save()
+    category = update_request_message.worry_board.category.id
     cache.delete("cate_paginated_worry_boards"), cache.delete("all_paginated_worry_boards")
+    cache.delete(f"{category}_paginated_worry_boards")
 
 
 def delete_request_message_data(request_message_id: int):
@@ -71,7 +77,9 @@ def delete_request_message_data(request_message_id: int):
 
     if delete_request_message:
         delete_request_message.delete()
+    category = delete_request_message.worry_board.category.id
     cache.delete("cate_paginated_worry_boards"), cache.delete("all_paginated_worry_boards")
+    cache.delete(f"{category}_paginated_worry_boards")
 
 
 def accept_request_message_data(request_message_id: int) -> None:
@@ -87,6 +95,9 @@ def accept_request_message_data(request_message_id: int) -> None:
     )
     update_request_message_serializer.is_valid(raise_exception=True)
     update_request_message_serializer.save(request_status_id=request_status.id)
+    category = accept_request_message.worry_board.category.id
+    cache.delete("cate_paginated_worry_boards"), cache.delete("all_paginated_worry_boards")
+    cache.delete(f"{category}_paginated_worry_boards")
 
 
 def disaccept_request_message_data(request_message_id: int) -> None:
@@ -102,6 +113,9 @@ def disaccept_request_message_data(request_message_id: int) -> None:
     )
     update_request_message_serializer.is_valid(raise_exception=True)
     update_request_message_serializer.save(request_status_id=request_status.id)
+    category = accept_request_message.worry_board.category.id
+    cache.delete("cate_paginated_worry_boards"), cache.delete("all_paginated_worry_boards")
+    cache.delete(f"{category}_paginated_worry_boards")
 
 
 def update_request_status(author: UserModel, worry_board_id):

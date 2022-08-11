@@ -1,4 +1,3 @@
-from django.core.cache import cache
 from django.db import transaction
 from django.db.models import F
 from django.db.models.query_utils import Q
@@ -35,9 +34,6 @@ def letter_post_service(letter_author: UserModel, request_data: dict) -> None:
 
     update_mongle_grade(user=letter_author, grade=1, rate_type="letter")
 
-    cache.delete("main_profile_data")
-    cache.delete("my_letter_count")
-
 
 def letter_is_read_service(letter_id: LetterModel, user_id=UserModel) -> None:
     """
@@ -49,7 +45,6 @@ def letter_is_read_service(letter_id: LetterModel, user_id=UserModel) -> None:
         raise LetterModel.DoesNotExist
 
     letter.update(is_read=True)
-    cache.delete("my_letter_count")
 
 
 @transaction.atomic
@@ -61,9 +56,6 @@ def letter_review_like_service(letter_review_id: int, user_id: int) -> None:
     like_create = LetterReviewLikeModel.objects.create(user_id=user_id, letter_review=target_board)
     if like_create:
         LetterReviewModel.objects.filter(id=letter_review_id).update(like_count=F("like_count") + 1)
-
-    cache.delete("live_reviews")
-    cache.delete("best_reviews")
 
 
 @transaction.atomic
@@ -78,6 +70,3 @@ def letter_review_like_delete_service(letter_review_like_id: int, user_id: int) 
         raise exceptions.PermissionDenied
     LetterReviewModel.objects.filter(id=target_review_like.letter_review.id).update(like_count=F("like_count") - 1)
     target_review_like.delete()
-
-    cache.delete("live_reviews")
-    cache.delete("best_reviews")

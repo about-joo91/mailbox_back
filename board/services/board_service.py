@@ -35,13 +35,13 @@ def get_paginated_board_data(page_num: int, author: UserModel, is_mine: str) -> 
                 .prefetch_related("boardcomment_set__author")
                 .prefetch_related("boardlike_set")
                 .filter(author=author)
-                .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+                .order_by("-create_date")[:100]
             )
             paginated_boards = BoardSerializer(my_paginated_board_data, many=True, context={"author": author}).data
-            cache.set("my_boards_data", paginated_boards)
+            cache.set("my_boards_data", paginated_boards, 60 * 60)
 
         total_count = BoardModel.objects.filter(author=author).count()
-        return cache.get("my_boards_data"), total_count
+        return cache.get("my_boards_data")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)], total_count
 
     else:
         if not cache.get("boards_data"):
@@ -50,14 +50,14 @@ def get_paginated_board_data(page_num: int, author: UserModel, is_mine: str) -> 
                 .prefetch_related("boardcomment_set__author")
                 .prefetch_related("boardlike_set")
                 .all()
-                .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+                .order_by("-create_date")[:100]
             )
 
             paginated_boards = BoardSerializer(paginated_board_data, many=True, context={"author": author}).data
-            cache.set("boards_data", paginated_boards)
+            cache.set("boards_data", paginated_boards, 60 * 60)
 
         total_count = BoardModel.objects.count()
-        return cache.get("boards_data"), total_count
+        return cache.get("boards_data")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)], total_count
 
 
 def create_board_data(board_data: Dict[str, str], author: UserModel) -> None:

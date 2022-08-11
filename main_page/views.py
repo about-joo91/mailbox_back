@@ -1,6 +1,7 @@
 import math
 
 import django
+from django.core.cache import cache
 from rest_framework import exceptions, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -182,3 +183,25 @@ class LetterisReadView(APIView):
 
         except LetterModel.DoesNotExist:
             return Response({"detail": "자신이 받은 편지가 아닙니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AllCacheDelete(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    """
+    로그 아웃시 모든 캐시를 삭제
+    """
+
+    def post(self, request):
+
+        cache.delete("live_reviews")
+        cache.delete("best_reviews")
+        cache.delete("my_letter_count")
+        cache.delete("main_profile_data")
+        cache.delete("my_boards_data"), cache.delete("boards_data")
+        cache.delete("cate_paginated_worry_boards"), cache.delete("all_paginated_worry_boards")
+        for i in range(1, 7):
+            cache.delete(f"{i}_paginated_worry_boards")
+
+        return Response(status=status.HTTP_200_OK)

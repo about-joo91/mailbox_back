@@ -33,7 +33,7 @@ def my_letter_count(user_id: int) -> list[dict]:
 
         my_worrys = LetterModel.objects.filter(Q(is_read=False) & Q(worryboard__author=user_id)).count()
 
-        cache.set("my_letter_count", my_worrys)
+        cache.set("my_letter_count", my_worrys, 60 * 60)
 
     return cache.get("my_letter_count")
 
@@ -51,7 +51,7 @@ def worry_worryboard_union() -> list[dict]:
             order_by_cate_worry_list = order_by_cate_worry_list.union(
                 worry_categories[cate_idx].worryboard_set.order_by("-create_date")[:3]
             )
-        cache.set("worry_worryboard_union", order_by_cate_worry_list)
+        cache.set("worry_worryboard_union", order_by_cate_worry_list, 60 * 60)
 
     return cache.get("worry_worryboard_union")
 
@@ -64,7 +64,7 @@ def best_review_list_service() -> list[dict]:
     if not cache.get("best_reviews"):
         best_reviews_data = LetterReviewModel.objects.order_by("-like_count").order_by("-grade")[:10]
 
-        cache.set("best_reviews", best_reviews_data)
+        cache.set("best_reviews", best_reviews_data, 60 * 60)
 
     return cache.get("best_reviews")
 
@@ -77,6 +77,6 @@ def live_review_list_service() -> list[dict]:
     if not cache.get("live_reviews"):
         live_reviews_data = LetterReviewModel.objects.order_by("-create_date")[:10]
 
-        cache.set("live_reviews", live_reviews_data)
+        cache.set("live_reviews", live_reviews_data, 60 * 60)
 
     return cache.get("live_reviews")

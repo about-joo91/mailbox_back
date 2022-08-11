@@ -131,10 +131,11 @@ class TestWorryBoardService(TestCase):
         """
         worry_board_data를 삭제하는 함수가 정상적으로 작동 되었을 때에 대한 검증
         """
+
         user = UserModel.objects.create(username="Ko", nickname="Ko")
         category = WorryCategory.objects.create(cate_name="일상")
         user_worry_board = WorryBoardModel.objects.create(author=user, category=category, content="삭제할 데이터")
-        with self.assertNumQueries(4):
+        with self.assertNumQueries(5):
             delete_worry_board_data(author=user, worry_board_id=user_worry_board.id)
 
         self.assertEqual(0, WorryBoardModel.objects.count())

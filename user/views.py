@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from user.serializers import UserCertificationSerializer
 from user.services.report_service import create_user_report
 from user.services.user_profile_category_service import (
     create_category_of_profile,
@@ -13,7 +14,13 @@ from user.services.user_profile_category_service import (
     get_category_of_profile_except_mine,
 )
 from user.services.user_profile_service import get_user_profile_data, update_user_profile_data
-from user.services.user_signup_login_service import get_user_signup_data, post_user_signup_data
+from user.services.user_signup_login_service import (
+    check_author,
+    check_certification_question,
+    get_user_signup_data,
+    post_user_signup_data,
+    update_user_new_password,
+)
 
 from .models import MongleGrade
 from .models import User as UserModel
@@ -38,6 +45,37 @@ class UserView(APIView):
         except exceptions.ValidationError as e:
             error = "\n".join([str(value) for values in e.detail.values() for value in values])
             return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request: Request) -> Response:
+        update_user_new_password(request.user, request.data)
+        return Response({"detail": "비밀번호를 새로 설정하였습니다."}, status=status.HTTP_200_OK)
+
+
+class UserCheckView(APIView):
+    """
+    새로운 비밀번호 설정을 위한 계정 탐색
+    """
+
+    def post(self, request: Request) -> Response:
+        check_author(request.data)
+        return Response({"detail": "일치하는 계정을 찾았습니다."}, status=status.HTTP_200_OK)
+
+
+class UserCertificationView(APIView):
+    """
+    본인 확인 질문을 대조하는 View
+    """
+
+    def get(self, request: Request) -> Response:
+        author = check_author(request.data)
+        author_certification = UserCertificationSerializer(author).data
+        return Response({"certification_request": author_certification})
+
+    def post(self, request: Request) -> Response:
+        if check_certification_question(request.data):
+            return Response({"detail": "본인인증에 성공하였습니다."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"detail": "답변이 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserProfileView(APIView):

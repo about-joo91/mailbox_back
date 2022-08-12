@@ -47,7 +47,7 @@ class UserView(APIView):
             return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request: Request) -> Response:
-        update_user_new_password(request.user, request.data)
+        update_user_new_password(request.data)
         return Response({"detail": "비밀번호를 새로 설정하였습니다."}, status=status.HTTP_200_OK)
 
 

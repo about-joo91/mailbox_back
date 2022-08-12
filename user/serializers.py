@@ -56,6 +56,29 @@ class UserSignupSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class NewPasswordSerializer(serializers.ModelSerializer):
+    def validate(self, data):
+        condition = all(x not in ["!", "@", "#", "$", "%", "^", "&", "*", "_"] for x in data["password"])
+
+        if len(data["password"]) < 8 or condition:
+            raise serializers.ValidationError("비밀번호는 8자 이상 특수문자 포함해 입력해주세요")
+        return data
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            if key == "password":
+                instance.set_password(value)
+                continue
+
+            setattr(instance, key, value)
+        instance.save()
+        return instance
+
+    class Meta:
+        model = UserModel
+        fields = ["password"]
+
+
 class MongleGradeSerializer(serializers.ModelSerializer):
     mongle_image = serializers.SerializerMethodField()
     level = serializers.SerializerMethodField()

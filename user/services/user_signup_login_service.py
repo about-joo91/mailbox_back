@@ -3,7 +3,7 @@ from typing import Dict
 from django.db import transaction
 
 from user.models import User
-from user.serializers import UserSignupSerializer
+from user.serializers import NewPasswordSerializer, UserSignupSerializer
 
 
 def get_user_signup_data(user: User) -> Dict:
@@ -39,10 +39,12 @@ def check_certification_question(certification_data: Dict[str, str]):
     return author.certification_answer == certification_data["certification_answer"]
 
 
-def update_user_new_password(user: User, update_data: Dict) -> None:
+def update_user_new_password(update_data: Dict) -> None:
     """
     비밀번호 새로 설정
     """
-    update_user_serializer = UserSignupSerializer(user, data=update_data, partial=True)
+    username = update_data.pop("username")
+    user = User.objects.get(username=username)
+    update_user_serializer = NewPasswordSerializer(user, data=update_data, partial=True)
     update_user_serializer.is_valid(raise_exception=True)
     update_user_serializer.save()

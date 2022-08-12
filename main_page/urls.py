@@ -8,5 +8,4 @@ urlpatterns = [
     path("letter/<int:letter_id>", views.LetterisReadView.as_view()),
     path("review_like<int:letter_review_like_id>", views.ReviewLikeView.as_view()),
     path("review/like_get", views.LikeisGet.as_view()),
-    path("cachedelete", views.AllCacheDelete.as_view()),
 ]

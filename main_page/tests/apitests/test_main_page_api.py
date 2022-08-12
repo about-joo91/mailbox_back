@@ -20,9 +20,7 @@ class TestMaingPageAPI(APITestCase):
         """
         MainPageView의 의 get 함수를 검증하는 함수
         """
-        cache.delete("main_profile_data")
-        cache.delete("live_reviews")
-        cache.delete("best_reviews")
+        cache.delete("worry_worryboard_union")
         client = APIClient()
         user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         UserProfileModel.objects.create(user=user)
@@ -82,7 +80,6 @@ class TestMaingPageAPI(APITestCase):
         MainPageView의 의 get 함수를 검증하는 함수
         case: moglegrade가 없을 때
         """
-        cache.delete("main_profile_data")
         client = APIClient()
         user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         UserProfileModel.objects.create(user=user)
@@ -133,7 +130,6 @@ class TestMaingPageAPI(APITestCase):
         MainPageView의 의 get 함수를 검증하는 함수
         case: userprofile 데이터가 없을 때
         """
-        cache.delete("main_profile_data")
         client = APIClient()
         user = UserModel.objects.create(username="hajin", password="1234", nickname="hajin")
         mongle_level = MongleLevel.objects.create(id=1)

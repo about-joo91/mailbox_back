@@ -18,48 +18,33 @@ def get_paginated_worry_board_data(
     worry_board의 데이터를 가져오는 service
     """
     if category == ALL_WORRY_BOARD:
-        if not cache.get("all_paginated_worry_boards"):
-            paginated_worry_board = (
-                WorryBoardModel.objects.select_related("author")
-                .prefetch_related("requestmessage_set")
-                .all()
-                .order_by("-create_date")[:100]
-            )
-            paginated_worry_boards = WorryBoardSerializer(
-                paginated_worry_board, many=True, context={"author": author}
-            ).data
-            cache.set("all_paginated_worry_boards", paginated_worry_boards, 60 * 60)
 
+        paginated_worry_board = (
+            WorryBoardModel.objects.select_related("author")
+            .prefetch_related("requestmessage_set")
+            .all()
+            .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        )
+        paginated_worry_boards = WorryBoardSerializer(paginated_worry_board, many=True, context={"author": author}).data
         total_count = WorryBoardModel.objects.count()
-        return cache.get("all_paginated_worry_boards")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)], total_count
 
     elif category == RECOMMEND_BOARD:
-        if not cache.get("cate_paginated_worry_boards"):
-            paginated_worry_board = recommended_worryboard[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
-            paginated_worry_boards = WorryBoardSerializer(
-                paginated_worry_board, many=True, context={"author": author}
-            ).data
-            cache.set("cate_paginated_worry_boards", paginated_worry_boards, 60 * 60)
+
+        paginated_worry_board = recommended_worryboard[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        paginated_worry_boards = WorryBoardSerializer(paginated_worry_board, many=True, context={"author": author}).data
         total_count = WorryBoardModel.objects.count()
-        return cache.get("cate_paginated_worry_boards"), total_count
 
     else:
-        if not cache.get(f"{category}_paginated_worry_boards"):
-            paginated_worry_board = (
-                WorryBoardModel.objects.select_related("author")
-                .prefetch_related("requestmessage_set")
-                .filter(category=category)
-                .order_by("-create_date")[:100]
-            )
-            paginated_worry_boards = WorryBoardSerializer(
-                paginated_worry_board, many=True, context={"author": author}
-            ).data
-            cache.set(f"{category}_paginated_worry_boards", paginated_worry_boards, 60 * 60)
-        total_count = WorryBoardModel.objects.filter(category=category).count()
-        return (
-            cache.get(f"{category}_paginated_worry_boards")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)],
-            total_count,
+        paginated_worry_board = (
+            WorryBoardModel.objects.select_related("author")
+            .prefetch_related("requestmessage_set")
+            .filter(category=category)
+            .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
         )
+        paginated_worry_boards = WorryBoardSerializer(paginated_worry_board, many=True, context={"author": author}).data
+        total_count = WorryBoardModel.objects.filter(category=category).count()
+
+    return paginated_worry_boards, total_count
 
 
 def create_worry_board_data(author: UserModel, create_data: Dict[str, str]) -> None:
@@ -70,11 +55,7 @@ def create_worry_board_data(author: UserModel, create_data: Dict[str, str]) -> N
     create_worry_board_serializer = WorryBoardSerializer(data=create_data)
     create_worry_board_serializer.is_valid(raise_exception=True)
     create_worry_board_serializer.save(author=author)
-    category = create_data.pop("category")
-
-    cache.delete("cate_paginated_worry_boards"), cache.delete("all_paginated_worry_boards")
     cache.delete("worry_worryboard_union")
-    cache.delete(f"{category}_paginated_worry_boards")
 
 
 def update_worry_board_data(worry_board_id: int, update_data: Dict[str, str]) -> None:
@@ -85,10 +66,7 @@ def update_worry_board_data(worry_board_id: int, update_data: Dict[str, str]) ->
     update_worry_board_serializer = WorryBoardSerializer(update_worry_board, data=update_data, partial=True)
     update_worry_board_serializer.is_valid(raise_exception=True)
     update_worry_board_serializer.save()
-    category = update_worry_board.category.id
-    cache.delete("cate_paginated_worry_boards"), cache.delete("all_paginated_worry_boards")
     cache.delete("worry_worryboard_union")
-    cache.delete(f"{category}_paginated_worry_boards")
 
 
 def delete_worry_board_data(author: UserModel, worry_board_id: int) -> None:
@@ -97,10 +75,7 @@ def delete_worry_board_data(author: UserModel, worry_board_id: int) -> None:
     """
     delete_model = WorryBoardModel.objects.get(author_id=author.id, id=worry_board_id)
     delete_model.delete()
-    cache.delete("cate_paginated_worry_boards"), cache.delete("all_paginated_worry_boards")
     cache.delete("worry_worryboard_union")
-    category = delete_model.category.id
-    cache.delete(f"{category}_paginated_worry_boards")
 
 
 def check_is_it_clean_text(check_content: str) -> bool:

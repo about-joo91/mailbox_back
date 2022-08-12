@@ -1,6 +1,5 @@
 from typing import Dict, List, Tuple
 
-from django.core.cache import cache
 from rest_framework import exceptions
 
 import unsmile_filtering
@@ -29,35 +28,29 @@ def get_paginated_board_data(page_num: int, author: UserModel, is_mine: str) -> 
     """
 
     if is_mine == "True":
-        if not cache.get("my_boards_data"):
-            my_paginated_board_data = (
-                BoardModel.objects.select_related("author")
-                .prefetch_related("boardcomment_set__author")
-                .prefetch_related("boardlike_set")
-                .filter(author=author)
-                .order_by("-create_date")[:100]
-            )
-            paginated_boards = BoardSerializer(my_paginated_board_data, many=True, context={"author": author}).data
-            cache.set("my_boards_data", paginated_boards, 60 * 60)
-
+        my_paginated_board_data = (
+            BoardModel.objects.select_related("author")
+            .prefetch_related("boardcomment_set__author")
+            .prefetch_related("boardlike_set")
+            .filter(author=author)
+            .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        )
+        paginated_boards = BoardSerializer(my_paginated_board_data, many=True, context={"author": author}).data
         total_count = BoardModel.objects.filter(author=author).count()
-        return cache.get("my_boards_data")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)], total_count
 
     else:
-        if not cache.get("boards_data"):
-            paginated_board_data = (
-                BoardModel.objects.select_related("author")
-                .prefetch_related("boardcomment_set__author")
-                .prefetch_related("boardlike_set")
-                .all()
-                .order_by("-create_date")[:100]
-            )
+        paginated_board_data = (
+            BoardModel.objects.select_related("author")
+            .prefetch_related("boardcomment_set__author")
+            .prefetch_related("boardlike_set")
+            .all()
+            .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+        )
 
-            paginated_boards = BoardSerializer(paginated_board_data, many=True, context={"author": author}).data
-            cache.set("boards_data", paginated_boards, 60 * 60)
-
+        paginated_boards = BoardSerializer(paginated_board_data, many=True, context={"author": author}).data
         total_count = BoardModel.objects.count()
-        return cache.get("boards_data")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)], total_count
+
+    return paginated_boards, total_count
 
 
 def create_board_data(board_data: Dict[str, str], author: UserModel) -> None:
@@ -69,7 +62,6 @@ def create_board_data(board_data: Dict[str, str], author: UserModel) -> None:
 
     update_mongle_grade(user=author, grade=1, rate_type="board")
     create_board_serializer.save(author=author)
-    cache.delete("my_boards_data"), cache.delete("boards_data")
 
 
 def update_board_data(board_id: int, update_data: Dict[str, str], author: UserModel) -> None:
@@ -82,7 +74,6 @@ def update_board_data(board_id: int, update_data: Dict[str, str], author: UserMo
     update_board_serializer = BoardSerializer(update_board, data=update_data, partial=True)
     update_board_serializer.is_valid(raise_exception=True)
     update_board_serializer.save()
-    cache.delete("my_boards_data"), cache.delete("boards_data")
 
 
 def delete_board_data(board_id: int, author: UserModel) -> None:
@@ -93,7 +84,6 @@ def delete_board_data(board_id: int, author: UserModel) -> None:
     if author != delete_model.author:
         raise exceptions.PermissionDenied
     delete_model.delete()
-    cache.delete("my_boards_data"), cache.delete("boards_data")
 
 
 def make_like_data(author: UserModel, board_id: int) -> None:
@@ -102,7 +92,6 @@ def make_like_data(author: UserModel, board_id: int) -> None:
     """
     target_board = BoardModel.objects.get(id=board_id)
     BoardLikeModel.objects.create(author=author, board=target_board)
-    cache.delete("my_boards_data"), cache.delete("boards_data")
 
 
 def delete_like_data(author: UserModel, board_id: int) -> None:
@@ -112,7 +101,6 @@ def delete_like_data(author: UserModel, board_id: int) -> None:
     target_board = BoardModel.objects.get(id=board_id)
     liked_board = BoardLikeModel.objects.get(author=author, board=target_board)
     liked_board.delete()
-    cache.delete("my_boards_data"), cache.delete("boards_data")
 
 
 def get_board_comment_data(board_id: int, author: UserModel) -> List:
@@ -139,7 +127,6 @@ def create_board_comment_data(author: UserModel, board_id: int, create_data: Dic
     create_board_comment_serializer = BoardCommentSerializer(data=create_data)
     create_board_comment_serializer.is_valid(raise_exception=True)
     create_board_comment_serializer.save(author=author, board=board)
-    cache.delete("my_boards_data"), cache.delete("boards_data")
 
 
 def update_board_comment_data(update_data: Dict, comment_id: int) -> None:
@@ -158,7 +145,6 @@ def delete_board_comment_data(comment_id: int, author: UserModel) -> None:
     """
     delete_comment = BoardCommentModel.objects.get(id=comment_id, author=author)
     delete_comment.delete()
-    cache.delete("my_boards_data"), cache.delete("boards_data")
 
 
 def get_user_profile_data(author: UserModel):

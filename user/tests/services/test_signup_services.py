@@ -1,6 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
+from user.models import CertificationQuestion as CertificationQuestionModel
 from user.models import User as UserModel
 
 
@@ -51,8 +52,15 @@ class TestUserRegistrationAPI(APITestCase):
         닉네임 중복체크
         """
         url = reverse("user_view")
+        certification_question = CertificationQuestionModel.objects.create(certification_question="질문")
         UserModel.objects.create(username="joo", nickname="won")
-        user_data = {"username": "won1", "password": "qwer1234%", "nickname": "won"}
+        user_data = {
+            "username": "won1",
+            "password": "qwer1234%",
+            "nickname": "won",
+            "certification_question": certification_question.id,
+            "certification_answer": "답변",
+        }
         response = self.client.post(url, user_data)
         result = response.json()
 
@@ -65,7 +73,14 @@ class TestUserRegistrationAPI(APITestCase):
         비밀번호 8자 이상이 아닌 경우
         """
         url = reverse("user_view")
-        user_data = {"username": "won1", "password": "qwer123", "nickname": "won1122"}
+        certification_question = CertificationQuestionModel.objects.create(certification_question="질문")
+        user_data = {
+            "username": "won1",
+            "password": "qwer123",
+            "nickname": "won1122",
+            "certification_question": certification_question.id,
+            "certification_answer": "답변",
+        }
         response = self.client.post(url, user_data)
         result = response.json()
 
@@ -77,7 +92,14 @@ class TestUserRegistrationAPI(APITestCase):
         비밀번호에 특수문자가 포함되지 않은 경우
         """
         url = reverse("user_view")
-        user_data = {"username": "won1", "password": "qwer1234", "nickname": "won1122"}
+        certification_question = CertificationQuestionModel.objects.create(certification_question="질문")
+        user_data = {
+            "username": "won1",
+            "password": "qwer1234",
+            "nickname": "won1122",
+            "certification_question": certification_question.id,
+            "certification_answer": "질문",
+        }
         response = self.client.post(url, user_data)
         result = response.json()
 

@@ -4,6 +4,7 @@ from rest_framework.test import APIClient, APITestCase
 
 from main_page.models import Letter as LetterModel
 from main_page.models import WorryCategory as WorryCategoryModel
+from user.models import CertificationQuestion as CertificationQuestionModel
 from user.models import MongleLevel
 from user.models import User as UserModel
 from user.services.user_signup_login_service import post_user_signup_data
@@ -17,8 +18,21 @@ class TestLetterviewAPI(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        user_data = {"username": "hajin_test", "password": "p@ssword", "nickname": "1"}
-        user_data_author = {"username": "author_test", "password": "p@ssword", "nickname": "2"}
+        certification_question = CertificationQuestionModel.objects.create(certification_question="질문")
+        user_data = {
+            "username": "hajin_test",
+            "password": "p@ssword",
+            "nickname": "1",
+            "certification_question": certification_question.id,
+            "certification_answer": "답변",
+        }
+        user_data_author = {
+            "username": "author_test",
+            "password": "p@ssword",
+            "nickname": "2",
+            "certification_question": certification_question.id,
+            "certification_answer": "답변",
+        }
         MongleLevel.objects.create(id=1)
         post_user_signup_data(user_data)
         post_user_signup_data(user_data_author)
@@ -151,8 +165,21 @@ class TestLetterIsReadView(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        user_data = {"username": "hajin_test", "password": "p@ssword", "nickname": "1"}
-        user_data_author = {"username": "author_test", "password": "p@ssword", "nickname": "2"}
+        CertificationQuestionModel.objects.create(certification_question="질문")
+        user_data = {
+            "username": "hajin_test",
+            "password": "p@ssword",
+            "nickname": "1",
+            "certification_question": 1,
+            "certification_answer": "답변",
+        }
+        user_data_author = {
+            "username": "author_test",
+            "password": "p@ssword",
+            "nickname": "2",
+            "certification_question": 1,
+            "certification_answer": "답변",
+        }
         MongleLevel.objects.create(id=1)
         post_user_signup_data(user_data)
         post_user_signup_data(user_data_author)

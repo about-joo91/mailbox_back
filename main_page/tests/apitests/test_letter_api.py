@@ -165,19 +165,19 @@ class TestLetterIsReadView(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-        CertificationQuestionModel.objects.create(certification_question="질문")
+        certification_question = CertificationQuestionModel.objects.create(certification_question="질문")
         user_data = {
             "username": "hajin_test",
             "password": "p@ssword",
             "nickname": "1",
-            "certification_question": 1,
+            "certification_question": certification_question.id,
             "certification_answer": "답변",
         }
         user_data_author = {
             "username": "author_test",
             "password": "p@ssword",
             "nickname": "2",
-            "certification_question": 1,
+            "certification_question": certification_question.id,
             "certification_answer": "답변",
         }
         MongleLevel.objects.create(id=1)

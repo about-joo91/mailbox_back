@@ -14,14 +14,14 @@ services:
       - ./redisdata:/data
   mail_box:
     build: .
+    env_file:
+      - ./.env.dev
     command: python manage.py runserver 0.0.0.0:8000
     ports:
       - 8000:8000
     working_dir: /app/
     volumes:
       - ./:/app/
-    env_file:
-      - ./.env
     expose:
       - 8000
     depends_on:
@@ -41,6 +41,7 @@ services:
     ports:
       - 3306:3306
   elasticsearch:
+    container_name: elasticsearch
     build:
       context: elasticsearch/
       args:
@@ -64,6 +65,8 @@ services:
       # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
   logstash:
+    env_file:
+      - ./.env.dev
     build:
       context: logstash/
       args:
@@ -86,7 +89,6 @@ services:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
     depends_on:
       - elasticsearch
-
   kibana:
     build:
       context: kibana/

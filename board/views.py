@@ -20,6 +20,7 @@ from board.services.board_service import (
     update_board_comment_data,
     update_board_data,
 )
+from elasticsearch import Elasticsearch
 
 
 # Create your views here.
@@ -187,3 +188,19 @@ class BorderCommentView(APIView):
             return Response({"detail": "댓글이 존재하지 않습니다."}, status=status.HTTP_404_NOT_FOUND)
         except TypeError:
             return Response({"detail": "comment_id가 비어있습니다."}, status=status.HTTP_404_NOT_FOUND)
+
+
+class SearchView(APIView):
+    def get(self, request):
+        client = Elasticsearch("elasticsearch:9200")
+
+        search_type = request.query_params.get("search_type")
+        search_word = request.query_params.get("search_word")
+        if not search_word:
+            return Response({"detail": "검색어는 필수값입니다."}, status=status.HTTP_400_BAD_REQUEST)
+        headers = {"Content-Type": "application/json"}
+        results = client.search(
+            index="mail_box", headers=headers, body={"query": {"match": {search_type: search_word}}}
+        )
+
+        return Response(results["hits"]["hits"], status=status.HTTP_200_OK)

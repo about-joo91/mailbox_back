@@ -4,9 +4,10 @@ FROM docker.elastic.co/logstash/logstash:${ELK_VERSION}
 
 COPY ./jars/ /usr/share/logstash/logstash-core/lib/jars/
 
-# https://www.docker.elastic.co/
+COPY ./log_stash_keystore.sh .
 
+USER root
 
-# Add your logstash plugins setup here
+RUN chmod -R 777 log_stash_keystore.sh
 
-# Example: RUN logstash-plugin install logstash-filter-json
+RUN "./log_stash_keystore.sh" 

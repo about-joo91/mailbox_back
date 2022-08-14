@@ -27,6 +27,8 @@ class User(AbstractBaseUser):
     nickname = models.CharField("닉네임", max_length=20, blank=True)
     received_letter_cnt = models.IntegerField(default=0)
     sent_letter_cnt = models.IntegerField(default=0)
+    certification_question = models.ForeignKey("CertificationQuestion", on_delete=models.SET_NULL, null=True)
+    certification_answer = models.TextField("본인인증 답변", max_length=30, default="")
 
     create_date = models.DateTimeField("가입일", auto_now_add=True)
     update_date = models.DateTimeField("갱신일", auto_now=True)
@@ -94,3 +96,7 @@ class Report(models.Model):
 
 class ReportedUser(models.Model):
     user = models.ForeignKey("User", on_delete=models.CASCADE)
+
+
+class CertificationQuestion(models.Model):
+    certification_question = models.TextField("본인인증 질문", max_length=40)

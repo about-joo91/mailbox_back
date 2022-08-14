@@ -13,6 +13,10 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
         elif len(data["nickname"]) == 0:
             raise serializers.ValidationError("닉네임을 입력해주세요.")
+        elif str(data["certification_question"]) == "None":
+            raise serializers.ValidationError("본인인증 질문을 선택해주세요.")
+        elif len(data["certification_answer"]) == 0:
+            raise serializers.ValidationError("본인인증 답변을 입력해주세요.")
         elif UserModel.objects.filter(nickname=data["nickname"]).exists():
             raise serializers.ValidationError("중복된 닉네임이 존재합니다.")
 
@@ -30,16 +34,49 @@ class UserSignupSerializer(serializers.ModelSerializer):
         MongleGrade(user=user, mongle_level=mongle_level).save()
         return user
 
-    def update(ser, *args, **kwargs):
-        user = super().create(*args, **kwargs)
-        p = user.password
-        user.set_password(p)
-        user.save()
-        return user
+    # def update(ser, *args, **kwargs):
+    #     user = super().create(*args, **kwargs)
+    #     p = user.password
+    #     user.set_password(p)
+    #     user.save()
+    #     return user
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            if key == "password":
+                instance.set_password(value)
+                continue
+
+            setattr(instance, key, value)
+        instance.save()
+        return instance
 
     class Meta:
         model = UserModel
         fields = "__all__"
+
+
+class NewPasswordSerializer(serializers.ModelSerializer):
+    def validate(self, data):
+        condition = all(x not in ["!", "@", "#", "$", "%", "^", "&", "*", "_"] for x in data["password"])
+
+        if len(data["password"]) < 8 or condition:
+            raise serializers.ValidationError("비밀번호는 8자 이상 특수문자 포함해 입력해주세요")
+        return data
+
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            if key == "password":
+                instance.set_password(value)
+                continue
+
+            setattr(instance, key, value)
+        instance.save()
+        return instance
+
+    class Meta:
+        model = UserModel
+        fields = ["password"]
 
 
 class MongleGradeSerializer(serializers.ModelSerializer):
@@ -87,3 +124,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "profile_img",
             "categories",
         ]
+
+
+class UserCertificationSerializer(serializers.ModelSerializer):
+    certification_question = serializers.SerializerMethodField()
+
+    def get_certification_question(self, obj):
+        return obj.certification_question.certification_question
+
+    class Meta:
+        model = UserModel
+        fields = ["username", "certification_question"]

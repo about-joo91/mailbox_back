@@ -94,7 +94,7 @@ class TestBoardAPI(APITestCase):
         result = response.json()
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(result["detail"], "게시글이 생성되었습니다.")
+        self.assertEqual(result["detail"], "몽글점수를 5점 획득 하셨습니다!")
 
     def test_when_unauthenticated_user_in_post_board_content(self) -> None:
         """

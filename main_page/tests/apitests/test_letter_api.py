@@ -73,7 +73,7 @@ class TestLetterviewAPI(APITestCase):
         self.assertEqual(1, UserModel.objects.get(id=author_user.id).sent_letter_cnt)
         self.assertEqual(200, response.status_code)
         self.assertEqual(author_user.id, test_letter_obj)
-        self.assertEqual(result["detail"], "편지 작성이 완료 되었습니다.")
+        self.assertEqual(result["detail"], "몽글점수를 100점 획득 하셨습니다!")
 
     def test_inappropriate_content_letter_post(self) -> None:
         """

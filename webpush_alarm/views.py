@@ -20,15 +20,54 @@ from worry_board.models import RequestMessage, WorryBoard
 # from django.views.decorators.http import require_GET, require_POST
 
 
-class CheckLoginView(APIView):
-    def get(self, request):
-        # user = User.objects.get(id = request.user.id)
-        # user.is_login = "True"
-        # user.save()
+# class CheckLoginView(APIView):
+#     def get(self, request):
+#         # user = User.objects.get(id = request.user.id)
+#         # user.is_login = "True"
+#         # user.save()
 
+#         webpush = webpush_request(request.user)
+#         print(webpush)
+#         return Response({"message": webpush})
+
+
+############################################
+
+
+class WebpushView(APIView):
+    def get(self, request):
+        webpush_settings = getattr(settings, "WEBPUSH_SETTINGS", {})
+        vapid_key = webpush_settings.get("VAPID_PUBLIC_KEY")
+        user = request.user
+        return Response({"vapid_key": vapid_key, "user": user.id}, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        try:
+            body = request.body
+            data = json.loads(body)
+            print(data)
+
+            if "head" not in data or "body" not in data or "id" not in data:
+                return JsonResponse(status=400, data={"message": "Invalid data format"})
+
+            user_id = data["id"]
+            print(user_id)
+            user = get_object_or_404(User, pk=user_id)
+            payload = {"head": data["head"], "body": data["body"]}
+            payload = json.dumps(payload)
+            send_notification_to_user(user=user, payload=payload, ttl=100000)
+            print("여기까지 들어옴!!")
+
+            return JsonResponse(status=200, data={"message": "Web push successful"})
+        except TypeError:
+            return JsonResponse(status=500, data={"message": "An error occurred"})
+
+
+class SendWebpushView(APIView):
+    def get(self, request):
         webpush = webpush_request(request.user)
         print(webpush)
-        return Response({"message": webpush})
+        return Response({"message": webpush}, status=status.HTTP_200_OK)
 
 
 def webpush_request(user_obj):
@@ -55,39 +94,3 @@ def webpush_request(user_obj):
         payload = json.dumps(payload)
         return payload
     return "요청이 없습니다"
-
-
-############################################
-
-
-class WebpushView(APIView):
-    def get(self, request):
-        print("home get")
-        webpush_settings = getattr(settings, "WEBPUSH_SETTINGS", {})
-        print(webpush_settings)
-        vapid_key = webpush_settings.get("VAPID_PUBLIC_KEY")
-        print(vapid_key)
-        user = request.user
-        print(user)
-        return Response({"vapid_key": vapid_key, "user": user.id}, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        try:
-            body = request.body
-            data = json.loads(body)
-            print(data)
-
-            if "head" not in data or "body" not in data or "id" not in data:
-                return JsonResponse(status=400, data={"message": "Invalid data format"})
-
-            user_id = data["id"]
-            print(user_id)
-            user = get_object_or_404(User, pk=user_id)
-            payload = {"head": data["head"], "body": data["body"]}
-            payload = json.dumps(payload)
-            send_notification_to_user(user=user, payload=payload, ttl=100000)
-            print("여기까지 들어옴!!")
-
-            return JsonResponse(status=200, data={"message": "Web push successful"})
-        except TypeError:
-            return JsonResponse(status=500, data={"message": "An error occurred"})

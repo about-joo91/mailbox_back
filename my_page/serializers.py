@@ -32,6 +32,24 @@ class LetterSerializer(serializers.ModelSerializer):
     letter_author = serializers.SerializerMethodField()
     received_user = serializers.SerializerMethodField()
     review_data = serializers.SerializerMethodField()
+    font_size = serializers.SerializerMethodField()
+    font_family = serializers.SerializerMethodField()
+    color = serializers.SerializerMethodField()
+
+    def get_font_size(self, obj):
+        if obj.font_size is None:
+            return "1.5vh"
+        return obj.font_size
+
+    def get_font_family(self, obj):
+        if obj.font_family is None:
+            return "Gamja Flower, cursive;"
+        return obj.font_family
+
+    def get_color(self, obj):
+        if obj.color is None:
+            return "black"
+        return obj.color
 
     def get_review_data(self, obj):
         try:
@@ -60,4 +78,7 @@ class LetterSerializer(serializers.ModelSerializer):
             "letter_author",
             "received_user",
             "review_data",
+            "font_size",
+            "color",
+            "font_family",
         ]

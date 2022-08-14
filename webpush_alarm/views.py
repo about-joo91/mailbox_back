@@ -1,8 +1,6 @@
 import json
 
 from django.conf import settings
-from django.http.response import JsonResponse
-from django.shortcuts import get_object_or_404
 
 # from django.views.generic import TemplateView
 from rest_framework import status
@@ -11,10 +9,12 @@ from rest_framework.views import APIView
 
 # from rest_framework_simplejwt.authentication import JWTAuthentication
 from webpush import send_user_notification
-from webpush.utils import send_notification_to_user
 
-from user.models import User
+# from user.models import User
 from worry_board.models import RequestMessage, WorryBoard
+
+# from webpush.utils import send_notification_to_user
+
 
 # from django.views.decorators.csrf import csrf_exempt
 # from django.views.decorators.http import require_GET, require_POST
@@ -41,26 +41,26 @@ class WebpushView(APIView):
         user = request.user
         return Response({"vapid_key": vapid_key, "user": user.id}, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        try:
-            body = request.body
-            data = json.loads(body)
-            print(data)
+    # def post(self, request):
+    #     try:
+    #         body = request.body
+    #         data = json.loads(body)
+    #         print(data)
 
-            if "head" not in data or "body" not in data or "id" not in data:
-                return JsonResponse(status=400, data={"message": "Invalid data format"})
+    #         if "head" not in data or "body" not in data or "id" not in data:
+    #             return JsonResponse(status=400, data={"message": "Invalid data format"})
 
-            user_id = data["id"]
-            print(user_id)
-            user = get_object_or_404(User, pk=user_id)
-            payload = {"head": data["head"], "body": data["body"]}
-            payload = json.dumps(payload)
-            send_notification_to_user(user=user, payload=payload, ttl=100000)
-            print("여기까지 들어옴!!")
+    #         user_id = data["id"]
+    #         print(user_id)
+    #         user = get_object_or_404(User, pk=user_id)
+    #         payload = {"head": data["head"], "body": data["body"]}
+    #         payload = json.dumps(payload)
+    #         send_notification_to_user(user=user, payload=payload, ttl=100000)
+    #         print("여기까지 들어옴!!")
 
-            return JsonResponse(status=200, data={"message": "Web push successful"})
-        except TypeError:
-            return JsonResponse(status=500, data={"message": "An error occurred"})
+    #         return JsonResponse(status=200, data={"message": "Web push successful"})
+    #     except TypeError:
+    #         return JsonResponse(status=500, data={"message": "An error occurred"})
 
 
 class SendWebpushView(APIView):

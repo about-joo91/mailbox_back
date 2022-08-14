@@ -33,6 +33,9 @@ def check_password_in_signup_data(password_data: Dict) -> bool:
 
 
 def get_certification_question_list() -> list:
+    """
+    회원가입시 고르는 certification_question 목록 가져오기
+    """
     certification_questions = CertificationQuestion.objects.all()
     certification_question_list = []
     for question in certification_questions:
@@ -54,6 +57,13 @@ def check_certification_question(certification_data: Dict[str, str]):
     """
     author = User.objects.get(username=certification_data["username"])
     return author.certification_answer == certification_data["certification_answer"]
+
+
+def update_user_certification_question(user_id: int, update_data: Dict[str, str]):
+    user = User.objects.filter(id=user_id)
+    certification_question_id = update_data["certification_question"]
+    certification_answer = update_data["certification_answer"]
+    user.update(certification_question=certification_question_id, certification_answer=certification_answer)
 
 
 def update_user_new_password(update_data: Dict) -> None:

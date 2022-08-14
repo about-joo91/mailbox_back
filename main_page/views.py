@@ -17,6 +17,7 @@ from main_page.services.letter_service import (
 from main_page.services.main_gage_service import (
     best_review_list_service,
     live_review_list_service,
+    main_page_data_and_user_profile,
     my_letter_count,
     worry_worryboard_union,
 )
@@ -25,8 +26,7 @@ from worry_board.serializers import WorryBoardSerializer
 
 from .models import Letter as LetterModel
 from .models import LetterReviewLike as LetterReviewLikeModel
-from .models import WorryCategory as WorryCategoryModel
-from .serializers import BestReviewSerializer, LiveReviewSerializer, MainPageDataSerializer
+from .serializers import BestReviewSerializer, LiveReviewSerializer
 
 # Create your views here.
 
@@ -108,15 +108,8 @@ class MainPageView(APIView):
     def get(self, request):
         cur_user = request.user
 
-        not_read_my_letter_count = my_letter_count(request.user.id)
-
-        worry_categories = WorryCategoryModel.objects.prefetch_related("worryboard_set").all()
-        order_by_cate_worry_list = worry_worryboard_union(worry_categories)
-        main_page_data_and_user_profile = {}
         try:
-            main_page_data_and_user_profile = MainPageDataSerializer(
-                UserModel.objects.select_related("userprofile").get(id=cur_user.id)
-            ).data
+            main_page_data_and_user_profile_data = main_page_data_and_user_profile(cur_user.id)
         except UserModel.userprofile.RelatedObjectDoesNotExist:
             return Response({"detail": "유저프로필이 없습니다 생성해주세요."}, status=status.HTTP_404_NOT_FOUND)
         except UserModel.monglegrade.RelatedObjectDoesNotExist:
@@ -125,13 +118,15 @@ class MainPageView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        not_read_my_letter_count = my_letter_count(cur_user.id)
+        order_by_cate_worry_list = worry_worryboard_union()
         grade_order_best_reviews = best_review_list_service()
         create_order_live_reviews = live_review_list_service()
 
         return Response(
             {
                 "letter_count": not_read_my_letter_count,
-                "main_page_data_and_user_profile": main_page_data_and_user_profile,
+                "main_page_data_and_user_profile": main_page_data_and_user_profile_data,
                 "order_by_cate_worry_list": WorryBoardSerializer(
                     order_by_cate_worry_list, context={"author": cur_user}, many=True
                 ).data,

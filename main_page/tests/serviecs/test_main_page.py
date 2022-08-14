@@ -103,18 +103,9 @@ class TestMainPageServices(TestCase):
             for cate_idx in range(first_cate, last_cate + 1):
                 WorryBoardModel.objects.create(author_id=user.id, content="ttttt", category_id=cate_idx)
 
-        worry_categories = WorryCategoryModel.objects.prefetch_related("worryboard_set").all()
-        worry_worryboard_union(worry_categories)
+        worry_worryboard_union()
 
-        test_board = WorryBoardModel.objects.filter(category_id=first_cate).order_by("-create_date")[:3]
-
-        count = 0
-        for worry_union_idx in worry_worryboard_union(worry_categories):
-            if worry_union_idx in test_board:
-                count += 1
-
-        self.assertEqual(18, worry_worryboard_union(worry_categories).count())
-        self.assertEqual(3, count)
+        self.assertEqual(18, worry_worryboard_union().count())
 
     def test_when_not_queryset_worryboard_union_service(self) -> None:
         """

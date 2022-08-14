@@ -16,13 +16,7 @@ class LetterSerilaizer(serializers.ModelSerializer):
 
     class Meta:
         model = LetterModel
-        fields = [
-            "letter_author",
-            "title",
-            "content",
-            "create_date",
-            "worryboard",
-        ]
+        fields = ["letter_author", "title", "content", "create_date", "worryboard", "color", "font_size", "font_family"]
 
 
 class MainPageDataSerializer(serializers.ModelSerializer):

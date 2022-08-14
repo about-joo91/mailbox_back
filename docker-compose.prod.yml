@@ -1,5 +1,17 @@
 version: '3.9'
 services:
+  redis:
+    image: redis:alpine
+    container_name: redis_service
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    ports:
+      - 6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - ./redisdata:/data
   web_server:
     image: aboutjoo/mail_box:latest
     env_file:
@@ -8,3 +20,5 @@ services:
       - "80:8000"
     command: gunicorn --bind 0.0.0.0:8000 --workers=5 mail_box.wsgi:application  &
     working_dir: /app/
+    depends_on:
+      - redis

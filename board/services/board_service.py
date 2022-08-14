@@ -26,15 +26,18 @@ def get_paginated_board_data(page_num: int, author: UserModel, is_mine: str) -> 
     """
     page_num을 통해서 board 데이터를 가져오는 service
     """
+
     if is_mine == "True":
-        paginated_board_data = (
+        my_paginated_board_data = (
             BoardModel.objects.select_related("author")
             .prefetch_related("boardcomment_set__author")
             .prefetch_related("boardlike_set")
             .filter(author=author)
             .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
         )
+        paginated_boards = BoardSerializer(my_paginated_board_data, many=True, context={"author": author}).data
         total_count = BoardModel.objects.filter(author=author).count()
+
     else:
         paginated_board_data = (
             BoardModel.objects.select_related("author")
@@ -44,8 +47,9 @@ def get_paginated_board_data(page_num: int, author: UserModel, is_mine: str) -> 
             .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
         )
 
+        paginated_boards = BoardSerializer(paginated_board_data, many=True, context={"author": author}).data
         total_count = BoardModel.objects.count()
-    paginated_boards = BoardSerializer(paginated_board_data, many=True, context={"author": author}).data
+
     return paginated_boards, total_count
 
 

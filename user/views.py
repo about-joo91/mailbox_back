@@ -21,6 +21,7 @@ from user.services.user_signup_login_service import (
     get_certification_question_list,
     get_user_signup_data,
     post_user_signup_data,
+    update_user_certification_question,
     update_user_new_password,
 )
 
@@ -88,16 +89,32 @@ class UserCertificationView(APIView):
     """
 
     def get(self, request) -> Response:
-        username = self.request.query_params.get("username")
-        author = check_is_user(username)
-        user_certification_question = UserCertificationSerializer(author).data
-        return Response({"certification_request": user_certification_question})
+        try:
+            username = self.request.query_params.get("username")
+            author = check_is_user(username)
+            user_certification_question = UserCertificationSerializer(author).data
+            return Response({"certification_request": user_certification_question})
+        except AttributeError:
+            return Response({"detail": "회원가입시 입력하지 않아 비밀번호를 찾을 수 없습니다"}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request: Request) -> Response:
         if check_certification_question(request.data):
             return Response({"detail": "본인인증에 성공하였습니다."}, status=status.HTTP_200_OK)
         else:
             return Response({"detail": "답변이 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserCertificationupdateView(APIView):
+    """
+    user의 본인 확인 질문을 업데이트 하는 View
+    """
+
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def put(self, request: Request) -> Response:
+        update_user_certification_question(request.user.id, request.data)
+        return Response({"detail": "본인확인 질문이 업데이트 되었습니다"}, status=status.HTTP_200_OK)
 
 
 class UserProfileView(APIView):

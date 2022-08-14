@@ -56,7 +56,7 @@ class TestLetterReviewView(APITestCase):
         result = response.json()
 
         self.assertEqual(201, response.status_code)
-        self.assertEqual("리뷰가 생성되었습니다.", result["detail"])
+        self.assertEqual("햇살 님에게 몽글점수를 50점 주셨습니다!", result["detail"])
 
     def test_when_invalid_data_is_given_post_letter_review(self) -> None:
         """

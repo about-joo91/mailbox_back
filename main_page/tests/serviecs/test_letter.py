@@ -13,7 +13,7 @@ from main_page.services.letter_service import (
     letter_review_like_service,
 )
 from main_page.services.main_gage_service import my_letter_count
-from user.models import MongleLevel
+from user.models import CertificationQuestion, MongleLevel
 from user.models import User as UserModel
 from user.services.user_signup_login_service import post_user_signup_data
 from worry_board.models import WorryBoard as WorryBoardModel
@@ -22,8 +22,21 @@ from worry_board.models import WorryBoard as WorryBoardModel
 class TestLoginUser(TestCase):
     @classmethod
     def setUpTestData(cls):
-        user_data = {"username": "hajin_test", "password": "p@ssword", "nickname": "hajin"}
-        user_data_author = {"username": "test_user", "password": "p@ssword", "nickname": "author"}
+        certification_question = CertificationQuestion.objects.create(certification_question="질문")
+        user_data = {
+            "username": "hajin_test",
+            "password": "p@ssword",
+            "nickname": "hajin",
+            "certification_question": certification_question.id,
+            "certification_answer": "답변",
+        }
+        user_data_author = {
+            "username": "test_user",
+            "password": "p@ssword",
+            "nickname": "author",
+            "certification_question": certification_question.id,
+            "certification_answer": "답변",
+        }
         MongleLevel.objects.create(id=1)
         post_user_signup_data(user_data)
         post_user_signup_data(user_data_author)

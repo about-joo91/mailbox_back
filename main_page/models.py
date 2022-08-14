@@ -14,6 +14,9 @@ class Letter(models.Model):
     content = models.TextField()
     create_date = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    font_size = models.CharField(max_length=30, null=True)
+    font_family = models.CharField(max_length=30, null=True)
+    color = models.CharField(max_length=30, null=True)
 
 
 class LetterReview(models.Model):

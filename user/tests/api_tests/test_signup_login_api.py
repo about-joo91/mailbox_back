@@ -23,6 +23,7 @@ class TestUserRegistrationAPI(APITestCase):
         user_data = {
             "username": "won1",
             "password": "qwer1234%",
+            "check_password": "qwer1234%",
             "nickname": "won1122",
             "certification_question": certification_question.id,
             "certification_answer": "답변",

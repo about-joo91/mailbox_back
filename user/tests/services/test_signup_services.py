@@ -16,7 +16,7 @@ class TestUserRegistrationAPI(APITestCase):
         """
         url = reverse("user_view")
         UserModel.objects.create(username="won1", nickname="won")
-        user_data = {"username": "won1", "password": "qwer1234%", "nickname": "won1"}
+        user_data = {"username": "won1", "password": "qwer1234%", "check_password": "qwer1234%", "nickname": "won1"}
         response = self.client.post(url, user_data)
         result = response.json()
 
@@ -28,7 +28,7 @@ class TestUserRegistrationAPI(APITestCase):
         아이디가 4자 이상이 아닌 경우
         """
         url = reverse("user_view")
-        user_data = {"username": "won", "password": "qwer1234%", "nickname": "won1122"}
+        user_data = {"username": "won", "password": "qwer1234%", "check_password": "qwer1234%", "nickname": "won1122"}
         response = self.client.post(url, user_data)
         result = response.json()
 
@@ -40,7 +40,7 @@ class TestUserRegistrationAPI(APITestCase):
         닉네임 입력하지 않은 경우
         """
         url = reverse("user_view")
-        user_data = {"username": "won1", "password": "qwer1234%", "nickname": ""}
+        user_data = {"username": "won1", "password": "qwer1234%", "check_password": "qwer1234%", "nickname": ""}
         response = self.client.post(url, user_data)
         result = response.json()
 
@@ -57,6 +57,7 @@ class TestUserRegistrationAPI(APITestCase):
         user_data = {
             "username": "won1",
             "password": "qwer1234%",
+            "check_password": "qwer1234%",
             "nickname": "won",
             "certification_question": certification_question.id,
             "certification_answer": "답변",
@@ -77,6 +78,7 @@ class TestUserRegistrationAPI(APITestCase):
         user_data = {
             "username": "won1",
             "password": "qwer123",
+            "check_password": "qwer123",
             "nickname": "won1122",
             "certification_question": certification_question.id,
             "certification_answer": "답변",
@@ -96,6 +98,7 @@ class TestUserRegistrationAPI(APITestCase):
         user_data = {
             "username": "won1",
             "password": "qwer1234",
+            "check_password": "qwer1234",
             "nickname": "won1122",
             "certification_question": certification_question.id,
             "certification_answer": "질문",

@@ -2,7 +2,7 @@ from typing import Dict
 
 from django.db import transaction
 
-from user.models import User
+from user.models import CertificationQuestion, User
 from user.serializers import NewPasswordSerializer, UserSignupSerializer
 
 
@@ -23,11 +23,28 @@ def post_user_signup_data(user_data: Dict) -> None:
     user_data_serializer.save()
 
 
-def check_author(certification_data: Dict[str, str]):
+def check_password_in_signup_data(password_data: Dict) -> bool:
+    """
+    회원가입시 비밀번호 대조
+    """
+    password = password_data["password"]
+    check_password = password_data["check_password"]
+    return password == check_password
+
+
+def get_certification_question_list() -> list:
+    certification_questions = CertificationQuestion.objects.all()
+    certification_question_list = []
+    for question in certification_questions:
+        certification_question_list.append(question.certification_question)
+    return certification_question_list
+
+
+def check_is_user(username: str):
     """
     username을 기반으로 User모델에서 탐색
     """
-    check_user = User.objects.get(username=certification_data["username"])
+    check_user = User.objects.get(username=username)
     return check_user
 
 

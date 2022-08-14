@@ -127,6 +127,11 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserCertificationSerializer(serializers.ModelSerializer):
+    certification_question = serializers.SerializerMethodField()
+
+    def get_certification_question(self, obj):
+        return obj.certification_question.certification_question
+
     class Meta:
         model = UserModel
         fields = ["username", "certification_question"]

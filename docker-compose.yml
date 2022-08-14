@@ -1,31 +1,106 @@
 version: '3.9'
 services:
+  redis:
+    image: redis:alpine
+    container_name: redis_service
+    labels:
+      - "name=redis"
+      - "mode=standalone"
+    ports:
+      - 6379:6379
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - ./redisdata:/data
   mail_box:
     build: .
-    command: python manage.py migrate && python manage.py runserver
+    command: python manage.py runserver 0.0.0.0:8000
     ports:
       - 8000:8000
     working_dir: /app/
     volumes:
       - ./:/app/
     env_file:
-      - ./.env.dev
+      - ./.env
     expose:
       - 8000
     depends_on:
+      - redis
       - db
+      - elasticsearch
   db:
     image: mysql:8.0.25
     restart: always
-    command: mysqld --character-set-server=utf8 --collation-server=utf8_general_ci --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: "mail_box"
-      MYSQL_USER: "root"
-      MYSQL_PASSWORD: 1234
+    cap_add:
+      - SYS_NICE
     volumes:
-      - mysql_db:/var/lib/mysql
+      - db:/var/lib/mysql
     ports:
       - 3306:3306
+  elasticsearch:
+    build:
+      context: elasticsearch/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./elasticsearch/config/elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+        read_only: true
+      - type: volume
+        source: elasticsearch
+        target: /usr/share/elasticsearch/data
+    depends_on:
+      - db
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      # Use single node discovery in order to disable production mode and avoid bootstrap checks
+      # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+      discovery.type: single-node
+  logstash:
+    build:
+      context: logstash/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./logstash/config/logstash.yml
+        target: /usr/share/logstash/config/logstash.yml
+        read_only: true
+      - type: bind
+        source: ./logstash/pipeline
+        target: /usr/share/logstash/pipeline
+        read_only: true
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    build:
+      context: kibana/
+      args:
+        ELK_VERSION: $ELK_VERSION
+    volumes:
+      - type: bind
+        source: ./kibana/config/kibana.yml
+        target: /usr/share/kibana/config/kibana.yml
+        read_only: true
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
 volumes:
-  mysql_db:
+  elasticsearch:
+  db:

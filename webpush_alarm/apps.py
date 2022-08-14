@@ -6,4 +6,4 @@ class WebpushAlarmConfig(AppConfig):
     name = "webpush_alarm"
 
     # def ready(self):
-    # import webpush_alarm.signals
+    #     import webpush_alarm.signals

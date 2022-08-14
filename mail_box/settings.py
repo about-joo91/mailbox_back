@@ -79,6 +79,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://*",
@@ -102,10 +103,12 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
     "access-control-allow-origin",
+    "ttl",
 ]
 CSRF_TRUSTED_ORIGINS = ["http://*"]
 
 ROOT_URLCONF = "mail_box.urls"
+
 
 TEMPLATES = [
     {

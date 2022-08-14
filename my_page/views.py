@@ -159,7 +159,9 @@ class LetterReviewView(APIView):
             cur_user = request.user
             review_data = request.data
             create_letter_review(user=cur_user, letter_id=letter_id, review_data=review_data)
-            return Response({"detail": "리뷰가 생성되었습니다."}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"detail": f"햇살 님에게 몽글점수를 {review_data['grade'] * 10 }점 주셨습니다!"}, status=status.HTTP_201_CREATED
+            )
         except exceptions.ValidationError:
             return Response({"detail": "리뷰 생성에 실패했습니다. 리뷰를 다시 한번 확인하신 후에 시도해주세요."}, status=status.HTTP_400_BAD_REQUEST)
         except TypeError:

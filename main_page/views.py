@@ -162,7 +162,7 @@ class LetterView(APIView):
             break
         try:
             letter_post_service(letter_author=request.user, request_data=request.data)
-            return Response({"detail": "편지 작성이 완료 되었습니다."}, status=status.HTTP_200_OK)
+            return Response({"detail": "몽글점수를 100점 획득 하셨습니다!"}, status=status.HTTP_200_OK)
         except django.db.utils.IntegrityError:
             return Response({"detail": "이미 편지를 작성 하셨습니다."}, status=status.HTTP_400_BAD_REQUEST)
 

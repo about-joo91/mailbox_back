@@ -56,7 +56,7 @@ class BoardView(APIView):
         try:
             if check_is_it_clean_text(request.data["content"]):
                 create_board_data(request.data, request.user)
-                return Response({"detail": "게시글이 생성되었습니다."}, status=status.HTTP_200_OK)
+                return Response({"detail": "몽글점수를 5점 획득 하셨습니다!"}, status=status.HTTP_200_OK)
             else:
                 return Response(
                     {"detail": "부적절한 내용이 담겨있어 게시글을 올릴 수 없습니다"},

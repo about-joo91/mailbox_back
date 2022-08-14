@@ -1,6 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
 
+from user.models import CertificationQuestion as CertificationQuestionModel
 from user.models import MongleLevel
 from user.models import User as UserModel
 
@@ -18,7 +19,15 @@ class TestUserRegistrationAPI(APITestCase):
 
     def test_signup(self) -> None:
         url = reverse("user_view")
-        user_data = {"username": "won1", "password": "qwer1234%", "nickname": "won1122"}
+        certification_question = CertificationQuestionModel.objects.create(certification_question="질문")
+        user_data = {
+            "username": "won1",
+            "password": "qwer1234%",
+            "check_password": "qwer1234%",
+            "nickname": "won1122",
+            "certification_question": certification_question.id,
+            "certification_answer": "답변",
+        }
         response = self.client.post(url, user_data)
         result = response.json()
 

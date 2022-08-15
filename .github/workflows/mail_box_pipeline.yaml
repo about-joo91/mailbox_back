@@ -78,4 +78,4 @@ jobs:
           username: ubuntu
           key: ${{ secrets.PRIVATE_KEY }}
           port: 22
-          script: docker-compose -f docker-compose.prod.yml pull && docker-compose -f docker-compose.prod.yml up -d
+          script: docker-compose -f docker-compose.prod.yml pull && docker-compose -f docker-compose.prod.yml up --build -d

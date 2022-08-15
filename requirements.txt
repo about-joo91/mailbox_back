@@ -25,6 +25,7 @@ http-ece==1.1.0
 huggingface-hub==0.8.1
 identify==2.5.2
 idna==3.3
+isort==5.10.1
 jmespath==1.0.1
 joblib==1.1.0
 JPype1==1.4.0

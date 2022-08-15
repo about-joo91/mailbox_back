@@ -7,9 +7,6 @@ from user.models import User as UserModel
 from worry_board.models import WorryBoard as WorryBoardModel
 from worry_board.serializers import WorryBoardSerializer
 
-# import requests
-
-
 RECOMMEND_BOARD = 7
 ALL_WORRY_BOARD = 0
 

@@ -24,6 +24,7 @@ services:
       - redis
       - elasticsearch
   elasticsearch:
+    working_dir: /app/
     build:
       context: ./elasticsearch/
       args:
@@ -45,6 +46,7 @@ services:
       # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
   logstash:
+    working_dir: /app/
     env_file:
       - ./.env.prod
     build:
@@ -70,6 +72,7 @@ services:
     depends_on:
       - elasticsearch
   kibana:
+    working_dir: /app/
     build:
       context: ./kibana/
       args:

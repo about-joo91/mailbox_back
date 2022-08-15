@@ -98,6 +98,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     categories = serializers.SerializerMethodField()
     mongle_grade = serializers.SerializerMethodField(read_only=True)
+    certification_question_id = serializers.SerializerMethodField(read_only=True)
+    certification_answer = serializers.SerializerMethodField(read_only=True)
 
     def get_categories(self, obj):
         return [{"id": cate.id, "cate_name": cate.category.cate_name} for cate in obj.userprofilecategory_set.all()]
@@ -107,6 +109,12 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         return obj.user.nickname
+
+    def get_certification_question_id(self, obj):
+        return obj.user.certification_question.id
+
+    def get_certification_answer(self, obj):
+        return obj.user.certification_answer
 
     def update(self, instance, validated_data):
         for key, value in validated_data.items():
@@ -123,6 +131,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "fullname",
             "profile_img",
             "categories",
+            "certification_question_id",
+            "certification_answer",
         ]
 
 

@@ -128,8 +128,13 @@ class UserProfileView(APIView):
     def get(self, request: Request) -> Response:
         cur_user = request.user
         try:
+            certification_question_list = get_certification_question_list()
+
             profile_data = get_user_profile_data(cur_user.id)
-            return Response(profile_data, status=status.HTTP_200_OK)
+            return Response(
+                {"profile_data": profile_data, "certification_question_list": certification_question_list},
+                status=status.HTTP_200_OK,
+            )
         except UserProfileModel.DoesNotExist:
             UserProfileModel.objects.create(user=cur_user)
             return Response({"detail": "잘못된 접근입니다. 다시 시도해주세요."}, status=status.HTTP_400_BAD_REQUEST)

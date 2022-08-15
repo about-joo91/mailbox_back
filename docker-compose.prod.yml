@@ -29,8 +29,6 @@ services:
     working_dir: /app/
     build:
       context: ./elasticsearch/
-      args:
-        ELK_VERSION: $ELK_VERSION
     volumes:
       - type: bind
         source: ./elasticsearch/config/elasticsearch.yml
@@ -53,8 +51,6 @@ services:
       - ./.env.prod
     build:
       context: ./logstash/
-      args:
-        ELK_VERSION: $ELK_VERSION
     volumes:
       - type: bind
         source: ./logstash/config/logstash.yml
@@ -76,9 +72,7 @@ services:
   kibana:
     working_dir: /app/
     build:
-      context: ./kibana/
-      args:
-        ELK_VERSION: $ELK_VERSION
+      context: kibana/
     volumes:
       - type: bind
         source: ./kibana/config/kibana.yml

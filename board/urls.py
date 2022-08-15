@@ -8,4 +8,5 @@ urlpatterns = [
     path("like/<int:board_id>", views.BorderLikeView.as_view()),
     path("comment/", views.BorderCommentView.as_view()),
     path("comment/<int:comment_id>", views.BorderCommentView.as_view()),
+    path("search", views.SearchView.as_view()),
 ]

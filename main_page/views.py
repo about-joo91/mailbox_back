@@ -182,3 +182,15 @@ class LetterisReadView(APIView):
 
         except LetterModel.DoesNotExist:
             return Response({"detail": "자신이 받은 편지가 아닙니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CheckUserCertification(APIView):
+    """
+    로그인 시 유저의 질문이 설정이 되어있는가를 체크하는 View
+    """
+
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    def get(self, request):
+        return request.user.certification_question

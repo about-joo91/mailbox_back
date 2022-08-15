@@ -22,6 +22,10 @@ from board.services.board_service import (
 )
 from elasticsearch import Elasticsearch
 
+from .serializers import BoardSerializer
+
+MAX_PAGE = 10
+
 
 # Create your views here.
 class BoardView(APIView):
@@ -196,11 +200,40 @@ class SearchView(APIView):
 
         search_type = request.query_params.get("search_type")
         search_word = request.query_params.get("search_word")
+        page_num = int(request.query_params.get("page_num"))
+        author = request.user
+
         if not search_word:
             return Response({"detail": "검색어는 필수값입니다."}, status=status.HTTP_400_BAD_REQUEST)
+
         headers = {"Content-Type": "application/json"}
         results = client.search(
-            index="mail_box", headers=headers, body={"query": {"match": {search_type: search_word}}}
+            index="mail_box",
+            headers=headers,
+            body={
+                "sort": ["_score"],
+                "from": page_num,
+                "size": MAX_PAGE,
+                "query": {"match": {search_type: search_word}},
+            },
         )
+        searched_board_ids = [x["_id"] for x in results["hits"]["hits"]]
 
-        return Response(results["hits"]["hits"], status=status.HTTP_200_OK)
+        my_paginated_board_data = (
+            BoardModel.objects.select_related("author")
+            .prefetch_related("boardcomment_set__author")
+            .prefetch_related("boardlike_set")
+            .filter(id__in=searched_board_ids)
+            .order_by("-create_date")
+        )
+        paginated_boards = BoardSerializer(my_paginated_board_data, many=True, context={"author": author}).data
+
+        user_profile_data = get_user_profile_data(author)
+        return Response(
+            {
+                "boards": paginated_boards,
+                "total_count": len(searched_board_ids),
+                "user_profile_data": user_profile_data,
+            },
+            status=status.HTTP_200_OK,
+        )

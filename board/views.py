@@ -200,7 +200,7 @@ class SearchView(APIView):
 
         search_type = request.query_params.get("search_type")
         search_word = request.query_params.get("search_word")
-        page_num = int(request.query_params.get("page_num"))
+        page_num = (int(request.query_params.get("page_num")) - 1) * 10
         author = request.user
 
         if not search_word:
@@ -217,6 +217,7 @@ class SearchView(APIView):
                 "query": {"match": {search_type: search_word}},
             },
         )
+        total_count = results["hits"]["total"]["value"]
         searched_board_ids = [x["_id"] for x in results["hits"]["hits"]]
 
         my_paginated_board_data = (
@@ -227,12 +228,11 @@ class SearchView(APIView):
             .order_by("-create_date")
         )
         paginated_boards = BoardSerializer(my_paginated_board_data, many=True, context={"author": author}).data
-
         user_profile_data = get_user_profile_data(author)
         return Response(
             {
                 "boards": paginated_boards,
-                "total_count": len(searched_board_ids),
+                "total_count": total_count,
                 "user_profile_data": user_profile_data,
             },
             status=status.HTTP_200_OK,

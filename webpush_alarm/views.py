@@ -19,8 +19,8 @@ class SendWebpushView(APIView):
     def get(self, request):
 
         payload = {
-            "head": "우와!",
-            "body": "확인하지 않은 요청이 존재합니다. 나에게 온 요청을 확인해주세요!",
+            "head": "💌 편지 요청 확인 💌",
+            "body": "아직 확인하지 않은 요청이 있습니다. 편지 받기 탭에서 내게 온 요청을 확인 해주세요!",
             "icon": "https://user-images.githubusercontent.com/55477835/181283419-20705c71-a20a-46ab-a30e-bb4edece1670.png",  # 몽글이 이미지 링크를 넣자
             "url": "/letter/received_request.html",  # 내가받은 요청 페이지로 가자
         }

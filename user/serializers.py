@@ -118,7 +118,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
         return obj.user.nickname
 
     def get_certification_question_id(self, obj):
-        return obj.user.certification_question.id
+        if obj.user.certification_question:
+            return obj.user.certification_question.id
+        return None
 
     def get_certification_answer(self, obj):
         return obj.user.certification_answer

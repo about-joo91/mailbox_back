@@ -42,7 +42,6 @@ services:
       - 3306:3306
   elasticsearch:
     container_name: elasticsearch
-    working_dir: /app/
     build:
       context: elasticsearch/
       args:
@@ -68,7 +67,6 @@ services:
   logstash:
     env_file:
       - ./.env.dev
-    working_dir: /app/
     build:
       context: logstash/
       args:
@@ -92,7 +90,6 @@ services:
     depends_on:
       - elasticsearch
   kibana:
-    working_dir: /app/
     build:
       context: kibana/
       args:

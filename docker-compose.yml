@@ -43,7 +43,7 @@ services:
   elasticsearch:
     container_name: elasticsearch
     build:
-      context: elasticsearch/
+      context: ./elasticsearch/
       args:
         ELK_VERSION: $ELK_VERSION
     volumes:
@@ -68,7 +68,7 @@ services:
     env_file:
       - ./.env.dev
     build:
-      context: logstash/
+      context: ./logstash/
       args:
         ELK_VERSION: $ELK_VERSION
     volumes:
@@ -91,7 +91,7 @@ services:
       - elasticsearch
   kibana:
     build:
-      context: kibana/
+      context: ./kibana/
       args:
         ELK_VERSION: $ELK_VERSION
     volumes:

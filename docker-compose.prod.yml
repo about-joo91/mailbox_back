@@ -24,7 +24,6 @@ services:
       - redis
       - elasticsearch
   elasticsearch:
-    working_dir: /app/
     build:
       context: ./elasticsearch/
       args:
@@ -48,7 +47,6 @@ services:
   logstash:
     env_file:
       - ./.env.prod
-    working_dir: /app/
     build:
       context: ./logstash/
       args:
@@ -72,7 +70,6 @@ services:
     depends_on:
       - elasticsearch
   kibana:
-    working_dir: /app/
     build:
       context: ./kibana/
       args:

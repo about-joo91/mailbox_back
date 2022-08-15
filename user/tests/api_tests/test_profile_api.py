@@ -2,6 +2,7 @@ import json
 
 from rest_framework.test import APIClient, APITestCase
 
+from user.models import CertificationQuestion
 from user.models import MongleGrade as MongleGradeModel
 from user.models import MongleLevel as MongleLevelModel
 from user.models import User as UserModel
@@ -16,8 +17,10 @@ class TestProfileAPI(APITestCase):
 
     @classmethod
     def setUpTestData(cls):
-
-        user = UserModel.objects.create(username="joo", nickname="joo")
+        certification_question = CertificationQuestion.objects.create(certification_question="질문")
+        user = UserModel.objects.create(
+            username="joo", nickname="joo", certification_question=certification_question, certification_answer="답변"
+        )
         UserProfileModel.objects.create(user=user)
         mongle_level = MongleLevelModel.objects.create()
         MongleGradeModel.objects.create(user=user, mongle_level=mongle_level)
@@ -41,10 +44,10 @@ class TestProfileAPI(APITestCase):
         response = client.get(url)
         result = response.json()
 
-        self.assertEqual(result["fullname"], user.userprofile.fullname)
-        self.assertEqual(result["description"], user.userprofile.description)
-        self.assertEqual(result["mongle_grade"], MongleGradeSerializer(user.monglegrade).data)
-        self.assertEqual(result["profile_img"], user.userprofile.profile_img)
+        self.assertEqual(result["profile_data"]["fullname"], user.userprofile.fullname)
+        self.assertEqual(result["profile_data"]["description"], user.userprofile.description)
+        self.assertEqual(result["profile_data"]["mongle_grade"], MongleGradeSerializer(user.monglegrade).data)
+        self.assertEqual(result["profile_data"]["profile_img"], user.userprofile.profile_img)
 
     def test_when_user_profile_is_none_in_get_user_profile(self) -> None:
         """

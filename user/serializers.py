@@ -4,6 +4,8 @@ from .models import MongleGrade, MongleLevel
 from .models import User as UserModel
 from .models import UserProfile as UserProfileModel
 
+MONGLE_GRADE_LIST = [0, 200, 600, 1200, 2500]
+
 
 class UserSignupSerializer(serializers.ModelSerializer):
     def validate(self, data):
@@ -80,8 +82,10 @@ class NewPasswordSerializer(serializers.ModelSerializer):
 
 
 class MongleGradeSerializer(serializers.ModelSerializer):
+
     mongle_image = serializers.SerializerMethodField()
     level = serializers.SerializerMethodField()
+    left_grade = serializers.SerializerMethodField()
 
     def get_mongle_image(self, obj):
         return obj.mongle_level.mongle_image
@@ -89,15 +93,20 @@ class MongleGradeSerializer(serializers.ModelSerializer):
     def get_level(self, obj):
         return obj.mongle_level.level
 
+    def get_left_grade(self, obj):
+        return int(MONGLE_GRADE_LIST[obj.mongle_level.level]) - obj.grade
+
     class Meta:
-        fields = ["mongle_image", "level", "grade"]
         model = MongleGrade
+        fields = ["mongle_image", "level", "grade", "left_grade"]
 
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     categories = serializers.SerializerMethodField()
     mongle_grade = serializers.SerializerMethodField(read_only=True)
+    certification_question_id = serializers.SerializerMethodField(read_only=True)
+    certification_answer = serializers.SerializerMethodField(read_only=True)
 
     def get_categories(self, obj):
         return [{"id": cate.id, "cate_name": cate.category.cate_name} for cate in obj.userprofilecategory_set.all()]
@@ -107,6 +116,14 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         return obj.user.nickname
+
+    def get_certification_question_id(self, obj):
+        if obj.user.certification_question:
+            return obj.user.certification_question.id
+        return None
+
+    def get_certification_answer(self, obj):
+        return obj.user.certification_answer
 
     def update(self, instance, validated_data):
         for key, value in validated_data.items():
@@ -123,6 +140,8 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "fullname",
             "profile_img",
             "categories",
+            "certification_question_id",
+            "certification_answer",
         ]
 
 

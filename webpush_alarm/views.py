@@ -2,8 +2,8 @@ from django.conf import settings
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from webpush import send_user_notification
 
+from webpush import send_user_notification
 from worry_board.models import RequestMessage, WorryBoard
 
 
@@ -17,9 +17,7 @@ class GetinfoView(APIView):
 
 class SendWebpushView(APIView):
     def get(self, request):
-
         try:
-
             payload = {
                 "head": "💌 편지 요청 확인 💌",
                 "body": "아직 확인하지 않은 요청이 있습니다. 편지 받기 탭에서 내게 온 요청을 확인 해주세요!",

@@ -24,9 +24,8 @@ services:
       - redis
       - elasticsearch
   elasticsearch:
-    working_dir: /app/
     build:
-      context: elasticsearch/
+      context: /app/elasticsearch/
       args:
         ELK_VERSION: $ELK_VERSION
     volumes:
@@ -48,9 +47,8 @@ services:
   logstash:
     env_file:
       - ./.env.prod
-    working_dir: /app/
     build:
-      context: logstash/
+      context: /app/logstash/
       args:
         ELK_VERSION: $ELK_VERSION
     volumes:
@@ -72,9 +70,8 @@ services:
     depends_on:
       - elasticsearch
   kibana:
-    working_dir: /app/
     build:
-      context: kibana/
+      context: /app/kibana/
       args:
         ELK_VERSION: $ELK_VERSION
     volumes:

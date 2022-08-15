@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ["MONGLE_SECRET_KEY"]
 REDIS_HOST = os.environ["MONGLE_REDIS_HOST"]
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "13.209.201.47", "172.31.56.122", "www.api-mongle.shop", "api-mongle.shop"]
 
@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     "worry_board",
     "user",
     "recommendation",
+    "webpush",
+    "webpush_alarm",
 ]
 
 REST_FRAMEWORK = {
@@ -77,6 +79,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
     "http://*",
@@ -100,10 +103,12 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
     "access-control-allow-origin",
+    "ttl",
 ]
 CSRF_TRUSTED_ORIGINS = ["http://*"]
 
 ROOT_URLCONF = "mail_box.urls"
+
 
 TEMPLATES = [
     {
@@ -216,3 +221,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
 
 SCHEDULER_DEFAULT = True
+
+
+WEBPUSH_SETTINGS = {
+    "VAPID_PUBLIC_KEY": "BDyiIRr-ZM0pP8wruE2vA4Vb4WQVoZ_kCDgl-EM1fdx0KQbAdhzBfMx5syBk68z54ECawJ8KMz2ujEDnriV22_k",
+    "VAPID_PRIVATE_KEY": "1cIu0eo44g9poEt0qX3xLR3R9ch5NMbj6WP4GmvpsWo",
+    "VAPID_ADMIN_EMAIL": "fortest0528@example.com",
+}

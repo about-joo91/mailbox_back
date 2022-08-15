@@ -20,6 +20,8 @@ services:
       - "80:8000"
     command: gunicorn --bind 0.0.0.0:8000 --workers=5 mail_box.wsgi:application  &
     working_dir: /app/
+    volumes:
+      - ./:/app/
     depends_on:
       - redis
       - elasticsearch
@@ -46,9 +48,9 @@ services:
       # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
   logstash:
+    working_dir: /app/
     env_file:
       - ./.env.prod
-    working_dir: /app/
     build:
       context: ./logstash/
       args:

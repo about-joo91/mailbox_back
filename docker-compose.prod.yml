@@ -20,6 +20,8 @@ services:
       - "80:8000"
     command: gunicorn --bind 0.0.0.0:8000 --workers=5 mail_box.wsgi:application  &
     working_dir: /app/
+    volumes:
+      - ./:/app/
     depends_on:
       - redis
       - elasticsearch

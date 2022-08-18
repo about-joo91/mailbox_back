@@ -30,7 +30,6 @@ www.mongle.site
 <img style="width:250px;" src="https://user-images.githubusercontent.com/55477835/182720832-aec05e94-6c21-401d-9183-03b5a5c57f5b.png">
 <img style="width:250px;;" src="https://user-images.githubusercontent.com/55477835/182720902-1648eb3f-1735-4cfb-8379-04393f284462.png">
 </p>
-## 몽글 기능
 
 ![20220818152045](https://user-images.githubusercontent.com/102797869/185308909-658e2d00-4722-4e0f-80ab-bb812a15c9b1.png)
 

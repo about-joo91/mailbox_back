@@ -10,10 +10,10 @@ from .forms import SubscriptionForm, WebPushForm
 
 
 class SaveinfoView(APIView):
+    authentication_classes = [JWTAuthentication]
+
     @csrf_exempt
     def post(self, request):
-        authentication_classes = [JWTAuthentication]
-        print(authentication_classes)
         # Parse the  json object from post data. return 400 if the json encoding is wrong
         try:
             post_data = json.loads(request.body.decode("utf-8"))

@@ -26,9 +26,11 @@ www.mongle.site
 
 ## 메인 캐릭터 - 몽글이
 <p align="center">
-<img style="width:250px;" src="https://user-images.githubusercontent.com/55477835/182720723-943798ac-468d-4c67-b3bc-39a035d32492.png">
-<img style="width:250px;" src="https://user-images.githubusercontent.com/55477835/182720832-aec05e94-6c21-401d-9183-03b5a5c57f5b.png">
-<img style="width:250px;;" src="https://user-images.githubusercontent.com/55477835/182720902-1648eb3f-1735-4cfb-8379-04393f284462.png">
+<img style="width:20%;" src="https://user-images.githubusercontent.com/55477835/185823450-c6c82584-43c9-419e-bdc5-47b924ee6cde.png">
+<img style="width:20%;" src="https://user-images.githubusercontent.com/55477835/185823469-abe701da-0150-4a2d-ba10-d320733f0473.png">
+<img style="width:20%;" src="https://user-images.githubusercontent.com/55477835/185823477-7d6de8e3-0c28-4203-8560-1d0c941ef93f.png">
+<img style="width:20%;" src="https://user-images.githubusercontent.com/55477835/185823478-5e186a08-db50-4da4-b644-b219bea6b653.png">
+<img style="width:20%;" src="https://user-images.githubusercontent.com/55477835/185823480-7ecf1449-8d22-4f99-b489-231a81ec1594.png">
 </p>
 
 ## 페이지 별 기능

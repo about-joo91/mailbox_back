@@ -1,30 +1,30 @@
 # 몽글(Mongle)
 
 
-## 기획의도 
+## 📝 기획의도 
 - 익명의 사용자가 고민을 게재하면 기명의 사용자가 그 고민에 대해서 편지를 보내준다.
 - 누구나 일상을 살아가다보면 넘어지고 다치는 순간이 생깁니다. 그 순간들에 이 페이지가 밴드 정도만 되도 괜찮을 것 같습니다.
 
-## 배포사이트
+## 👍 배포사이트
 www.mongle.site
 
-## 팀원들이 생각한 웹페이지의 느낌
+## 🤔 팀원들이 생각한 웹페이지의 느낌
 
 ![Group 30](https://user-images.githubusercontent.com/55477835/177790010-706e97b8-a65c-4009-aafc-d40aef1a8292.png)
 
 따뜻함과 편안함, 자연, 종이질감의 텍스쳐 괴로운 상황을 편안하게 만들어준다는 스토리텔링까지 담겨서 기획의도를 더 명확하게 가져가고 페이지의 테마를 정하는데 도움을 받을 수 있었습니다.
 
-## 테마색상
+## 🌈 테마색상
 
 ![Group 31](https://user-images.githubusercontent.com/55477835/177790475-5b13c5f2-38d9-4801-8e50-ca58aa3c2594.png)
 
-## 페이지 목업
+## 🙏 페이지 목업
 ![](https://velog.velcdn.com/images/aboutjoo/post/6456f187-1956-4b54-ba3e-d1b609052f4b/image.png)
 
 
 정한 테마 색상을 토대로 편지를 쓴다는 컨셉에 맞게 편지를 작성할 수 있고 접근성이 너무 낮다는 팀원들의 피드백에 맞춰 익명 게시판도 만들게 되었습니다.
 
-## 메인 캐릭터 - 몽글이
+## 🐥 메인 캐릭터 - 몽글이
 <p align="center">
 <img style="width:20%;" src="https://user-images.githubusercontent.com/55477835/185823450-c6c82584-43c9-419e-bdc5-47b924ee6cde.png">
 <img style="width:20%;" src="https://user-images.githubusercontent.com/55477835/185823469-abe701da-0150-4a2d-ba10-d320733f0473.png">
@@ -33,15 +33,15 @@ www.mongle.site
 <img style="width:20%;" src="https://user-images.githubusercontent.com/55477835/185823480-7ecf1449-8d22-4f99-b489-231a81ec1594.png">
 </p>
 
-## 페이지 별 기능
+## 🔨 페이지 별 기능
 
 ![20220818152045](https://user-images.githubusercontent.com/102797869/185308909-658e2d00-4722-4e0f-80ab-bb812a15c9b1.png)
 
-## 개발 아키텍처
+## 🏛 개발 아키텍처
 
 ![Web App Reference Architecture (2)](https://user-images.githubusercontent.com/55477835/185822526-93e791e1-bf37-4d5f-a225-1de87cc83fab.png)
 
-## 사용기술
+## 🛠 사용기술
 - cloudfront와 route53, s3를 활용한 https 프론트 배포
 - elb와 route53, ec2를 활용한 https 백엔드 배포
 - pre-commit hook(black, isort, flake8)을 통한 코드 포맷팅
@@ -56,21 +56,21 @@ www.mongle.site
 https://github.com/smilegate-ai/korean_unsmile_dataset
 - github actions과 도커를 통한 ci/cd 기능 구현
 
-## ERD
+## 📚 ERD
 ![mongle_erd](https://user-images.githubusercontent.com/55477835/182724054-fd7394ac-121c-498a-8396-19e009e61685.png)
 
-## api명세서
+## 🏹 api명세서
 - post맨 mock server를 활용한 api명세서
 - https://documenter.getpostman.com/view/9279033/Uzs9wMsa
 
-## 컨벤션
+## 🤙 컨벤션
 - feat/ : 새로운 기능 추가/수정/삭제
 - enhan/ : 기존 코드에 기능을 추가하거나 기능을 강화할 때
 - refac/ : 코드 리팩토링,버그 수정
 - test/ : 테스트 코드/기능 추가
 - edit/ : 파일을 수정한 경우(파일위치변경, 파일이름 변경, 삭제)
 
-## 그라운드 룰
+## 🙏 그라운드 룰
 1. 작업 단위로 팀원들에게 공유하기(매일 오후5시) and 하루 일정 공유하기(매일 오전 9시)
 2. 저녁7시에 TIL 작성후 팀원들과 피드백
 3. API 작업시 변동사항 API 설계 업데이트 하기.

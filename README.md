@@ -33,12 +33,20 @@ www.mongle.site
 
 ![20220818152045](https://user-images.githubusercontent.com/102797869/185308909-658e2d00-4722-4e0f-80ab-bb812a15c9b1.png)
 
+## 개발 아키텍처
+
+![Web App Reference Architecture (2)](https://user-images.githubusercontent.com/55477835/185822526-93e791e1-bf37-4d5f-a225-1de87cc83fab.png)
+
 ## 사용기술
 - cloudfront와 route53, s3를 활용한 https 프론트 배포
-- elb와 acm docker ec2를 활용한 https 백엔드 배포
-- pre-commit hook을 통한 코드 포맷팅
-- 272개의 test코드를 통한 에러 핸들링
-- 별개의 flask 서버를 운용하여 추천기능 구현
+- elb와 route53, ec2를 활용한 https 백엔드 배포
+- pre-commit hook(black, isort, flake8)을 통한 코드 포맷팅
+- 273개의 test코드를 통한 에러 핸들링
+- 별개의 fast-API 서버를 운용하여 추천기능 구현
+- APScheduler를 통해 4시간마다(fast-API서버에서) 추천 데이터가 담긴 csv파일 수신
+- redis 캐싱을 통한 서버 응답속도 향상
+- logstash를 활용하여 mysql 데이터 30분 마다 elastic-search로 업데이트
+- elastic-search를 활용하여 유사 검색어 기능 구현
 - 딥러닝을 활용한 비속어 필터링 기술
 페이지의 의도와 맞지않는 편지내용이 들어갈 수도 있으므로 비속어나 비방언어를 사용하면 편지를 쓰지 못하게 막는다.
 https://github.com/smilegate-ai/korean_unsmile_dataset

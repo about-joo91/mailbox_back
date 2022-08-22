@@ -21,9 +21,6 @@ www.mongle.site
 ## 🙏 페이지 목업
 ![](https://velog.velcdn.com/images/aboutjoo/post/6456f187-1956-4b54-ba3e-d1b609052f4b/image.png)
 
-
-정한 테마 색상을 토대로 편지를 쓴다는 컨셉에 맞게 편지를 작성할 수 있고 접근성이 너무 낮다는 팀원들의 피드백에 맞춰 익명 게시판도 만들게 되었습니다.
-
 ## 🐥 메인 캐릭터 - 몽글이
 <p align="center">
 <img style="width:20%;" src="https://user-images.githubusercontent.com/55477835/185823450-c6c82584-43c9-419e-bdc5-47b924ee6cde.png">

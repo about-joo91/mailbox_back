@@ -20,15 +20,13 @@ services:
       - "80:8000"
     command: gunicorn --bind 0.0.0.0:8000 --workers=5 mail_box.wsgi:application  &
     working_dir: /app/
-    volumes:
-      - ./:/app/
     depends_on:
       - redis
       - elasticsearch
   elasticsearch:
     working_dir: /app/
     build:
-      context: ./elasticsearch/
+      context: elasticsearch/
     volumes:
       - type: bind
         source: ./elasticsearch/config/elasticsearch.yml
@@ -50,7 +48,7 @@ services:
     env_file:
       - ./.env.prod
     build:
-      context: ./logstash/
+      context: logstash/
     volumes:
       - type: bind
         source: ./logstash/config/logstash.yml

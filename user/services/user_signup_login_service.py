@@ -60,10 +60,23 @@ def check_certification_question(certification_data: Dict[str, str]):
 
 
 def update_user_certification_question(user_id: int, update_data: Dict[str, str]):
+    """
+    유저의 본인확인 질문 업데이트
+    """
     user = User.objects.filter(id=user_id)
     certification_question_id = update_data["certification_question"]
     certification_answer = update_data["certification_answer"]
     user.update(certification_question=certification_question_id, certification_answer=certification_answer)
+
+
+def check_certification_is_none(check_data: Dict[str, str]):
+    """
+    본인확인 질문이 비어있는지 체크
+    """
+    certification_question_id = check_data["certification_question"]
+    certification_answer = check_data["certification_answer"]
+
+    return bool(certification_question_id and certification_answer)
 
 
 def update_user_new_password(update_data: Dict) -> None:

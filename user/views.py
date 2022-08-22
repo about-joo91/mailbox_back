@@ -15,6 +15,7 @@ from user.services.user_profile_category_service import (
 )
 from user.services.user_profile_service import get_user_profile_data, update_user_profile_data
 from user.services.user_signup_login_service import (
+    check_certification_is_none,
     check_certification_question,
     check_is_user,
     check_password_in_signup_data,
@@ -113,8 +114,10 @@ class UserCertificationupdateView(APIView):
     authentication_classes = [JWTAuthentication]
 
     def put(self, request: Request) -> Response:
-        update_user_certification_question(request.user.id, request.data)
-        return Response({"detail": "본인확인 질문이 업데이트 되었습니다"}, status=status.HTTP_200_OK)
+        if check_certification_is_none(request.data):
+            update_user_certification_question(request.user.id, request.data)
+            return Response({"detail": "본인확인 질문이 업데이트 되었습니다"}, status=status.HTTP_200_OK)
+        return Response({"detail": "답변이 비어있습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserProfileView(APIView):
@@ -128,8 +131,13 @@ class UserProfileView(APIView):
     def get(self, request: Request) -> Response:
         cur_user = request.user
         try:
+            certification_question_list = get_certification_question_list()
+
             profile_data = get_user_profile_data(cur_user.id)
-            return Response(profile_data, status=status.HTTP_200_OK)
+            return Response(
+                {"profile_data": profile_data, "certification_question_list": certification_question_list},
+                status=status.HTTP_200_OK,
+            )
         except UserProfileModel.DoesNotExist:
             UserProfileModel.objects.create(user=cur_user)
             return Response({"detail": "잘못된 접근입니다. 다시 시도해주세요."}, status=status.HTTP_400_BAD_REQUEST)

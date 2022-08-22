@@ -1,6 +1,7 @@
 from django.test import TestCase
 from rest_framework.exceptions import ValidationError
 
+from user.models import CertificationQuestion
 from user.models import MongleGrade as MongleGradeModel
 from user.models import MongleLevel as MongleLevelModel
 from user.models import User as UserModel
@@ -15,7 +16,11 @@ class TestUserProfileServices(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        user = UserModel.objects.create(username="joo", nickname="joo")
+        certification_question = CertificationQuestion.objects.create(certification_question="질문")
+
+        user = UserModel.objects.create(
+            username="joo", nickname="joo", certification_question=certification_question, certification_answer="대답"
+        )
         UserProfileModel.objects.create(user=user)
         mongle_level = MongleLevelModel.objects.create()
         MongleGradeModel.objects.create(user=user, mongle_level=mongle_level)
@@ -32,7 +37,7 @@ class TestUserProfileServices(TestCase):
         """
         user = UserModel.objects.get(username="joo")
 
-        with self.assertNumQueries(3):
+        with self.assertNumQueries(4):
             user_profile_data = get_user_profile_data(user.id)
 
         self.assertEqual("", user_profile_data["fullname"])

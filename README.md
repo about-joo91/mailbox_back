@@ -17,8 +17,6 @@ www.mongle.site
 
 ![Group 31](https://user-images.githubusercontent.com/55477835/177790475-5b13c5f2-38d9-4801-8e50-ca58aa3c2594.png)
 
-## 🙏 페이지 목업
-![](https://velog.velcdn.com/images/aboutjoo/post/6456f187-1956-4b54-ba3e-d1b609052f4b/image.png)
 
 ## 🐥 메인 캐릭터 - 몽글이
 <p align="center">

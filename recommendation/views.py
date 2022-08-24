@@ -10,4 +10,3 @@ def db_to_csv():
     res.raise_for_status()
     zfile = zipfile.ZipFile(io.BytesIO(res.content))
     zfile.extractall()
-    print(str(res.status_code), "성공!")

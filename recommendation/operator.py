@@ -19,7 +19,7 @@ def start():
 
     scheduler.add_job(
         get_reported_user_over_condition,
-        trigger=CronTrigger(day_of_week="sun", hour="20", minute="06"),
+        trigger=CronTrigger(day_of_week="mon", hour="03", minute="00"),
         max_instances=1,
         name="check_reported_user",
     )

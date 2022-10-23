@@ -1,8 +1,7 @@
 version: '3.9'
 services:
-  redis:
+  redis_service:
     image: redis:alpine
-    container_name: redis_service
     labels:
       - "name=redis"
       - "mode=standalone"
@@ -13,27 +12,31 @@ services:
     volumes:
       - ./redisdata:/data
   mail_box:
-    build: .
     env_file:
-      - ./.env.dev
-    command: python manage.py runserver 0.0.0.0:8000
+      - .env
+    build: .
+    command:
+      - sh
+      - -c
+      - |
+        python manage.py migrate
+        python manage.py runserver 0.0.0.0:8000
     ports:
       - 8000:8000
-    working_dir: /app/
     volumes:
       - ./:/app/
     expose:
       - 8000
     depends_on:
-      - redis
+      - redis_service
       - db
       - elasticsearch
   db:
     image: mysql:8.0.25
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
-      MYSQL_DATABASE: "mail_box"
+      MYSQL_ROOT_PASSWORD: ${MONGLE_PASSWORD}
+      MYSQL_DATABASE: ${MONGLE_DB_NAME}
     cap_add:
       - SYS_NICE
     volumes:
@@ -41,17 +44,11 @@ services:
     ports:
       - 3306:3306
   elasticsearch:
-    container_name: elasticsearch
     build:
-      context: elasticsearch/
+      context: .
+      dockerfile: elasticsearch/Dockerfile
     volumes:
-      - type: bind
-        source: ./elasticsearch/config/elasticsearch.yml
-        target: /usr/share/elasticsearch/config/elasticsearch.yml
-        read_only: true
-      - type: volume
-        source: elasticsearch
-        target: /usr/share/elasticsearch/data
+      - elasticsearch:/usr/share/elasticsearch/data
     depends_on:
       - db
     ports:
@@ -62,20 +59,15 @@ services:
       # Use single node discovery in order to disable production mode and avoid bootstrap checks
       # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
+      ELASTIC_PASSWORD: ${MONGLE_ES_PASSWORD}
   logstash:
     env_file:
-      - ./.env.dev
+      - .env
     build:
-      context: logstash/
+      context: .
+      dockerfile: logstash/Dockerfile
     volumes:
-      - type: bind
-        source: ./logstash/config/logstash.yml
-        target: /usr/share/logstash/config/logstash.yml
-        read_only: true
-      - type: bind
-        source: ./logstash/pipeline
-        target: /usr/share/logstash/pipeline
-        read_only: true
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
     ports:
       - "5044:5044"
       - "5000:5000/tcp"
@@ -87,7 +79,8 @@ services:
       - elasticsearch
   kibana:
     build:
-      context: kibana/
+      context: .
+      dockerfile: kibana/Dockerfile
     volumes:
       - type: bind
         source: ./kibana/config/kibana.yml

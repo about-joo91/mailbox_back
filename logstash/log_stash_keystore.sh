@@ -10,5 +10,7 @@ echo "$MONGLE_PORT" | /usr/share/logstash/bin/logstash-keystore add 'MONGLE_PORT
 echo "$MONGLE_PASSWORD" | /usr/share/logstash/bin/logstash-keystore add 'MONGLE_PASSWORD' -x
 echo "$MONGLE_USER" | /usr/share/logstash/bin/logstash-keystore add 'MONGLE_USER' -x
 echo "$MONGLE_DB_NAME" | /usr/share/logstash/bin/logstash-keystore add 'MONGLE_DB_NAME' -x
+echo "$MONGLE_ES_USER" | /usr/share/logstash/bin/logstash-keystore add 'MONGLE_ES_USER' -x
+echo "$MONGLE_ES_PASSWORD" | /usr/share/logstash/bin/logstash-keystore add 'MONGLE_ES_PASSWORD' -x
 
 exec "$@"

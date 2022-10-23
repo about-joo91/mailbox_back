@@ -1,9 +1,13 @@
 
-FROM docker.elastic.co/logstash/logstash:7.10.0
+FROM docker.elastic.co/logstash/logstash:8.4.3
 
-COPY ./jars/ /usr/share/logstash/logstash-core/lib/jars/
+WORKDIR /app/logstash
 
-COPY ./log_stash_keystore.sh .
+COPY logstash/config/logstash.yml /usr/share/logstash/config/logstash.yml
+
+COPY logstash/jars/ /usr/share/logstash/logstash-core/lib/jars/
+
+COPY logstash/log_stash_keystore.sh .
 
 USER root
 

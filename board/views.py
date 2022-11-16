@@ -15,16 +15,16 @@ from board.services.board_service import (
     delete_like_data,
     get_board_comment_data,
     get_paginated_board_data,
+    get_searched_data,
     get_user_profile_data,
     make_like_data,
     update_board_comment_data,
     update_board_data,
 )
-from elasticsearch import Elasticsearch
+from user.models import MongleGrade
+from user.models import UserProfile as UserProfileModel
 
 from .serializers import BoardSerializer
-
-MAX_PAGE = 10
 
 
 # Create your views here.
@@ -196,39 +196,40 @@ class BorderCommentView(APIView):
 
 class SearchView(APIView):
     def get(self, request):
-        client = Elasticsearch("elasticsearch:9200")
-
         search_type = request.query_params.get("search_type")
         search_word = request.query_params.get("search_word")
         page_num = (int(request.query_params.get("page_num")) - 1) * 10
         author = request.user
 
-        if not search_word:
-            return Response({"detail": "검색어는 필수값입니다."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            searched_data = get_searched_data(search_word=search_word, search_type=search_type, page_num=page_num)
+        except ValueError as e:
+            return Response({"detail": e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
-        headers = {"Content-Type": "application/json"}
-        results = client.search(
-            index="mail_box",
-            headers=headers,
-            body={
-                "sort": ["_score"],
-                "from": page_num,
-                "size": MAX_PAGE,
-                "query": {"match": {search_type: search_word}},
-            },
-        )
-        total_count = results["hits"]["total"]["value"]
-        searched_board_ids = [x["_id"] for x in results["hits"]["hits"]]
+        total_count = searched_data["hits"]["total"]["value"]
+        searched_board_ids = [x["_id"] for x in searched_data["hits"]["hits"]]
 
-        my_paginated_board_data = (
-            BoardModel.objects.select_related("author")
-            .prefetch_related("boardcomment_set__author")
-            .prefetch_related("boardlike_set")
-            .filter(id__in=searched_board_ids)
-            .order_by("-create_date")
-        )
-        paginated_boards = BoardSerializer(my_paginated_board_data, many=True, context={"author": author}).data
-        user_profile_data = get_user_profile_data(author)
+        try:
+            my_paginated_board_data = (
+                BoardModel.objects.select_related("author")
+                .prefetch_related("boardcomment_set__author")
+                .prefetch_related("boardlike_set")
+                .filter(id__in=searched_board_ids)
+                .order_by("-create_date")
+            )
+            paginated_boards = BoardSerializer(my_paginated_board_data, many=True, context={"author": author}).data
+        except TypeError:
+            return Response({"detail": "게시판을 조회할 수 없습니다. 다시 시도해주세요."}, status=status.HTTP_404_NOT_FOUND)
+        except exceptions.ValidationError as e:
+            error = "".join([str(value) for values in e.detail.values() for value in values])
+            return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user_profile_data = get_user_profile_data(author)
+        except UserProfileModel.DoesNotExist:
+            return Response({"detail": "잘못된 접근입니다. 다시 시도해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+        except MongleGrade.DoesNotExist:
+            return Response({"detail": "잘못된 접근입니다. 다시 시도해주세요."}, status=status.HTTP_400_BAD_REQUEST)
         return Response(
             {
                 "boards": paginated_boards,

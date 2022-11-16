@@ -13,6 +13,7 @@ from board.services.board_service import (
     delete_like_data,
     get_board_comment_data,
     get_paginated_board_data,
+    get_searched_data,
     make_like_data,
     update_board_comment_data,
     update_board_data,
@@ -416,3 +417,19 @@ class TestBoardService(TestCase):
             delete_like_data(author=user, board_id=user_board.id)
 
         self.assertEqual(0, BoardLikeModel.objects.all().count())
+
+    def test_get_searched_data_when_search_word_is_not_given(self) -> None:
+        """
+        엘라스틱 서치에 데이터를 검색하는 함수 검증
+        case: 검색어를 입력하지 않았을 때
+        """
+        with self.assertRaises(ValueError):
+            get_searched_data(search_word="", search_type="title", page_num=0)
+
+    def test_get_searched_data_when_search_type_is_not_given(self) -> None:
+        """
+        엘라스틱 서치에 데이터를 검색하는 함수 검증
+        case: 검색어 타입이 빈 값일 때
+        """
+        with self.assertRaises(ValueError):
+            get_searched_data(search_word="안녕", search_type="", page_num=0)

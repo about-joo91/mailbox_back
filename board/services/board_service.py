@@ -7,8 +7,11 @@ from board.models import Board as BoardModel
 from board.models import BoardComment as BoardCommentModel
 from board.models import BoardLike as BoardLikeModel
 from board.serializers import BoardCommentSerializer, BoardSerializer, UserProfileSerializer
+from elasticsearch import Elasticsearch
 from my_page.services.letter_review_service import update_mongle_grade
 from user.models import User as UserModel
+
+MAX_PAGE = 10
 
 
 def check_is_it_clean_text(check_content: dict[str, str]):
@@ -169,3 +172,22 @@ def get_paginated_my_board_data(page_num: int, author: UserModel) -> Tuple[List,
     paginated_boards = BoardSerializer(paginated_board_data, many=True, context={"author": author}).data
     total_count = BoardModel.objects.count()
     return paginated_boards, total_count
+
+
+def get_searched_data(search_word: str, search_type: str, page_num: int = 0) -> dict[str]:
+    if not search_word or not search_type:
+        raise ValueError("카테고리와 검색어는 필수값입니다.")
+
+    client = Elasticsearch("elasticsearch:9200")
+    headers = {"Content-Type": "application/json"}
+    searched_data = client.search(
+        index="mail_box",
+        headers=headers,
+        body={
+            "sort": ["_score"],
+            "from": page_num,
+            "size": MAX_PAGE,
+            "query": {"match": {search_type: search_word}},
+        },
+    )
+    return searched_data

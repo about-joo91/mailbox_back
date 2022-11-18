@@ -1,5 +1,7 @@
+import os
 from typing import Dict, List, Tuple
 
+from django.db.models import Q
 from rest_framework import exceptions
 
 import unsmile_filtering
@@ -25,33 +27,20 @@ def check_is_it_clean_text(check_content: dict[str, str]):
     return False
 
 
-def get_paginated_board_data(page_num: int, author: UserModel, is_mine: str) -> Tuple[List, int]:
+def get_paginated_board_data(page_num: int, author: UserModel, query: Q) -> Tuple[List, int]:
     """
     page_num을 통해서 board 데이터를 가져오는 service
     """
 
-    if is_mine == "True":
-        my_paginated_board_data = (
-            BoardModel.objects.select_related("author")
-            .prefetch_related("boardcomment_set__author")
-            .prefetch_related("boardlike_set")
-            .filter(author=author)
-            .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
-        )
-        paginated_boards = BoardSerializer(my_paginated_board_data, many=True, context={"author": author}).data
-        total_count = BoardModel.objects.filter(author=author).count()
-
-    else:
-        paginated_board_data = (
-            BoardModel.objects.select_related("author")
-            .prefetch_related("boardcomment_set__author")
-            .prefetch_related("boardlike_set")
-            .all()
-            .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
-        )
-
-        paginated_boards = BoardSerializer(paginated_board_data, many=True, context={"author": author}).data
-        total_count = BoardModel.objects.count()
+    my_paginated_board_data = (
+        BoardModel.objects.select_related("author")
+        .prefetch_related("boardcomment_set__author")
+        .prefetch_related("boardlike_set")
+        .filter(query)
+        .order_by("-create_date")[10 * (page_num - 1) : 10 + 10 * (page_num - 1)]
+    )
+    paginated_boards = BoardSerializer(my_paginated_board_data, many=True, context={"author": author}).data
+    total_count = BoardModel.objects.filter(query).count()
 
     return paginated_boards, total_count
 
@@ -174,20 +163,20 @@ def get_paginated_my_board_data(page_num: int, author: UserModel) -> Tuple[List,
     return paginated_boards, total_count
 
 
-def get_searched_data(search_word: str, search_type: str, page_num: int = 0) -> dict[str]:
+def get_searched_data(search_word: str, search_type: str, page_num: int = 0) -> tuple[list[int], int]:
     if not search_word or not search_type:
         raise ValueError("카테고리와 검색어는 필수값입니다.")
 
-    client = Elasticsearch("elasticsearch:9200")
-    headers = {"Content-Type": "application/json"}
-    searched_data = client.search(
-        index="mail_box",
-        headers=headers,
-        body={
-            "sort": ["_score"],
-            "from": page_num,
-            "size": MAX_PAGE,
-            "query": {"match": {search_type: search_word}},
-        },
+    client = Elasticsearch(
+        f"elasticsearch://{os.environ['MONGLE_ES_HOST']}:9200",
+        http_auth=(os.environ["MONGLE_ES_USER"], os.environ["MONGLE_ES_PASSWORD"]),
     )
-    return searched_data
+    headers = {"Content-Type": "application/json"}
+    searched_data = client.options(headers=headers).search(
+        index="mail_box", from_=page_num, sort=["_score"], size=MAX_PAGE, query={"match": {search_type: search_word}}
+    )
+
+    total_count = searched_data["hits"]["total"]["value"]
+    searched_board_ids = [x["_id"] for x in searched_data["hits"]["hits"]]
+
+    return searched_board_ids, total_count

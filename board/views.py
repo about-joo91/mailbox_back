@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import exceptions, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -24,8 +25,6 @@ from board.services.board_service import (
 from user.models import MongleGrade
 from user.models import UserProfile as UserProfileModel
 
-from .serializers import BoardSerializer
-
 
 # Create your views here.
 class BoardView(APIView):
@@ -38,10 +37,27 @@ class BoardView(APIView):
 
     def get(self, request):
         try:
-            is_mine = self.request.query_params.get("is_mine")
-            page_num = int(self.request.query_params.get("page_num"))
-            paginated_boards, total_count = get_paginated_board_data(page_num, request.user, is_mine)
+            try:
+                is_mine = bool(self.request.query_params.get("is_mine"))
+            except ValueError:
+                return Response({"detail": "입력데이터를 수정해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+            try:
+                page_num = int(self.request.query_params.get("page_num"))
+            except ValueError:
+                return Response({"detail": "입력데이터를 수정해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+
+            author = request.user
+
+            if is_mine:
+                board_query = Q(author=author)
+            else:
+                board_query = Q()
+
+            paginated_boards, total_count = get_paginated_board_data(
+                page_num=page_num, author=author, query=board_query
+            )
             user_profile_data = get_user_profile_data(request.user)
+
             return Response(
                 {
                     "boards": paginated_boards,
@@ -195,31 +211,30 @@ class BorderCommentView(APIView):
 
 
 class SearchView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
     def get(self, request):
-        search_type = request.query_params.get("search_type")
-        search_word = request.query_params.get("search_word")
-        page_num = (int(request.query_params.get("page_num")) - 1) * 10
         author = request.user
 
+        search_type = request.query_params.get("search_type")
+        search_word = request.query_params.get("search_word")
+
         try:
-            searched_data = get_searched_data(search_word=search_word, search_type=search_type, page_num=page_num)
+            page_num = int(request.query_params.get("page_num"))
+        except ValueError:
+            return Response({"detail": "게시판을 조회할 수 없습니다. 다시 시도해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            searched_board_ids, total_count = get_searched_data(
+                search_word=search_word, search_type=search_type, page_num=page_num
+            )
         except ValueError as e:
             return Response({"detail": e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
 
-        total_count = searched_data["hits"]["total"]["value"]
-        searched_board_ids = [x["_id"] for x in searched_data["hits"]["hits"]]
-
         try:
-            my_paginated_board_data = (
-                BoardModel.objects.select_related("author")
-                .prefetch_related("boardcomment_set__author")
-                .prefetch_related("boardlike_set")
-                .filter(id__in=searched_board_ids)
-                .order_by("-create_date")
-            )
-            paginated_boards = BoardSerializer(my_paginated_board_data, many=True, context={"author": author}).data
-        except TypeError:
-            return Response({"detail": "게시판을 조회할 수 없습니다. 다시 시도해주세요."}, status=status.HTTP_404_NOT_FOUND)
+            query_for_search = Q(id__in=searched_board_ids)
+            paginated_boards = get_paginated_board_data(page_num=page_num, query=query_for_search, author=author)
         except exceptions.ValidationError as e:
             error = "".join([str(value) for values in e.detail.values() for value in values])
             return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)

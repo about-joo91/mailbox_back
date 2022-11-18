@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.test import TestCase
 from rest_framework import exceptions
 
@@ -74,8 +75,8 @@ class TestBoardService(TestCase):
         """
 
         author = UserModel.objects.get(username="ko", nickname="ko")
-        is_mine = "False"
-        paginated_board, total_count = get_paginated_board_data(1, author=author, is_mine=is_mine)
+        board_query = Q()
+        _, total_count = get_paginated_board_data(page_num=1, query=board_query, author=author)
         self.assertEqual(BoardModel.objects.all().count(), total_count)
 
     def test_get_paginated_board_data_with_unauthenticated_user(self) -> None:
@@ -418,6 +419,20 @@ class TestBoardService(TestCase):
 
         self.assertEqual(0, BoardLikeModel.objects.all().count())
 
+    def test_get_paginated_data_with_search_query_happy_case(self) -> None:
+        """
+        검색된 데이터의 board를 가져오는 함수
+        case : 해피케이스
+        """
+        user = UserModel.objects.get(username="ko", nickname="ko")
+        searched_board_ids = [board_data.id for board_data in BoardModel.objects.all()]
+
+        query_for_search = Q(id__in=searched_board_ids)
+
+        paginated_boards = get_paginated_board_data(query=query_for_search, author=user, page_num=1)
+
+        self.assertEqual(2, len(paginated_boards))
+
     def test_get_searched_data_when_search_word_is_not_given(self) -> None:
         """
         엘라스틱 서치에 데이터를 검색하는 함수 검증
@@ -433,3 +448,11 @@ class TestBoardService(TestCase):
         """
         with self.assertRaises(ValueError):
             get_searched_data(search_word="안녕", search_type="", page_num=0)
+
+    def test_get_searched_data_when_invalid_page_num_is_given(self) -> None:
+        """
+        엘라스틱 서치에 데이터를 검색하는 함수 검증
+        case: 없는 page_num을 조회하려고 할때
+        """
+
+        get_searched_data(search_word="안녕", search_type="title", page_num=1)

@@ -1,3 +1,5 @@
+import os
+
 from django.db.models import Q
 from django.test import TestCase
 from rest_framework import exceptions
@@ -19,6 +21,7 @@ from board.services.board_service import (
     update_board_comment_data,
     update_board_data,
 )
+from elasticsearch import Elasticsearch
 from user.models import MongleGrade as MongleGradeModel
 from user.models import MongleLevel as MongleLevelModel
 from user.models import User as UserModel
@@ -46,6 +49,20 @@ class TestBoardService(TestCase):
 
         BoardCommentModel.objects.create(author=cur_user, board=cur_user_board, content="content")
         BoardCommentModel.objects.create(author=not_cur_user, board=not_cur_user_board, content="content2")
+
+        elastic_client = Elasticsearch(
+            f"elasticsearch://{os.environ['MONGLE_ES_HOST']}:9200",
+            basic_auth=(os.environ["MONGLE_ES_USER"], os.environ["MONGLE_ES_PASSWORD"]),
+        )
+
+        if elastic_client.search(index="test", query={"match": {"title": "title"}})["hits"]["total"]["value"]:
+            elastic_client.delete_by_query(index="test", query={"match": {"title": "title"}})
+
+        elastic_client.create(
+            index="test",
+            id=cur_user_board.id,
+            document={"title": "title", "content": "content"},
+        )
 
     def test_check_is_it_clean_text(self):
         """
@@ -420,18 +437,26 @@ class TestBoardService(TestCase):
         self.assertEqual(0, BoardLikeModel.objects.all().count())
 
     def test_get_paginated_data_with_search_query_happy_case(self) -> None:
-        """
-        검색된 데이터의 board를 가져오는 함수
-        case : 해피케이스
-        """
+        """ """
         user = UserModel.objects.get(username="ko", nickname="ko")
-        searched_board_ids = [board_data.id for board_data in BoardModel.objects.all()]
+        searched_board_ids, total_count = get_searched_data(
+            search_word="title", search_type="title", search_index="test", page_num=0
+        )
 
         query_for_search = Q(id__in=searched_board_ids)
 
-        paginated_boards = get_paginated_board_data(query=query_for_search, author=user, page_num=1)
+        paginated_boards, _ = get_paginated_board_data(query=query_for_search, author=user, page_num=1)
 
-        self.assertEqual(2, len(paginated_boards))
+        self.assertEqual(1, len(paginated_boards))
+        self.assertEqual(1, total_count)
+
+    def test_get_paginated_data_with_search_query_when_data_not_exist(self) -> None:
+        """
+        검색된 데이터의 board를 가져오는 함수
+        case : 데이터가 없을 때
+        """
+        with self.assertRaises(IndexError):
+            get_searched_data(search_word="타이틀", search_type="title", search_index="test", page_num=0)
 
     def test_get_searched_data_when_search_word_is_not_given(self) -> None:
         """
@@ -439,7 +464,7 @@ class TestBoardService(TestCase):
         case: 검색어를 입력하지 않았을 때
         """
         with self.assertRaises(ValueError):
-            get_searched_data(search_word="", search_type="title", page_num=0)
+            get_searched_data(search_word="", search_type="title", search_index="test", page_num=0)
 
     def test_get_searched_data_when_search_type_is_not_given(self) -> None:
         """
@@ -447,12 +472,4 @@ class TestBoardService(TestCase):
         case: 검색어 타입이 빈 값일 때
         """
         with self.assertRaises(ValueError):
-            get_searched_data(search_word="안녕", search_type="", page_num=0)
-
-    def test_get_searched_data_when_invalid_page_num_is_given(self) -> None:
-        """
-        엘라스틱 서치에 데이터를 검색하는 함수 검증
-        case: 없는 page_num을 조회하려고 할때
-        """
-
-        get_searched_data(search_word="안녕", search_type="title", page_num=1)
+            get_searched_data(search_word="title", search_type="", search_index="test", page_num=0)

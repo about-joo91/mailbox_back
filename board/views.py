@@ -227,10 +227,12 @@ class SearchView(APIView):
 
         try:
             searched_board_ids, total_count = get_searched_data(
-                search_word=search_word, search_type=search_type, page_num=page_num
+                search_word=search_word, search_type=search_type, search_index="mail_box", page_num=page_num
             )
         except ValueError as e:
             return Response({"detail": e.args[0]}, status=status.HTTP_400_BAD_REQUEST)
+        except IndexError:
+            return Response({"detail": "검색된 값이 없습니다. 다른 검색어로 다시 검색해주세요."}, status=status.HTTP_404_NOT_FOUND)
 
         try:
             query_for_search = Q(id__in=searched_board_ids)

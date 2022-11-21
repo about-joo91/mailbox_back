@@ -3,6 +3,7 @@ from typing import Dict, List, Tuple
 
 from django.db.models import Q
 from rest_framework import exceptions
+from rest_framework.utils.serializer_helpers import ReturnList
 
 import unsmile_filtering
 from board.models import Board as BoardModel
@@ -27,7 +28,7 @@ def check_is_it_clean_text(check_content: dict[str, str]):
     return False
 
 
-def get_paginated_board_data(page_num: int, author: UserModel, query: Q) -> Tuple[List, int]:
+def get_paginated_board_data(page_num: int, author: UserModel, query: Q) -> Tuple[ReturnList, int]:
     """
     page_num을 통해서 board 데이터를 가져오는 service
     """
@@ -163,20 +164,25 @@ def get_paginated_my_board_data(page_num: int, author: UserModel) -> Tuple[List,
     return paginated_boards, total_count
 
 
-def get_searched_data(search_word: str, search_type: str, page_num: int = 0) -> tuple[list[int], int]:
+def get_searched_data(
+    search_word: str, search_type: str, search_index: str, page_num: int = 0
+) -> tuple[list[int], int]:
     if not search_word or not search_type:
         raise ValueError("카테고리와 검색어는 필수값입니다.")
 
     client = Elasticsearch(
         f"elasticsearch://{os.environ['MONGLE_ES_HOST']}:9200",
-        http_auth=(os.environ["MONGLE_ES_USER"], os.environ["MONGLE_ES_PASSWORD"]),
+        basic_auth=(os.environ["MONGLE_ES_USER"], os.environ["MONGLE_ES_PASSWORD"]),
     )
     headers = {"Content-Type": "application/json"}
     searched_data = client.options(headers=headers).search(
-        index="mail_box", from_=page_num, sort=["_score"], size=MAX_PAGE, query={"match": {search_type: search_word}}
+        index=search_index, from_=page_num, sort=["_score"], size=MAX_PAGE, query={"match": {search_type: search_word}}
     )
 
     total_count = searched_data["hits"]["total"]["value"]
-    searched_board_ids = [x["_id"] for x in searched_data["hits"]["hits"]]
+    searched_board_ids = [int(x["_id"]) for x in searched_data["hits"]["hits"]]
+
+    if total_count == 0:
+        raise IndexError
 
     return searched_board_ids, total_count

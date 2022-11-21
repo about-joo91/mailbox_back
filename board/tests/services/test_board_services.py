@@ -437,7 +437,10 @@ class TestBoardService(TestCase):
         self.assertEqual(0, BoardLikeModel.objects.all().count())
 
     def test_get_paginated_data_with_search_query_happy_case(self) -> None:
-        """ """
+        """
+        검색된 데이터의 board를 가져오는 함수
+        case : 해피케이스
+        """
         user = UserModel.objects.get(username="ko", nickname="ko")
         searched_board_ids, total_count = get_searched_data(
             search_word="title", search_type="title", search_index="test", page_num=0

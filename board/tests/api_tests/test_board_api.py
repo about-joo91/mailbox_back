@@ -730,3 +730,33 @@ class TestBoardAPI(APITestCase):
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(result["detail"], "댓글이 존재하지 않습니다.")
+
+    def test_get_search_view_when_search_word_is_not_given(self) -> None:
+        """
+        SearchView의 get 함수를 검증
+        case : 검색어가 입력되지 않았을 때
+        """
+        client = APIClient()
+        user = UserModel.objects.get(username="ko", nickname="ko")
+        client.force_authenticate(user=user)
+        url = "/board/search" + "?search_type=title&page_num=0"
+        response = client.get(url)
+        result = response.json()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(result["detail"], "카테고리와 검색어는 필수값입니다.")
+
+    def test_get_search_view_when_search_data_not_found(self) -> None:
+        """
+        SearchView의 get 함수를 검증
+        case : 검색어가 없을 때
+        """
+        client = APIClient()
+        user = UserModel.objects.get(username="ko", nickname="ko")
+        client.force_authenticate(user=user)
+        url = "/board/search" + "?search_word=안녕&search_type=title&page_num=0"
+        response = client.get(url)
+        result = response.json()
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(result["detail"], "검색된 값이 없습니다. 다른 검색어로 다시 검색해주세요.")

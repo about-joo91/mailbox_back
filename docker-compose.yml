@@ -10,7 +10,7 @@ services:
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
     volumes:
-      - ./redisdata:/data
+      - redisdata:/data
   mail_box:
     env_file:
       - .env
@@ -93,3 +93,4 @@ services:
 volumes:
   elasticsearch:
   db:
+  redisdata:
